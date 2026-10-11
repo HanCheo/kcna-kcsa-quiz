@@ -1,60 +1,75 @@
 # Kubernetes Quiz
 
-A bilingual KCNA/KCSA study quiz with compact dark/gold, question-focused controls.
+[Open the bilingual KCNA/KCSA quiz](https://hancheo.github.io/kubernetes-quiz/).
 
-**454 questions: KCNA 252 + KCSA 202.** All 283 supplied links have complete acquired bodies and review dispositions: 49 preserve-existing, 51 revise-existing, 118 add-new and 65 unscorable. An unscorable source is a completed review, not a validated scored question. Some protected originals remain in the bank with known limitations. Source equivalence and editorial qualifications do not authenticate real-exam appearance.
+**562 questions: 252 unchanged KCNA + 310 fully replaced KCSA.** No question from the former 202-record KCSA pool remains live. Existing factual IDs, learner storage, vocabulary and saved attempts are not reset or repurposed.
 
-This is not an official past-exam bank, an empirically calibrated difficulty benchmark or a pass-probability predictor. Difficulty/cognitive/distractor judgments are editorial; many items are recognition-heavy and native distractors can be weak. Supported cloud-native/CNCF, community, SRE and FinOps subjects are not excluded merely because they are wider than Kubernetes operations.
+This is unofficial study practice, not authenticated past-exam content, an empirically calibrated difficulty benchmark or a pass-probability predictor. The retained KCNA material still includes the wider cloud-native/CNCF ecosystem; historical and protected source limitations remain applicable.
 
-## Review and limitations
+## KCSA source and attribution
 
-The original first 74 records remain protected except the approved policy correction to local-036 and explanation-only updates to local-045/local-052. Known limits include missing context, overlapping correct alternatives, old dockershim terminology, Service DNS variants, Secret representation, container-level overrides, host-network packet-capture prerequisites and overlapping hardening recommendations. Preserved grading is not authoritative for an unrestricted technical question; use the explanation and primary reference. Original domain tags can overlap a different preferred curriculum mapping.
+All rows in `public/questions.sqlite` from [thiago4go/kubernetes-security-kcsa-mock](https://github.com/thiago4go/kubernetes-security-kcsa-mock/tree/3b84cb8b17b6409d7f01b648de90c6cc2a8e7c81) were imported at commit `3b84cb8b17b6409d7f01b648de90c6cc2a8e7c81`.
 
-Unprotected corrections address NetworkPolicy isolation preconditions, effective Secret get/list/watch grants, container securityContext field scope, storage-platform authorization assumptions, PSA audit versus warning channels, verified signature/provenance evidence and Korean translation. local-411 is independently authored threat-model governance practice, not a PCI DSS or authenticated past-exam item. local-141 explicitly asks about Mesos's historical role; Apache retired it in 2025. local-003 remains protected: runtime/CRI is relevant, while its old version-number question is lower-priority historical recall.
+Attribution: [Thiago S Shimada Ramos / thiago4go](https://github.com/thiago4go). The upstream README declares the project MIT-licensed and expressly disclaims CNCF/Linux Foundation affiliation or endorsement. This quiz does not claim official endorsement either.
 
-local-610 uses a qualified unencrypted serialized Secret-representation alternative, not a literal reproduction of the source's no-additional-encoding wording. API base64 and backend serialization are not at-rest encryption. local-106 was retired because its incident-activity decision was different from the source's process-ownership decision; its factual ID was not repurposed.
+New IDs use `kcsa-mock-<three-digit upstream ID>`, preserving upstream gaps. English questions, all five choices in original order and complete answer keys are retained. Korean questions, choices and full explanations are provided; literal commands, API identifiers and technical names remain recognizable. Imported difficulty is `unrated`: the source provides no empirical difficulty measurements.
 
-## Mock weights
+Two explanation-only corrections apply to `kcsa-mock-254` and `kcsa-mock-255`: denial of performed actions is **Repudiation**, not Denial of Service, in [Microsoft's STRIDE model](https://learn.microsoft.com/en-us/azure/security/develop/secure-design). Their questions, choices and answer keys are unchanged. Other explanations and keys remain community-source content, not an independently verified 310-question semantic audit. Some command alternatives and broad security-model wording can be ambiguous or version-dependent; compare primary references rather than treating preserved grading as authoritative.
 
-Weights follow the [KCNA curriculum](https://raw.githubusercontent.com/cncf/curriculum/master/KCNA_Curriculum.pdf) and [KCSA curriculum](https://raw.githubusercontent.com/cncf/curriculum/master/KCSA%20Curriculum.pdf). Bank proportions describe current stored tags. The 60-question counts below were observed in the actual UI and use largest-remainder allocation.
+## Choices and grading
 
-| Exam | Domain | Official % | Bank count | Bank % | Mock count |
-|---|---|---:|---:|---:|---:|
-| KCNA | Kubernetes Fundamentals | 44 | 112 | 44.4 | 26 |
-| KCNA | Container Orchestration | 28 | 73 | 29.0 | 17 |
-| KCNA | Cloud Native Application Delivery | 16 | 30 | 11.9 | 10 |
-| KCNA | Cloud Native Architecture | 12 | 37 | 14.7 | 7 |
-| KCSA | Overview of Cloud Native Security | 14 | 27 | 13.4 | 8 |
-| KCSA | Kubernetes Cluster Component Security | 22 | 44 | 21.8 | 13 |
-| KCSA | Kubernetes Security Fundamentals | 22 | 44 | 21.8 | 13 |
-| KCSA | Kubernetes Threat Model | 16 | 33 | 16.3 | 10 |
-| KCSA | Platform Security | 16 | 33 | 16.3 | 10 |
-| KCSA | Compliance and Security Frameworks | 10 | 21 | 10.4 | 6 |
+- Retained KCNA: four choices and a scalar answer index.
+- Imported KCSA: five choices; 278 single-answer and 32 multiple-answer questions. Multiple keys have sizes two (12 questions), three (17) or four (3).
+- Single-answer practice gives immediate feedback. Multiple-answer practice uses checkboxes, then **정답 확인**.
+- Multiple-answer grading requires exactly all correct choices and no extras, in any selection order. Subsets and extra selections receive no credit. An empty set is unanswered.
+- Number keys support the displayed choice count, including the fifth choice. Outside focused controls, Enter confirms an ungraded multiple-answer practice question; otherwise it advances.
+- Explicit option-number references in explanations follow the shuffled display order. Stored source explanation text and saved snapshots are not rewritten.
 
-An individual mock has up to 60 questions and 90 minutes. Combined KCNA + KCSA samples up to 60 per exam: 120 unique questions and 180 minutes. Domain/type filters can reduce the pool; scarcity redistributes eligible quotas without duplicates. Time is 1.5 minutes per actual question.
+## Mock weights and timing
 
-PASS/FAIL uses the exact correct/total ratio against the **practice** 75% threshold; result percentages use one decimal where needed. Display rounding cannot turn 44/59 (74.6%) into PASS. The practice verdict does not establish real-exam passing or probability. [Official multiple-choice instructions](https://docs.linuxfoundation.org/tc-docs/certification/important-instructions-mc) describe the real exam; this site's four-option, single-answer format is not a guarantee about every real item.
+Weights follow the [KCNA curriculum](https://raw.githubusercontent.com/cncf/curriculum/master/KCNA_Curriculum.pdf) and [KCSA curriculum](https://raw.githubusercontent.com/cncf/curriculum/master/KCSA%20Curriculum.pdf). Current stored-domain proportions differ from exam weights. The individual quota below was observed in the actual quiz and uses largest-remainder allocation.
 
-## Progress and saved attempts
+| Exam | Domain | Official weight % | Bank count | 60-question quota |
+|---|---|---:|---:|---:|
+| KCNA | Kubernetes Fundamentals | 44 | 112 | 26 |
+| KCNA | Container Orchestration | 28 | 73 | 17 |
+| KCNA | Cloud Native Application Delivery | 16 | 30 | 10 |
+| KCNA | Cloud Native Architecture | 12 | 37 | 7 |
+| KCSA | Overview of Cloud Native Security | 14 | 36 | 8 |
+| KCSA | Kubernetes Cluster Component Security | 22 | 89 | 13 |
+| KCSA | Kubernetes Security Fundamentals | 22 | 99 | 13 |
+| KCSA | Kubernetes Threat Model | 16 | 22 | 10 |
+| KCSA | Platform Security | 16 | 34 | 10 |
+| KCSA | Compliance and Security Frameworks | 10 | 30 | 6 |
 
-Endless practice preserves previous/forward question order, choices, picked answers, explanations and translation state. Restored answers are locked and cannot add statistics twice. Viewed IDs persist separately in localStorage, including skipped questions; unseen questions precede weighted repeats. Exam/mode/domain/type changes start a new trail. Language and vocabulary tabs preserve quiz position. Wrong-only practice removes an item after two consecutive correct answers.
+An individual mock has up to 60 questions and 90 minutes. Combined KCNA + KCSA samples up to 60 per exam: 120 unique questions and 180 minutes. Filters can reduce the pool; scarcity redistributes eligible quotas without duplicates. Time remains 1.5 minutes per actual question, not the upstream simulator's timing.
 
-Selected-exam reset confirms before clearing that exam's statistics and viewed IDs, not vocabulary or saved history. Malformed viewed storage is preserved with a visible notice rather than silently replaced.
+PASS/FAIL compares exact counts (`right * 4 >= total * 3`) against the **practice** 75% threshold. Display rounding cannot promote a sub-threshold score. Neither the verdict nor the smoke results below predict real-exam passing.
 
-Completed attempts are immutable bilingual snapshots in IndexedDB for the browser and origin that created them. Later bank edits do not rewrite old questions, option orders, references or domains. Combined attempts with exam identity show separate scores; legacy snapshots without identity remain readable without invented exam scores. Statistics, history and vocabulary do not synchronize across devices or transfer automatically from localhost. Clearing site data can remove them; no server backup is provided.
+## Progress and immutable history
+
+Endless practice preserves previous/forward question order, scalar/array selections, draft versus graded state, explanations and translation state. Restoring a draft does not grade it; restoring a confirmed answer cannot add statistics twice. Viewed IDs persist separately, including skipped questions; unseen questions precede weighted repeats. Changing exam/mode/domain/type starts a new trail. Language and vocabulary tabs preserve quiz position.
+
+Old KCSA progress remains stored under retired IDs; the new namespace begins separate per-question progress. Selected-exam reset confirms before clearing that exam's statistics and viewed IDs, not vocabulary or saved history. Malformed viewed storage is preserved with a notice.
+
+Completed attempts are immutable bilingual snapshots in IndexedDB. Array keys and picks are copied; later bank edits do not alter old questions, answers, choice order, references or domains. Legacy scalar snapshots remain readable. Combined attempts with exam identity show separate scores; legacy snapshots without it do not receive inferred exam scores.
+
+Storage is browser-and-origin local, with no server backup or cross-device synchronization. Clearing site data can remove statistics, vocabulary and attempts. No migration or reset of the existing hosted origin is required.
 
 ## Personal vocabulary
 
-Click an English word in a question, choice, explanation or saved review to toggle membership with its complete English/Korean text context. Case variants share an entry. Word clicks never select or grade answers; use the numbered choice button or an empty choice area. The vocabulary tab provides search, learning/known filters, Korean meaning/note editing, confirmed deletion and reveal/self-rating cards. Words and notes use the separate localStorage key quiz:vocabulary.
+Click an English word in a question, choice, explanation or saved review to toggle membership with its complete English/Korean context. Word clicks do not select or grade answers; use the choice control or an empty choice area. The vocabulary tab supports search, learning/known filters, editable Korean meanings/notes, confirmed deletion and reveal/self-rating cards. Vocabulary uses the separate `quiz:vocabulary` key.
 
-[Free Dictionary API](https://dictionaryapi.dev/) provides general English definitions, not automatic Korean or context-specific translations. Only the selected word is sent, not questions, contexts or notes. Successful responses retain source/license attribution. The UI distinguishes missing words (404), HTTP status errors, ten-second timeout, request failure and unreadable responses. Timeout includes response-body reading. A request failure cannot by itself distinguish connectivity from browser restrictions.
+[Free Dictionary API](https://dictionaryapi.dev/) supplies general English definitions, not automatic Korean or context-specific translations. Only the selected word is sent, not questions, contexts or notes. Successful responses retain attribution. The UI distinguishes missing words, HTTP errors, ten-second timeout, request failure and unreadable responses. Failed refreshes retain cached definitions; async updates preserve notes, focus and caret, and cannot restore a deleted word.
 
-Failed refreshes show an error while retaining cached definitions and attribution. Async updates preserve unsaved notes, focus and caret; a late response cannot restore a deleted word. Switching tabs preserves mock answers, and clock-controlled expiry was verified without interrupting vocabulary editing.
-
-**External verification limit:** real browser lookups for counter, summary and sampler timed out; a direct endpoint read returned HTTP 522. Controlled-response UI coverage is not a real-provider success claim. No proxy or replacement provider was added. Offline saving, note editing and review remain usable.
+**External verification limit:** real lookups for `counter`, `summary` and `sampler` timed out; a direct endpoint read returned HTTP 522. Controlled-response coverage is not real-provider success. No proxy or replacement provider was added. Offline saving, note editing and review remain usable.
 
 ## Verification and publication
 
-Current-bank verification exercised 42 changed records with visible English/Korean question, choices, explanation and correct grading; individual KCSA and 120-question 60/60 mocks; scarcity, small/empty pools, unanswered results, exact PASS boundaries, immutable legacy history and reset isolation. Question/vocabulary/history/result and long-command surfaces were exercised at a 390×844 Chromium viewport without horizontal overflow. This is viewport emulation, not physical-device testing or empirical exam calibration.
+The private and exact sanitized banks passed count, retained-KCNA equality, native question/option/key fidelity, ID-retirement, scalar/array bounds and public-schema validation. Actual UI scenarios exercised two/three/four-key exact sets, subsets, extras, empty selections, draft/graded restoration, word isolation and the fifth keyboard choice.
 
-Only index.html, vocabulary.js, local/local.js and README.md are published. The bank projection contains exactly id, exam, domain, subtopic, difficulty, style, q, choices, answer, explain and ref, with only en/ko localized fields. Private provenance, authoring, raw discussions, evidence, source-repository history and unrelated exercises are excluded. Runtime script URLs use v=20261011-final283 to refresh assets without clearing learner storage. GitHub Pages deployment uses the existing workflow.
+The exact sanitized runtime completed a 60-question KCSA mock at 90:00 with 60/60, including six reverse-selected multiple-answer questions. A full mixed mock scored 117/120: one unanswered, one subset and one extra-selection case were the only misses. Array order, null unanswered picks, retired scalar history and byte-unchanged stored snapshots were verified. These are automated key-driven smoke scenarios, not learner performance measurements.
+
+Five real checkboxes and readable question metadata were exercised at a 390×844 Chromium viewport without horizontal overflow. This is viewport emulation, not physical-device testing.
+
+Only `index.html`, `vocabulary.js`, `local/local.js` and `README.md` are published. Each bank record contains exactly `id exam domain subtopic difficulty style q choices answer explain ref`, with only `en` and `ko` localized fields. Raw source material, private provenance, authoring, validation evidence and source-repository history are excluded. Script URLs use `v=20261011-kcsa310-multi` to refresh assets without clearing learner storage. Deployment uses the existing GitHub Pages workflow.

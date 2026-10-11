@@ -37,7 +37,7 @@ main{max-width:900px;margin:0 auto;padding:16px 16px 80px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;overflow-wrap:anywhere}
 .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--mute);font-size:12px;margin-bottom:16px}
 .meta .tag{border:1px solid var(--line);border-radius:5px;padding:2px 6px}
-.meta .question-domain{flex:1;min-width:0}
+.meta .question-domain{flex:1 1 180px;min-width:0}
 .meta .question-id{font-size:11px;border:0;padding:0}
 .meta .question-position{font-variant-numeric:tabular-nums}
 .q{font-size:18px;line-height:1.65;margin:0 0 18px;white-space:pre-wrap}
@@ -92,6 +92,8 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
 .vocabulary-word:hover{color:var(--acc);text-decoration:underline;text-underline-offset:4px}
 .vocabulary-word:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .choices li button.k{left:8px;top:8px;width:44px;height:44px;padding:0;border:0;border-radius:6px;background:transparent;font-size:14px}
+.choices li input.k{left:10px;top:12px;width:24px;height:24px;margin:0;padding:0;border-radius:0;accent-color:var(--acc);cursor:pointer}
+.choices li .choice-number{position:absolute;left:40px;top:13px;color:var(--mute);font-size:12px}
 .vocabulary-notice{position:fixed;z-index:10;left:16px;right:16px;bottom:16px;max-width:600px;margin:0 auto;background:var(--panel);border:1px solid var(--acc);border-radius:8px;padding:12px 16px;pointer-events:none}
 .vocabulary-toolbar,.vocabulary-actions,.vocabulary-entry-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .vocabulary-toolbar input{flex:1;min-width:160px}
@@ -182,8 +184,8 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
   </section>
   <div id="vocabularyNotice" class="vocabulary-notice hidden" role="status" aria-live="polite"></div>
 </main>
-<script src="local/local.js?v=20261011-final283"></script>
-<script src="vocabulary.js?v=20261011-final283"></script>
+<script src="local/local.js?v=20261011-kcsa310-multi"></script>
+<script src="vocabulary.js?v=20261011-kcsa310-multi"></script>
 <script>
 (() => {
 const BANKS = window.QUIZ_BANKS || {};
@@ -205,7 +207,7 @@ let seenError = "";
 try {
   const saved = localStorage.getItem(SEEN_KEY);
   const ids = saved == null
-    ? ["local-kcna", "local-kcsa", "local"].flatMap(key => Object.keys(JSON.parse(localStorage.getItem("quiz:stats:" + key) || "{}"))).filter(id => /^local-\d+$/.test(id))
+    ? ["local-kcna", "local-kcsa", "local"].flatMap(key => Object.keys(JSON.parse(localStorage.getItem("quiz:stats:" + key) || "{}"))).filter(id => /^(?:local-\d+|kcsa-mock-\d+)$/.test(id))
     : JSON.parse(saved);
   if (!Array.isArray(ids)) throw new Error("본 문항 기록 형식이 올바르지 않습니다.");
   for (const id of ids) if (typeof id === "string") seenIds.add(id);
@@ -253,6 +255,27 @@ function pick(p) {
 
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const hasChoice = (value, ci) => Array.isArray(value) ? value.includes(ci) : value === ci;
+const hasSelection = value => Array.isArray(value) ? value.length > 0 : value != null;
+const correctSelection = (answer, picked) => Array.isArray(answer)
+  ? Array.isArray(picked) && picked.length === answer.length && answer.every(ci => picked.includes(ci))
+  : picked === answer;
+const copySelection = value => Array.isArray(value) ? value.slice() : value;
+function selectionLabels(value, ord) {
+  if (!hasSelection(value)) return "무응답";
+  if (!Array.isArray(value)) return `${ord.indexOf(value) + 1}번`;
+  return ord.reduce((labels, ci, i) => {
+    if (value.includes(ci)) labels.push(`${i + 1}번`);
+    return labels;
+  }, []).join(", ");
+}
+function orderedExplanation(text, ord) {
+  return text.replace(/(\boptions?\s+|선택지\s*|보기\s*)([1-9](?:\s*\/\s*[1-9])*)(?!\d)/gi,
+    (_, label, numbers) => label + numbers.replace(/[1-9]/g, n => {
+      const position = ord.indexOf(+n - 1);
+      return position < 0 ? n : String(position + 1);
+    }));
+}
 let targetLanguage = "ko", translationShown = false;
 const bi = (en, ko, tag = "span", show = false) => {
   const primary = targetLanguage === "ko" ? en : ko, translation = targetLanguage === "ko" ? ko : en;
@@ -292,7 +315,7 @@ function historyRequest(mode, value) {
 async function loadHistory() {
   try {
     const raw = await historyRequest("readonly") || [];
-    const valid = raw.filter(r => r && typeof r.completedAt === "string" && typeof r.examLabel === "string" && Array.isArray(r.items) && r.items.length > 0 && r.items.every(it => it.question && typeof it.question.en === "string" && typeof it.question.ko === "string" && it.choices && Array.isArray(it.choices.en) && Array.isArray(it.choices.ko) && it.explain && typeof it.answer === "number" && Array.isArray(it.order)));
+    const valid = raw.filter(r => r && typeof r.completedAt === "string" && typeof r.examLabel === "string" && Array.isArray(r.items) && r.items.length > 0 && r.items.every(it => it.question && typeof it.question.en === "string" && typeof it.question.ko === "string" && it.choices && Array.isArray(it.choices.en) && Array.isArray(it.choices.ko) && it.explain && (typeof it.answer === "number" || (Array.isArray(it.answer) && it.answer.length > 0 && it.answer.every(Number.isInteger))) && Array.isArray(it.order)));
     historyError = valid.length !== raw.length ? "읽을 수 없는 시험 기록이 있어 제외했습니다." : "";
     historyRecords = valid.sort((a, b) => String(b.completedAt).localeCompare(String(a.completedAt)));
   } catch (e) { historyError = e.message; historyRecords = []; }
@@ -341,29 +364,35 @@ function fillDomains() {
 
 function renderQuestion(q, ord, picked, reveal) {
   const examTag = q.exam === "kcna" || q.id.startsWith("kcna") ? "KCNA" : q.exam === "kcsa" || q.id.startsWith("kcsa") ? "KCSA" : "개인";
+  const multiple = Array.isArray(q.answer);
+  const correct = correctSelection(q.answer, picked);
   const html = `
-    <div class="meta"><span class="tag">${examTag}</span><span class="question-domain">${esc(q.domain)}</span><span class="tag question-id">${q.id}</span>${exam ? `<span class="tag question-position">${exam.idx + 1} / ${exam.items.length}</span>` : endlessItems.length ? `<span class="question-position">${endlessIndex + 1} / ${endlessItems.length}</span>` : ""}</div>
+    <div class="meta"><span class="tag">${examTag}</span><span class="question-domain">${esc(q.domain)}</span><span class="tag">${multiple ? "복수 정답 · 모두 선택" : "단일 정답"}</span><span class="tag question-id">${q.id}</span>${exam ? `<span class="tag question-position">${exam.idx + 1} / ${exam.items.length}</span>` : endlessItems.length ? `<span class="question-position">${endlessIndex + 1} / ${endlessItems.length}</span>` : ""}</div>
     <p class="q">${bi(q.q.en, q.q.ko, "span", translationShown)}</p>
     <ol class="choices">${ord.map((ci, i) => {
       let cls = "";
-      if (reveal) { if (ci === q.answer) cls = "ok"; else if (picked === ci) cls = "bad"; cls += " locked"; }
-      else if (picked === ci) cls = "sel";
-      return `<li data-ci="${ci}" class="${cls}"><button type="button" class="k" aria-label="${i + 1}번 보기 선택"${reveal ? " disabled" : ""}>${i + 1}</button>${bi(q.choices.en[ci], q.choices.ko[ci], "span", translationShown)}</li>`;
+      if (reveal) { if (hasChoice(q.answer, ci)) cls = "ok"; else if (hasChoice(picked, ci)) cls = "bad"; cls += " locked"; }
+      else if (hasChoice(picked, ci)) cls = "sel";
+      const control = multiple
+        ? `<input type="checkbox" class="k" aria-label="${i + 1}번 보기 선택"${hasChoice(picked, ci) ? " checked" : ""}${reveal ? " disabled" : ""}><span class="choice-number" aria-hidden="true">${i + 1}</span>`
+        : `<button type="button" class="k" aria-label="${i + 1}번 보기 선택"${reveal ? " disabled" : ""}>${i + 1}</button>`;
+      return `<li data-ci="${ci}" class="${cls}">${control}${bi(q.choices.en[ci], q.choices.ko[ci], "span", translationShown)}</li>`;
     }).join("")}</ol>
     <div class="explain${reveal ? " show" : ""}">
-      <div class="verdict ${picked === q.answer ? "ok" : "bad"}">${picked === q.answer ? "정답" : "오답 — 정답은 " + (ord.indexOf(q.answer) + 1) + "번"}</div>
-      ${bi(q.explain.en, q.explain.ko, "div", translationShown)}
+      <div class="verdict ${correct ? "ok" : "bad"}">${correct ? "정답" : "오답 — 정답은 " + selectionLabels(q.answer, ord)}</div>
+      ${bi(orderedExplanation(q.explain.en, ord), orderedExplanation(q.explain.ko, ord), "div", translationShown)}
       ${q.ref ? `<a href="${esc(q.ref)}" target="_blank" rel="noopener noreferrer">${esc(q.ref)}</a>` : ""}
     </div>
     <div class="actions">
       <button id="translationToggle" type="button" aria-expanded="${translationShown}" aria-pressed="${translationShown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${translationShown ? "숨기기" : "보기"}</button>
       ${exam ? `<button id="prev"${exam.idx === 0 ? " disabled" : ""}>이전</button><button id="next" class="primary">${exam.idx === exam.items.length - 1 ? "제출" : "다음"}</button>`
-             : `<button id="prev"${endlessIndex <= 0 ? " disabled" : ""}>이전</button><button id="next" class="primary"${reveal || endlessIndex < endlessItems.length - 1 ? "" : " disabled"}>다음 문제</button>${!reveal && endlessIndex === endlessItems.length - 1 ? `<button id="skip">건너뛰기</button>` : ""}`}
-      <span class="hint">영단어: 추가·삭제 · 보기 번호/빈 공간: 답 선택 · 1–4 키${exam ? "" : " · Enter 다음"}</span>
+             : `${multiple && !reveal ? `<button id="checkAnswer" class="primary"${hasSelection(picked) ? "" : " disabled"}>정답 확인</button>` : ""}<button id="prev"${endlessIndex <= 0 ? " disabled" : ""}>이전</button><button id="next" class="primary"${reveal || endlessIndex < endlessItems.length - 1 ? "" : " disabled"}>다음 문제</button>${!reveal && endlessIndex === endlessItems.length - 1 ? `<button id="skip">건너뛰기</button>` : ""}`}
+      <span class="hint">영단어: 추가·삭제 · 보기 번호/빈 공간: ${multiple ? "선택·해제" : "답 선택"} · 1–${ord.length} 키${exam ? "" : multiple ? " · Enter 확인/다음" : " · Enter 다음"}</span>
     </div>`;
   el.card.innerHTML = html;
   el.card.querySelectorAll(".choices li").forEach(li => li.addEventListener("click", () => choose(+li.dataset.ci)));
   const tr = $("#translationToggle"); if (tr) tr.addEventListener("click", () => { translationShown = !translationShown; if (!exam && endlessItems[endlessIndex]) endlessItems[endlessIndex].translationShown = translationShown; renderQuestion(cur, order, picked, reveal); $("#translationToggle")?.focus(); });
+  const check = $("#checkAnswer"); if (check) check.addEventListener("click", gradePractice);
   const n = $("#next"); if (n) n.addEventListener("click", next);
   const s = $("#skip"); if (s) s.addEventListener("click", () => { lastId = cur.id; nextEndless(); });
   const pv = $("#prev"); if (pv) pv.addEventListener("click", () => { if (exam) { exam.idx--; showExamItem(); } else if (endlessIndex > 0) { endlessIndex--; showEndlessItem(); } });
@@ -373,7 +402,7 @@ function renderQuestion(q, ord, picked, reveal) {
 function showEndlessItem() {
   const it = endlessItems[endlessIndex];
   cur = it.q; order = it.order; currentPicked = it.picked;
-  locked = it.picked != null; translationShown = it.translationShown;
+  locked = it.graded; translationShown = it.translationShown;
   markSeen(cur); renderStats();
   renderQuestion(cur, order, currentPicked, locked);
 }
@@ -392,7 +421,7 @@ function nextEndless() {
     el.card.innerHTML = `<p class="q">${el.mode.value === "wrong" ? "현재 오답으로 남은 문항이 없습니다. 다른 모드를 선택하세요." : "이 조건에 해당하는 문항이 없습니다."}</p>`;
     return;
   }
-  endlessItems.push({ q, order: shuffle(q.choices.en.map((_, i) => i)), picked: null, translationShown: false });
+  endlessItems.push({ q, order: shuffle(q.choices.en.map((_, i) => i)), picked: null, graded: false, translationShown: false });
   endlessIndex++; showEndlessItem();
 }
 
@@ -405,15 +434,30 @@ function record(q, ok) {
 }
 
 function choose(ci) {
-  if (exam) { exam.items[exam.idx].picked = ci; currentPicked = ci; renderQuestion(cur, order, ci, false); return; }
-  if (locked) return;
+  if (!exam && locked) return;
+  const it = exam ? exam.items[exam.idx] : endlessItems[endlessIndex];
+  if (Array.isArray(cur.answer)) {
+    const focusChoice = document.activeElement?.matches("#card input.k") ? +document.activeElement.closest("li").dataset.ci : null;
+    const selected = it.picked ||= [];
+    const index = selected.indexOf(ci);
+    if (index < 0) selected.push(ci); else selected.splice(index, 1);
+    currentPicked = selected;
+    renderQuestion(cur, order, selected, false);
+    if (focusChoice != null) el.card.querySelector(`li[data-ci="${focusChoice}"] input.k`)?.focus({ preventScroll: true });
+    return;
+  }
+  it.picked = ci; currentPicked = ci;
+  if (exam) renderQuestion(cur, order, ci, false);
+  else gradePractice();
+}
+function gradePractice() {
+  if (exam || locked || !hasSelection(currentPicked)) return;
   locked = true;
-  currentPicked = ci;
-  endlessItems[endlessIndex].picked = ci;
-  record(cur, ci === cur.answer);
+  endlessItems[endlessIndex].graded = true;
+  record(cur, correctSelection(cur.answer, currentPicked));
   lastId = cur.id;
   renderStats();
-  renderQuestion(cur, order, ci, true);
+  renderQuestion(cur, order, currentPicked, true);
 }
 
 function next() {
@@ -467,7 +511,7 @@ function startExam() {
     ? ["kcna", "kcsa"].flatMap(kind => sampleMockQuestions(p.filter(q => q.exam === kind)))
     : sampleMockQuestions(p);
   // Each exam contributes up to 60 filtered questions; allow 1.5 minutes per item.
-  exam = { items: shuffle(items).map(q => ({ q, order: shuffle([0, 1, 2, 3]), picked: null })), idx: 0, endAt: Date.now() + items.length * 90 * 1000 };
+  exam = { items: shuffle(items).map(q => ({ q, order: shuffle(q.choices.en.map((_, i) => i)), picked: null })), idx: 0, endAt: Date.now() + items.length * 90 * 1000 };
   el.result.classList.add("hidden");
   el.timer.classList.remove("hidden");
   exam.timerId = setInterval(tick, 1000); tick();
@@ -494,7 +538,7 @@ function snapshotAttempt(items, right) {
     domainContext: el.domain.value || "전체 도메인",
     styleContext: el.style.value || "전체 유형",
     right, total: items.length, percent: Math.round(100 * right / items.length),
-    items: items.map(it => ({ id: it.q.id, exam: it.q.exam, domain: it.q.domain, subtopic: it.q.subtopic || "", difficulty: it.q.difficulty, style: it.q.style || "study", question: { en: it.q.q.en, ko: it.q.q.ko }, choices: { en: it.q.choices.en.slice(), ko: it.q.choices.ko.slice() }, answer: it.q.answer, picked: it.picked, order: it.order.slice(), explain: { en: it.q.explain.en, ko: it.q.explain.ko }, ref: it.q.ref || "" }))
+    items: items.map(it => ({ id: it.q.id, exam: it.q.exam, domain: it.q.domain, subtopic: it.q.subtopic || "", difficulty: it.q.difficulty, style: it.q.style || "study", question: { en: it.q.q.en, ko: it.q.q.ko }, choices: { en: it.q.choices.en.slice(), ko: it.q.choices.ko.slice() }, answer: copySelection(it.q.answer), picked: hasSelection(it.picked) ? copySelection(it.picked) : null, order: it.order.slice(), explain: { en: it.q.explain.en, ko: it.q.explain.ko }, ref: it.q.ref || "" }))
   };
 }
 function renderAttempt(attempt, allShown = false, options = {}) {
@@ -502,12 +546,12 @@ function renderAttempt(attempt, allShown = false, options = {}) {
   const passed = attempt.right * 4 >= attempt.total * 3;
   const percent = Math.round(1000 * attempt.right / attempt.total) / 10;
   const byDom = {};
-  for (const it of attempt.items) { const d = byDom[it.domain] ||= { r: 0, n: 0 }; d.n++; if (it.picked === it.answer) d.r++; }
+  for (const it of attempt.items) { const d = byDom[it.domain] ||= { r: 0, n: 0 }; d.n++; if (correctSelection(it.answer, it.picked)) d.r++; }
   const byExam = {};
   if (attempt.examKey === "local" && attempt.items.every(it => it.exam === "kcna" || it.exam === "kcsa")) {
     for (const it of attempt.items) {
       const e = byExam[it.exam] ||= { r: 0, n: 0 };
-      e.n++; if (it.picked === it.answer) e.r++;
+      e.n++; if (correctSelection(it.answer, it.picked)) e.r++;
     }
   }
   const examScores = ["kcna", "kcsa"].filter(kind => byExam[kind]).map(kind => {
@@ -525,9 +569,9 @@ function renderAttempt(attempt, allShown = false, options = {}) {
     <div class="review-actions"><button id="allTranslations" type="button" aria-expanded="${allShown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${allShown ? "숨기기" : "모두 보기"}</button><span class="status">각 문항에서도 번역을 열 수 있습니다.</span></div>
     ${attempt.items.map((it, i) => {
       const shown = reviewOverrides.has(i) ? reviewOverrides.get(i) : allShown;
-      const choiceHtml = it.order.map((ci, n) => `<li class="${ci === it.answer ? "ok" : ci === it.picked ? "bad" : ""}"><span class="k">${n + 1}</span>${bi(it.choices.en[ci], it.choices.ko[ci], "span", false)}</li>`).join("");
-      const picked = it.picked == null ? "무응답" : `${it.order.indexOf(it.picked) + 1}번`;
-      return `<div class="review-item${shown ? " translation-on" : ""}" data-review-index="${i}"><div class="meta"><span class="tag">${esc(it.domain)}</span><span class="tag">${esc(it.id)}</span></div><p class="q">${bi(it.question.en, it.question.ko, "span", false)}</p><ol class="choices">${choiceHtml}</ol><p class="review-answer"><b>내 답:</b> ${picked} · <b>${it.picked === it.answer ? "정답" : "정답은 " + (it.order.indexOf(it.answer) + 1) + "번"}</b></p><div class="review-actions"><button type="button" data-review-toggle aria-expanded="${shown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${shown ? "숨기기" : "보기"}</button></div><div class="explain show">${bi(it.explain.en, it.explain.ko, "div", false)}${it.ref ? `<a href="${esc(it.ref)}" target="_blank" rel="noopener noreferrer">${esc(it.ref)}</a>` : ""}</div></div>`;
+      const choiceHtml = it.order.map((ci, n) => `<li class="${hasChoice(it.answer, ci) ? "ok" : hasChoice(it.picked, ci) ? "bad" : ""}"><span class="k">${n + 1}</span>${bi(it.choices.en[ci], it.choices.ko[ci], "span", false)}</li>`).join("");
+      const picked = selectionLabels(it.picked, it.order);
+      return `<div class="review-item${shown ? " translation-on" : ""}" data-review-index="${i}"><div class="meta"><span class="tag">${esc(it.domain)}</span><span class="tag">${esc(it.id)}</span></div><p class="q">${bi(it.question.en, it.question.ko, "span", false)}</p><ol class="choices">${choiceHtml}</ol><p class="review-answer"><b>내 답:</b> ${picked} · <b>${correctSelection(it.answer, it.picked) ? "정답" : "정답은 " + selectionLabels(it.answer, it.order)}</b></p><div class="review-actions"><button type="button" data-review-toggle aria-expanded="${shown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${shown ? "숨기기" : "보기"}</button></div><div class="explain show">${bi(orderedExplanation(it.explain.en, it.order), orderedExplanation(it.explain.ko, it.order), "div", false)}${it.ref ? `<a href="${esc(it.ref)}" target="_blank" rel="noopener noreferrer">${esc(it.ref)}</a>` : ""}</div></div>`;
     }).join("")}
     <button id="closeReview" type="button">현재 퀴즈로 돌아가기</button> <button id="again" class="primary" type="button">다시 모의고사</button>`;
   $("#allTranslations").addEventListener("click", () => {
@@ -573,7 +617,7 @@ function finishExam() {
   exam.finished = true;
   clearInterval(exam.timerId); el.timer.classList.add("hidden");
   let right = 0;
-  for (const it of exam.items) { const ok = it.picked === it.q.answer; if (ok) right++; record(it.q, ok); }
+  for (const it of exam.items) { const ok = correctSelection(it.q.answer, it.picked); if (ok) right++; record(it.q, ok); }
   reviewOverrides.clear();
   const attempt = snapshotAttempt(exam.items, right);
   attemptSave = { attempt, status: "saving", error: "" };
@@ -629,8 +673,8 @@ el.reset.addEventListener("click", () => {
 document.addEventListener("keydown", e => {
   if (e.target.closest("select,button,input,textarea,summary,a,[contenteditable]")) return;
   if ($("#quizPanel").hidden || viewedAttempt || !el.history.classList.contains("hidden")) return;
-  if (/^[1-4]$/.test(e.key) && cur && order) { choose(order[+e.key - 1]); e.preventDefault(); }
-  else if ((e.key === "Enter" || e.key === " ") && cur) { next(); e.preventDefault(); }
+  if (/^[1-9]$/.test(e.key) && cur && order && +e.key <= order.length) { choose(order[+e.key - 1]); e.preventDefault(); }
+  else if ((e.key === "Enter" || e.key === " ") && cur) { if (!exam && !locked && Array.isArray(cur.answer)) gradePractice(); else next(); e.preventDefault(); }
 });
 
 const savedExam = pref("exam");
