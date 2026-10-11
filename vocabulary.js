@@ -61,7 +61,7 @@ function definition(w) {
   const message = state === "loading" ? "영영사전 조회 중…" : state === "missing" ? "일반 영영사전에 이 단어의 뜻이 없습니다. 기술 용어는 포함되지 않을 수 있습니다." : state === "timeout" ? "영영사전 서버가 10초 안에 응답하지 않았습니다. 단어와 예문은 저장되어 있습니다." : state?.startsWith("http:") ? `외부 영영사전 서버 오류 (HTTP ${state.slice(5)}). 단어와 예문은 저장되어 있습니다.` : state?.startsWith("request:") ? `외부 영영사전 요청 실패: ${state.slice(8)}. 연결 문제나 브라우저 요청 제한 등은 이 메시지만으로 구분할 수 없습니다.` : state === "response" ? "영영사전 응답에서 뜻을 읽지 못했습니다. 단어와 예문은 저장되어 있습니다." : "일반 영영사전의 영어 뜻을 아직 조회하지 않았습니다. 한국어 뜻은 직접 적을 수 있습니다.";
   const source = typeof w.definitionSource === "string" && /^https?:\/\//i.test(w.definitionSource) ? `<a href="${esc(w.definitionSource)}" target="_blank" rel="noopener noreferrer">사전 출처</a>` : "";
   const license = w.definitionLicense && /^https?:\/\//i.test(w.definitionLicense.url || "") ? `<a href="${esc(w.definitionLicense.url)}" target="_blank" rel="noopener noreferrer">${esc(w.definitionLicense.name)}</a>` : "";
-  return w.definition ? `<p class="vocabulary-definition"><b>영영사전${w.partOfSpeech ? ` · ${esc(w.partOfSpeech)}` : ""}</b><br>${esc(w.definition)}</p><p class="status">${source} ${license}</p>` : `<p class="status">${esc(message)}</p>`;
+  return w.definition ? `<p class="vocabulary-definition"><b>영영사전${w.partOfSpeech ? ` · ${esc(w.partOfSpeech)}` : ""}</b><br>${esc(w.definition)}</p><p class="status">${source} ${license}</p>${state && state !== "found" ? `<p class="status">${esc(message)} 저장된 영영사전 뜻은 유지합니다.</p>` : ""}` : `<p class="status">${esc(message)}</p>`;
 }
 function renderList() {
   const active = document.activeElement;
@@ -149,7 +149,7 @@ async function lookup(word) {
     }
     lookupStates.set(word, found ? "found" : "response");
     if (found && wordKeys.has(word)) update(word, found);
-  } catch { lookupStates.set(word, "response"); }
+  } catch (e) { lookupStates.set(word, e.name === "TimeoutError" || e.name === "AbortError" ? "timeout" : "response"); }
   refresh();
 }
 

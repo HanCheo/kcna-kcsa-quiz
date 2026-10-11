@@ -171,6 +171,7 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
   <section id="vocabularyPanel" class="card" role="tabpanel" aria-labelledby="vocabularyTab" hidden>
     <h2>개인 영단어장</h2>
     <p class="status">영단어 클릭으로 추가하고, 다시 클릭하면 삭제합니다. 일반 영영사전의 영어 뜻을 조회하며 한국어 뜻은 직접 적을 수 있습니다.</p>
+    <p class="status"><a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer">Free Dictionary API</a>에 선택한 영단어만 보냅니다. 예문·한국어 뜻·메모는 보내지 않으며 기술 용어는 조회되지 않을 수 있습니다.</p>
     <p class="status">이 브라우저에만 저장됩니다. 모의고사 시간은 탭을 바꿔도 계속 흐릅니다.</p>
     <div id="vocabularyBrowse">
       <div class="vocabulary-toolbar"><input id="vocabularySearch" type="search" aria-label="단어·한국어 뜻 검색" placeholder="단어·한국어 뜻 검색"><select id="vocabularyFilter" aria-label="단어 학습 상태"><option value="all">전체 단어</option><option value="learning">복습할 단어</option><option value="known">학습 완료</option></select><button id="startVocabularyReview" type="button" class="primary">현재 목록 복습</button></div>
@@ -181,8 +182,8 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
   </section>
   <div id="vocabularyNotice" class="vocabulary-notice hidden" role="status" aria-live="polite"></div>
 </main>
-<script src="local/local.js?v=20261011-checkpoint180"></script>
-<script src="vocabulary.js?v=20261011-checkpoint180"></script>
+<script src="local/local.js?v=20261011-final283"></script>
+<script src="vocabulary.js?v=20261011-final283"></script>
 <script>
 (() => {
 const BANKS = window.QUIZ_BANKS || {};
@@ -498,6 +499,8 @@ function snapshotAttempt(items, right) {
 }
 function renderAttempt(attempt, allShown = false, options = {}) {
   viewedAttempt = attempt; viewedAll = allShown;
+  const passed = attempt.right * 4 >= attempt.total * 3;
+  const percent = Math.round(1000 * attempt.right / attempt.total) / 10;
   const byDom = {};
   for (const it of attempt.items) { const d = byDom[it.domain] ||= { r: 0, n: 0 }; d.n++; if (it.picked === it.answer) d.r++; }
   const byExam = {};
@@ -508,13 +511,13 @@ function renderAttempt(attempt, allShown = false, options = {}) {
     }
   }
   const examScores = ["kcna", "kcsa"].filter(kind => byExam[kind]).map(kind => {
-    const e = byExam[kind], pct = Math.round(100 * e.r / e.n);
-    return `<tr><th scope="row">${kind.toUpperCase()}</th><td>${e.r}/${e.n}</td><td>${pct}%</td><td class="${pct >= 75 ? "pass" : "fail"}">${pct >= 75 ? "PASS" : "FAIL"}</td></tr>`;
+    const e = byExam[kind], pct = Math.round(1000 * e.r / e.n) / 10, passed = e.r * 4 >= e.n * 3;
+    return `<tr><th scope="row">${kind.toUpperCase()}</th><td>${e.r}/${e.n}</td><td>${pct}%</td><td class="${passed ? "pass" : "fail"}">${passed ? "PASS" : "FAIL"}</td></tr>`;
   }).join("");
   const saveStatus = attemptSave && attemptSave.attempt === attempt
     ? `<p id="saveStatus" class="status">${attemptSave.status === "saving" ? "기록 저장 중…" : attemptSave.status === "saved" ? "기록 저장됨" : `기록 저장 실패: ${esc(attemptSave.error)}`}</p>` : "";
   el.result.classList.remove("hidden");
-  el.result.innerHTML = `${saveStatus}<h2 class="${attempt.percent >= 75 ? "pass" : "fail"}">${attempt.percent}% — ${attempt.percent >= 75 ? "PASS" : "FAIL"} (연습 기준 75%)</h2>
+  el.result.innerHTML = `${saveStatus}<h2 class="${passed ? "pass" : "fail"}">${percent}% — ${passed ? "PASS" : "FAIL"} (연습 기준 75%)</h2>
     <p class="status">연습문제의 점수입니다. 실제 시험 합격 여부나 합격 확률을 뜻하지 않습니다.</p>
     <p>${attempt.right} / ${attempt.total} 정답 · ${esc(new Date(attempt.completedAt).toLocaleString())} · ${esc(attempt.examLabel)} · ${esc(attempt.domainContext)} · ${esc(attempt.styleContext)}</p>
     ${examScores ? `<table id="examScores"><caption>시험별 연습 결과 (기준 75%)</caption><tr><th>시험</th><th>정답</th><th>%</th><th>결과</th></tr>${examScores}</table>` : ""}
