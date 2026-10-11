@@ -1434,8 +1434,8 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "answer": 0,
     "explain": {
-      "en": "Init containers run to completion, in order, before the app containers start, so they are the place for setup work (download config, run migrations, generate files). Writing to a shared volume (e.g. emptyDir) hands the result to the main container. A sidecar runs concurrently with the app container, not before it; a PVC alone does not generate data.",
-      "ko": "Init container는 앱 컨테이너가 시작되기 전에 순서대로 끝까지 실행되므로 설정 다운로드·마이그레이션·파일 생성 같은 준비 작업에 적합하며, 공유 volume(emptyDir 등)에 결과를 써서 메인 컨테이너에 넘깁니다. Sidecar는 앱 컨테이너와 동시에 실행되지 '이전'에 실행되지 않고, PVC 자체는 데이터를 생성하지 않습니다."
+      "en": "The intended pattern is a regular init container that generates files in a shared volume and completes before the application containers start. This means application startup, not a time before the Pod object exists. A PVC provides storage but does not itself run initialization code. Native Kubernetes sidecars are restartable init containers: they start before the application containers and continue running alongside them. For setup work that should finish and exit, a regular init container is the standard fit; it is incorrect to say that sidecars can never start first.",
+      "ko": "의도한 구성은 일반 init container가 공유 볼륨에 파일을 생성하고 앱 컨테이너가 시작되기 전에 완료되는 방식입니다. 여기서 시작 전은 Pod 오브젝트가 존재하기 전이 아니라 앱 컨테이너 시작 전을 뜻합니다. PVC는 저장소를 제공할 뿐 초기화 코드를 실행하지 않습니다. Kubernetes 네이티브 사이드카는 재시작 가능한 init container로서 앱 컨테이너보다 먼저 시작한 뒤 함께 계속 실행됩니다. 준비 작업을 마치고 종료해야 한다면 일반 init container가 적합하며, 사이드카가 먼저 시작할 수 없다고 설명하는 것은 잘못입니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/"
   },
@@ -1658,8 +1658,8 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "answer": 2,
     "explain": {
-      "en": "Service Mesh Interface (SMI) was the CNCF specification defining common APIs (traffic split, access control, metrics) across meshes like Linkerd, Istio and Consul. It has since been archived in favor of the Kubernetes Gateway API's GAMMA initiative, but SMI remains the expected exam answer.",
-      "ko": "Service Mesh Interface(SMI)는 Linkerd, Istio, Consul 등 mesh 간 공통 API(traffic split, access control, metrics)를 정의한 CNCF 사양입니다. 현재는 archived 되고 Kubernetes Gateway API의 GAMMA 이니셔티브로 계승되었지만, 시험에서 기대하는 답은 여전히 SMI입니다."
+      "en": "Service Mesh Interface (SMI) was created as a standard Kubernetes service-mesh interface, covering common capabilities such as traffic splitting, access control, and metrics. CNCF announced its archival on October 3, 2023, after maintainers consolidated work toward the Gateway API GAMMA initiative. SMI is the historical specification represented by these choices; this practice item does not establish that it is an expected answer on a current real certification exam.",
+      "ko": "Service Mesh Interface(SMI)는 트래픽 분할, 접근 제어, 메트릭 같은 공통 기능을 다루는 Kubernetes 서비스 메시 표준 인터페이스로 만들어졌습니다. 유지관리자들이 Gateway API의 GAMMA 이니셔티브로 작업을 모으면서 CNCF는 2023년 10월 3일 프로젝트 아카이브를 발표했습니다. 이 보기에서 가리키는 역사적 사양은 SMI이지만, 이 연습 문항이 현재 실제 자격시험의 기대 정답이라는 근거는 아닙니다."
     },
     "ref": "https://smi-spec.io/"
   },
@@ -2370,32 +2370,32 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
   {
     "id": "local-075",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "Service mesh architecture · 자체 연습",
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "Which pair best describes the two primary planes commonly discussed in a service-mesh architecture?",
-      "ko": "서비스 mesh 아키텍처에서 일반적으로 말하는 두 가지 주요 plane을 가장 잘 설명하는 조합은 무엇입니까?"
+      "en": "Which pair represents the core components of a typical service mesh?",
+      "ko": "일반적인 서비스 메시의 핵심 구성 요소 조합은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "A control plane that configures policy and a data plane of proxies that handles service traffic",
-        "A storage plane that persists logs and a runtime plane that schedules Pods",
-        "A namespace plane that assigns IPs and a database plane that stores manifest",
-        "A build plane that creates images and a registry plane that signs certificates"
+        "Service proxies and a control plane that configures them",
+        "Distributed tracing collectors and persistent log storage",
+        "Circuit-breaking behavior and Kubernetes Pod scheduling",
+        "A data plane and a separate runtime plane"
       ],
       "ko": [
-        "정책을 구성하는 제어 plane과 서비스 트래픽을 처리하는 proxy들의 data plane",
-        "로그를 저장하는 스토리지 plane과 Pod를 스케줄링하는 런타임 plane",
-        "IP를 할당하는 네임스페이스 plane과 매니페스트를 저장하는 데이터베이스 plane",
-        "이미지를 만드는 빌드 plane과 인증서를 서명하는 registry plane"
+        "서비스 프록시와 이를 구성하는 컨트롤 플레인",
+        "분산 추적 수집기와 영구 로그 저장소",
+        "서킷 브레이킹 동작과 Kubernetes Pod 스케줄링",
+        "데이터 플레인과 별도의 런타임 플레인"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "A service mesh separates management from traffic handling: the control plane distributes configuration and policy, while data-plane proxies mediate service-to-service traffic. Storage, scheduling, and image building are separate platform concerns.",
-      "ko": "서비스 mesh는 관리와 트래픽 처리를 분리합니다. 제어 plane은 구성과 정책을 배포하고 data-plane proxy는 서비스 간 트래픽을 중개합니다. 스토리지, 스케줄링, 이미지 빌드는 별도의 플랫폼 관심사입니다."
+      "en": "A typical mesh has service proxies in its data plane and a control plane that supplies configuration and policy. Tracing and log stores are observability integrations; Pod scheduling belongs to Kubernetes rather than the mesh; a separate runtime plane is not the standard architectural counterpart of the data plane.",
+      "ko": "일반적인 서비스 메시는 데이터 플레인의 서비스 프록시와 설정·정책을 배포하는 컨트롤 플레인으로 구성됩니다. 추적 수집기와 로그 저장소는 관측 도구이고, Pod 스케줄링은 메시가 아니라 Kubernetes의 역할입니다. 별도의 런타임 플레인은 데이터 플레인에 대응하는 표준적인 구성 요소가 아닙니다."
     },
     "ref": "https://istio.io/latest/docs/ops/deployment/architecture/"
   },
@@ -2439,123 +2439,59 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which set contains the required top-level identity field for a Kubernetes object manifest?",
-      "ko": "Kubernetes 객체 매니페스트에서 객체 식별에 필요한 최상위 필드 조합은 무엇입니까?"
+      "en": "Which listed group contains the common top-level identity fields of a Kubernetes resource manifest?",
+      "ko": "다음 중 Kubernetes 리소스 매니페스트의 공통 최상위 식별 필드를 나열한 조합은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "apiVersion, kind, and metadata",
-        "apiVersion, namespace, and data",
-        "kind, namespace, and status",
-        "metadata, data, and status"
+        "apiVersion, kind, metadata",
+        "kind, namespace, data",
+        "apiVersion, metadata, namespace",
+        "kind, metadata, data"
       ],
       "ko": [
         "apiVersion, kind, metadata",
-        "apiVersion, 네임스페이스, data",
-        "kind, 네임스페이스, 상태",
-        "metadata, data, 상태"
+        "kind, namespace, data",
+        "apiVersion, metadata, namespace",
+        "kind, metadata, data"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "A manifest identifies the API version and object kind, and metadata supplies the object's identity and management information. field such as namespace, data, and status depend on the particular resource and are not universal top-level requirements.",
-      "ko": "매니페스트는 API version과 객체 kind를 지정하고 metadata가 객체 식별 및 관리 정보를 제공합니다. 네임스페이스, data, 상태는 리소스 종류에 따라 달라지므로 모든 객체에 공통인 top-level 필드는 아닙니다."
+      "en": "apiVersion selects the API version, kind selects the resource type, and metadata contains identity information such as the name. Namespace normally belongs under metadata, and data is resource-specific. These are common resource-manifest identity fields, not a claim that every API payload or list wrapper has an identical required schema; spec also depends on the resource type.",
+      "ko": "apiVersion은 API 버전을, kind는 리소스 종류를 지정하며 metadata는 이름 같은 식별 정보를 담습니다. namespace는 보통 metadata 아래에 있고 data는 리소스 종류에 따라 사용됩니다. 이 문항은 일반적인 리소스 매니페스트의 식별 필드를 비교하며, 모든 API 요청 본문이나 목록 래퍼가 같은 필수 스키마를 갖는다는 뜻은 아닙니다. spec도 리소스 종류에 따라 달라집니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/overview/working-with-objects/"
   },
   {
-    "id": "local-078",
+    "id": "local-081",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Site reliability engineering · 자체 연습",
+    "domain": "Container Orchestration",
+    "subtopic": "Network policies · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which activity most direct helps an SRE establish a baseline for an application's reliability?",
-      "ko": "SRE가 애플리케이션 신뢰성의 baseline을 설정하는 데 가장 직접적으로 도움이 되는 활동은 무엇입니까?"
+      "en": "Which Kubernetes feature must the network plugin support to control permitted traffic flows for workloads?",
+      "ko": "워크로드에 허용되는 트래픽 흐름을 제어하려면 네트워크 플러그인이 어떤 Kubernetes 기능을 지원해야 합니까?"
     },
     "choices": {
       "en": [
-        "Defining normal service-level indicators from measurements and monitoring them",
-        "Alerting only after an outage has already occurred",
-        "Forecasting capacity without defining any service-level indicator",
-        "Recording only successful requests and discarding failures"
+        "Border Gateway Protocol (BGP)",
+        "IP address management (IPAM)",
+        "Pod Security Policy",
+        "Network Policies"
       ],
       "ko": [
-        "측정값에서 정상 서비스-level indicator를 정의하고 이를 모니터링하기",
-        "outage가 이미 발생한 후에만 alert 보내기",
-        "서비스-level indicator를 정의하지 않고 capacity만 forecast하기",
-        "성공한 요청만 기록하고 장애는 버리기"
+        "Border Gateway Protocol (BGP)",
+        "IP 주소 관리(IPAM)",
+        "Pod Security Policy",
+        "Network Policies"
       ]
     },
-    "answer": 0,
+    "answer": 3,
     "explain": {
-      "en": "Monitoring meaningful indicators of normal behavior gives an SRE a reference against which incidents and regressions can be detected. UI design, feature inventory, and budgeting may matter elsewhere but do not establish an operational reliability baseline.",
-      "ko": "정상 동작을 나타내는 지표를 모니터링하면 SRE가 인시던트와 regression을 감지할 기준을 얻습니다. UI 설계, 기능 목록, budget은 다른 목적에는 필요할 수 있지만 운영 신뢰성 baseline을 만들지는 않습니다."
-    },
-    "ref": "https://sre.google/sre-book/monitoring-distributed-systems/"
-  },
-  {
-    "id": "local-080",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Distributed systems · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "At the application layer, which mechanism is designed to prevent split-brain leadership by requiring agreement among a quorum of members?",
-      "ko": "애플리케이션 계층에서 quorum 구성원의 합의를 요구하여 split-brain 리더를 방지하도록 설계된 메커니즘은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "A consensus protocol",
-        "A rolling update strategy",
-        "A container image registry",
-        "A namespace label"
-      ],
-      "ko": [
-        "consensus protocol",
-        "rolling update 전략",
-        "컨테이너 이미지 registry",
-        "네임스페이스 label"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Consensus protocols coordinate replicas so that a quorum agrees on a value or leader, which is the application-level mechanism for handling partition and split-brain risks. Kubernetes deployment strategies and namespace do not provide that agreement protocol.",
-      "ko": "consensus protocol은 replica들이 조정되어 quorum이 값이나 리더에 합의하도록 하므로 partition과 split-brain 위험을 다루는 애플리케이션 수준 메커니즘입니다. Kubernetes deployment 전략와 네임스페이스는 이러한 합의 protocol을 제공하지 않습니다."
-    },
-    "ref": "https://etcd.io/docs/v3.5/learning/why/"
-  },
-  {
-    "id": "local-081",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Network policies · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "A CNI plugin must enforce which Kubernetes resource to restrict traffic between selected Pods?",
-      "ko": "선택한 Pod 사이의 트래픽을 제한하려면 CNI plugin이 어떤 Kubernetes 리소스를 enforce해야 합니까?"
-    },
-    "choices": {
-      "en": [
-        "NetworkPolicy",
-        "PersistentVolumeClaim",
-        "HorizontalPodAutoscaler",
-        "PodDisruptionBudget"
-      ],
-      "ko": [
-        "NetworkPolicy",
-        "PersistentVolumeClaim",
-        "HorizontalPodAutoscaler",
-        "PodDisruptionBudget"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "NetworkPolicy expresses allowed ingress and egress traffic for selected Pods, but enforcement depends on a network plugin that supports NetworkPolicy. The other resources address storage, scaling, and disruption availability rather than packet-flow authorization.",
-      "ko": "NetworkPolicy는 선택한 Pod의 허용 ingress와 egress 트래픽을 표현하지만, 실제 enforcement는 NetworkPolicy를 지원하는 네트워크 plugin에 달려 있습니다. 다른 리소스는 각각 스토리지, scaling, disruption 가용성를 다룹니다."
+      "en": "NetworkPolicy specifies permitted ingress and egress for selected Pods, and enforcement requires a network plugin that supports it. BGP advertises routes and IPAM manages address allocation; neither supplies Kubernetes NetworkPolicy rules. The former PodSecurityPolicy mechanism governed Pod admission rather than network traffic. Creating a NetworkPolicy without an implementing network controller does not enforce it.",
+      "ko": "NetworkPolicy는 선택된 Pod에 허용되는 인바운드·아웃바운드 트래픽을 지정하며, 실제 적용에는 이를 지원하는 네트워크 플러그인이 필요합니다. BGP는 경로를 광고하고 IPAM은 주소 할당을 관리하며 Kubernetes NetworkPolicy 규칙을 제공하는 기능이 아닙니다. 구형 PodSecurityPolicy는 네트워크 트래픽이 아니라 Pod 입장 허용을 다뤘습니다. NetworkPolicy를 구현하는 네트워크 컨트롤러 없이 리소스만 생성해도 정책이 적용되지 않습니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
   },
@@ -2599,27 +2535,27 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "A controller must select every Pod carrying app=payments. Which Kubernetes mechanism expresses that matching rule?",
-      "ko": "controller가 app=payments label을 가진 모든 Pod를 선택해야 합니다. 이 일치하는 규칙을 표현하는 Kubernetes 메커니즘은 무엇입니까?"
+      "en": "Which Kubernetes mechanism is the core grouping primitive for identifying a set of objects?",
+      "ko": "객체 집합을 식별할 때 사용하는 Kubernetes의 핵심 그룹화 메커니즘은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "A label selector",
-        "A CustomResourceDefinition",
-        "A PodDisruptionBudget",
-        "A namespace name"
+        "Custom Resources",
+        "Labels",
+        "Label Selector",
+        "Pod"
       ],
       "ko": [
-        "label selector",
-        "CustomResourceDefinition",
-        "PodDisruptionBudget",
-        "네임스페이스 name"
+        "커스텀 리소스(Custom Resources)",
+        "레이블(Labels)",
+        "레이블 셀렉터(Label Selector)",
+        "Pod"
       ]
     },
-    "answer": 0,
+    "answer": 2,
     "explain": {
-      "en": "A label selector evaluates label requirements and identifies the set of object that match them. Labels are attributes attached to object; the selector is the query or matching mechanism.",
-      "ko": "label selector는 label requirement를 평가하여 조건에 맞는 객체 집합을 식별합니다. label은 객체에 붙는 attribute이고 selector는 이를 조회하거나 일치하는하는 메커니즘입니다."
+      "en": "A label selector identifies a set of objects by evaluating their labels, and Kubernetes documents it as the core grouping primitive. Labels are the attached key/value attributes; the selector expresses which attributes a group must match. Custom resources are API resources and a Pod runs containers; neither is the generic object-selection mechanism.",
+      "ko": "레이블 셀렉터는 객체의 레이블을 평가하여 객체 집합을 식별하며, Kubernetes 문서는 이를 핵심 그룹화 수단으로 설명합니다. 레이블은 객체에 붙는 키·값 속성이고 셀렉터는 그룹에 속하기 위한 일치 조건을 표현합니다. 커스텀 리소스는 API 리소스이고 Pod는 컨테이너를 실행하는 단위이지, 일반적인 객체 선택 메커니즘이 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/"
   },
@@ -2631,8 +2567,8 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which control-plane component exposes the Kubernetes API used by clients to create and manage object?",
-      "ko": "client가 객체를 생성하고 관리할 때 사용하는 Kubernetes API를 노출하는 제어-plane 구성 요소는 무엇입니까?"
+      "en": "Which control-plane component exposes the Kubernetes API for creating and managing objects?",
+      "ko": "객체를 생성하고 관리하는 Kubernetes API를 제공하는 제어 플레인 구성 요소는 무엇입니까?"
     },
     "choices": {
       "en": [
@@ -2644,85 +2580,53 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
       "ko": [
         "kube-apiserver",
         "etcd",
-        "kube-controller-관리자",
+        "kube-controller-manager",
         "kube-proxy"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "kube-apiserver provides the HTTP API endpoint for Kubernetes object and coordinates access through authentication, authorization, and admission. etcd stores status, while the other components perform different control or node features.",
-      "ko": "kube-apiserver는 Kubernetes 객체용 HTTP API endpoint를 제공하고 authentication, authorization, admission을 통해 access를 조정합니다. etcd는 상태를 저장하고 나머지 구성 요소는 다른 제어 또는 노드 기능을 수행합니다."
+      "en": "kube-apiserver exposes the HTTP API for Kubernetes resource access. etcd stores cluster API data, kube-controller-manager runs reconciliation controllers, and kube-proxy implements Service networking.",
+      "ko": "kube-apiserver는 Kubernetes 리소스에 접근하는 HTTP API를 제공합니다. etcd는 클러스터 API 데이터를 저장하고 kube-controller-manager는 조정 컨트롤러를 실행하며 kube-proxy는 Service 네트워킹을 구현합니다."
     },
-    "ref": "https://kubernetes.io/docs/concepts/overview/components/"
-  },
-  {
-    "id": "local-087",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Open source governance · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which artifact should an open-source project's governance board define to clarify how contributors and maintainers interact?",
-      "ko": "open-소스 프로젝트의 거버넌스 위원회가 기여자와 maintainer의 상호작용을 명확히 하기 위해 정의해야 하는 산출물는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "The project's terms of engagement",
-        "The project's release-versioning policy",
-        "The project's open-source license",
-        "The project's technical architecture roadmap"
-      ],
-      "ko": [
-        "프로젝트의 terms of engagement",
-        "프로젝트의 릴리스-versioning 정책",
-        "프로젝트의 open-소스 license",
-        "프로젝트의 technical architecture roadmap"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Terms of engagement document the project's participation rule, decision processes, and expectations for contributors and maintainers. They are governance rule, not runtime cluster settings.",
-      "ko": "terms of engagement는 기여자와 maintainer의 참여 규칙, 의사결정 과정, 기대사항을 문서화합니다. 이는 런타임 클러스터 설정이 아니라 거버넌스 규칙입니다."
-    },
-    "ref": "https://contribute.cncf.io/projects/best-practices/governance/"
+    "ref": "https://kubernetes.io/docs/concepts/overview/kubernetes-api/"
   },
   {
     "id": "local-089",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "Service discovery · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which pair are Kubernetes' traditional built-in Service-discovery mechanisms available to Pods?",
-      "ko": "Pod가 사용할 수 있는 Kubernetes의 전통적인 내장 Service-discovery 메커니즘 두 가지는 무엇입니까?"
+      "en": "Which pair are Kubernetes' documented primary Service-discovery mechanisms?",
+      "ko": "Kubernetes 문서에서 설명하는 주요 Service 검색 메커니즘 두 가지는 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Cluster DNS records and Service environment variables",
-        "LDAP records and RADIUS leases",
-        "Pod labels and DHCP options",
-        "API server logs and image tags"
+        "Environment variables and DNS",
+        "API calls and LDAP",
+        "Labels and RADIUS",
+        "Selectors and DHCP"
       ],
       "ko": [
-        "클러스터 DNS record와 Service 환경 variable",
-        "LDAP record와 RADIUS lease",
-        "Pod label과 DHCP option",
-        "API server log와 이미지 tag"
+        "환경 변수와 DNS",
+        "API 호출과 LDAP",
+        "레이블과 RADIUS",
+        "셀렉터와 DHCP"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Kubernetes provides cluster DNS records for Services and injects Service-related environment variables into Pods created after those Services exist. The environment-variable list is not retroactively updated for Services created later, so it is not an unconditional list of every Service.",
-      "ko": "Kubernetes는 Service용 클러스터 DNS record를 제공하고, 해당 Service가 존재할 때 생성된 Pod에 Service 관련 환경 variable을 주입합니다. 나중에 생성된 Service는 기존 Pod의 환경-variable 목록에 소급 반영되지 않으므로 모든 Service가 무조건 포함되는 것은 아닙니다."
+      "en": "Kubernetes documents Service discovery through environment variables and DNS. Service-related variables are populated when a Pod is created after the Service exists and are not automatically refreshed for later Services. Cluster DNS provides name-based discovery. LDAP, RADIUS, and DHCP are not the documented Service-discovery pair.",
+      "ko": "Kubernetes는 환경 변수와 DNS를 통한 Service 검색을 설명합니다. Service 관련 환경 변수는 해당 Service가 존재할 때 생성된 Pod에 채워지며, 이후 생성된 Service를 반영하도록 자동 갱신되지 않습니다. 클러스터 DNS는 이름 기반 검색을 제공합니다. LDAP, RADIUS, DHCP는 문서에서 설명하는 Service 검색 방식의 조합이 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/services-networking/service/#discovering-services"
   },
   {
     "id": "local-090",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Cloud Native Architecture",
     "subtopic": "Metrics and observability · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
@@ -2746,8 +2650,8 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "answer": 0,
     "explain": {
-      "en": "A Gauge represents one current numerical measurement that may rise or fall, such as temperature or concurrent requests. Counters represent cumulative totals, while Histograms and Summaries describe distributions of observations rather than one current measurement.",
-      "ko": "Gauge는 온도나 동시 요청처럼 오르내릴 수 있는 하나의 현재 numerical measurement를 나타냅니다. Counter는 cumulative total을 나타내고 Histogram과 Summary는 하나의 현재값이 아니라 observation 분포를 설명합니다."
+      "en": "A Gauge represents one current numerical measurement that may rise or fall, such as temperature or concurrent requests. A Counter accumulates a total and normally only increases, apart from resets. Histograms and Summaries describe distributions of observations rather than one current scalar measurement.",
+      "ko": "Gauge는 온도나 동시 요청 수처럼 오르내릴 수 있는 하나의 현재 수치 측정값을 나타냅니다. Counter는 누적 합계를 기록하며 초기화되는 경우를 제외하면 증가만 합니다. Histogram과 Summary는 하나의 현재 스칼라 측정값이 아니라 관측값의 분포를 설명합니다."
     },
     "ref": "https://prometheus.io/docs/concepts/metric_types/#gauge"
   },
@@ -2784,38 +2688,6 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "ref": "https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/"
   },
   {
-    "id": "local-092",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Cloud controller manager · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which Kubernetes component coordinates cloud-provider integration for a Service that requests an external load balancer?",
-      "ko": "external load balancer를 요청하는 Service에 대해 cloud-provider 통합을 조정하는 Kubernetes 구성 요소는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "cloud-controller-manager",
-        "kube-scheduler",
-        "kubelet",
-        "etcd"
-      ],
-      "ko": [
-        "cloud-controller-관리자",
-        "kube-scheduler",
-        "kubelet",
-        "etcd"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "The cloud-controller-manager runs cloud-specific controllers, including the Service controller that integrates Kubernetes Services with a cloud provider's load-balancer API. A Service remaining Pending alone is not proof of a controller failure; permission, quota, or provider configuration can also be causes.",
-      "ko": "cloud-controller-관리자는 cloud 전용 controller를 실행하며, Service를 cloud provider의 load-balancer API와 통합하는 Service controller도 포함합니다. Service가 Pending인 사실만으로 controller 장애를 증명할 수는 없고 권한, quota, provider 설정도 원인일 수 있습니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/architecture/cloud-controller/"
-  },
-  {
     "id": "local-093",
     "exam": "kcna",
     "domain": "Kubernetes Fundamentals",
@@ -2850,66 +2722,34 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
   {
     "id": "local-094",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Cloud Native Architecture",
     "subtopic": "CNCF terminology · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "What does the acronym CNCF expand to?",
-      "ko": "CNCF 약자는 무엇의 약자입니까?"
+      "en": "Which is the full name abbreviated as CNCF?",
+      "ko": "CNCF의 정식 명칭은 무엇입니까?"
     },
     "choices": {
       "en": [
+        "Cloud Native Community Foundation",
         "Cloud Native Computing Foundation",
-        "Cloud Network Container Federation",
-        "Cloud Neutral Compute Framework",
-        "Container Networking Community Forum"
+        "Cloud Neutral Computing Foundation",
+        "Cloud Neutral Community Foundation"
       ],
       "ko": [
+        "Cloud Native Community Foundation",
         "Cloud Native Computing Foundation",
-        "Cloud Network Container Federation",
-        "Cloud Neutral Compute Framework",
-        "Container Networking Community Forum"
+        "Cloud Neutral Computing Foundation",
+        "Cloud Neutral Community Foundation"
       ]
     },
-    "answer": 0,
+    "answer": 1,
     "explain": {
-      "en": "CNCF stands for Cloud Native Computing Foundation, a Linux Foundation organization that host and supports cloud-native open-source projects. The other expansions are not the organization's name.",
-      "ko": "CNCF는 Cloud Native Computing Foundation의 약자이며 cloud-native open-소스 프로젝트를 호스팅하고 지원하는 Linux Foundation organization입니다. 나머지 expansion은 공식 명칭이 아닙니다."
+      "en": "The official name is Cloud Native Computing Foundation. Native and Computing are both part of the name; Community and Neutral are substitutions, not the official expansion.",
+      "ko": "정식 명칭은 Cloud Native Computing Foundation입니다. Native와 Computing이 모두 명칭에 포함되며, Community나 Neutral로 바꾼 표현은 정식 명칭이 아닙니다."
     },
     "ref": "https://www.cncf.io/about/who-we-are/"
-  },
-  {
-    "id": "local-095",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Namespaces and organization · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "Why can teams use separate Kubernetes namespace within one physical cluster?",
-      "ko": "하나의 physical 클러스터 안에서 팀이 서로 다른 Kubernetes 네임스페이스를 사용할 수 있는 이유는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "Namespaces scope namespaced resources and help divide resources among teams or projects",
-        "Each namespace is a separate virtual machine with its own kernel",
-        "Namespaces replace the Kubernetes API server for that team",
-        "A namespace automatically encrypts every packet between its Pods"
-      ],
-      "ko": [
-        "네임스페이스가 namespaced 리소스의 범위를 정하고 팀 또는 프로젝트 간 리소스를 나누는 데 도움을 주기 때문입니다",
-        "각 네임스페이스가 자체 kernel을 가진 별도의 virtual machine이기 때문입니다",
-        "네임스페이스가 해당 팀의 Kubernetes API server를 교체하기 때문입니다",
-        "네임스페이스가 그 안의 Pod 사이 모든 packet을 자동으로 암호화하기 때문입니다"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Namespaces provide a scope for namespaced object and a way to divide cluster resources among teams or projects. They are not virtual machines, do not replace the API server, and do not by themselves provide network encryption.",
-      "ko": "네임스페이스는 namespaced 객체의 범위와 팀 또는 프로젝트 간 클러스터 리소스를 나누는 방법을 제공합니다. 네임스페이스 자체는 virtual machine이 아니며 API server를 교체하거나 네트워크 encryption을 제공하지 않습니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/"
   },
   {
     "id": "local-096",
@@ -2919,381 +2759,157 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which interface do kubectl, controllers, and other clients use to create, read, update, and delete Kubernetes resources?",
-      "ko": "kubectl, controller 및 다른 client가 Kubernetes resource를 생성·조회·업데이트·삭제할 때 사용하는 인터페이스는 무엇입니까?"
+      "en": "Which listed interface is the central interaction point for Kubernetes users, cluster components, and external clients?",
+      "ko": "Kubernetes 사용자, 클러스터 구성 요소, 외부 클라이언트가 상호작용하는 중심 인터페이스는 무엇입니까?"
     },
     "choices": {
       "en": [
-        "The Kubernetes API",
-        "The container runtime socket",
-        "The CNI configuration file",
-        "The kubelet's local status endpoint"
+        "kubectl",
+        "AWS Management Console",
+        "Kubernetes API",
+        "Google Cloud SDK"
       ],
       "ko": [
+        "kubectl",
+        "AWS Management Console",
         "Kubernetes API",
-        "컨테이너 런타임 socket",
-        "CNI 구성 파일",
-        "kubelet의 로컬 상태 endpoint"
+        "Google Cloud SDK"
       ]
     },
-    "answer": 0,
+    "answer": 2,
     "explain": {
-      "en": "The Kubernetes API is the central resource-based programmatic interface used by clients and cluster components. kubectl is one client of that API; runtime and CNI interfaces serve node-specific features.",
-      "ko": "Kubernetes API는 client와 cluster component가 사용하는 central resource-based programmatic 인터페이스입니다. kubectl은 그 API의 client 중 하나이며 runtime과 CNI 인터페이스는 node별 기능을 담당합니다."
+      "en": "The API server exposes the Kubernetes API, the shared HTTP interface used to query and change resource state. kubectl and other management tools are clients, not that central interface. This describes control-plane interaction, not a claim that all Pod-to-Pod application packets pass through the API server.",
+      "ko": "API 서버는 리소스 상태를 조회하고 변경하는 공통 HTTP 인터페이스인 Kubernetes API를 제공합니다. kubectl과 다른 관리 도구는 클라이언트이지 중심 인터페이스 자체가 아닙니다. 이는 제어 플레인 상호작용을 뜻하며 모든 Pod 간 애플리케이션 패킷이 API 서버를 통과한다는 의미는 아닙니다."
     },
-    "ref": "https://kubernetes.io/docs/reference/using-api/api-concepts/"
+    "ref": "https://kubernetes.io/docs/concepts/overview/kubernetes-api/"
   },
   {
     "id": "local-097",
     "exam": "kcna",
     "domain": "Kubernetes Fundamentals",
-    "subtopic": "Linux node services and container runtimes · 자체 연습",
-    "difficulty": "medium",
+    "subtopic": "CRI implementations and adapters · 자체 연습",
+    "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which component is a Linux system and service manager rather than a Kubernetes CRI container runtime?",
-      "ko": "Kubernetes CRI 컨테이너 런타임이 아니라 Linux 시스템 및 서비스 관리자인 구성 요소는 무엇입니까?"
+      "en": "Which listed component is not a CRI container runtime or a CRI runtime adapter?",
+      "ko": "보기 중 CRI 컨테이너 런타임이나 CRI 런타임 어댑터가 아닌 구성 요소는 무엇입니까?"
     },
     "choices": {
       "en": [
-        "systemd",
-        "containerd",
         "CRI-O",
-        "cri-dockerd"
+        "dockershim",
+        "systemd",
+        "containerd"
       ],
       "ko": [
-        "systemd",
-        "containerd",
         "CRI-O",
-        "cri-dockerd"
+        "dockershim",
+        "systemd",
+        "containerd"
       ]
     },
-    "answer": 0,
+    "answer": 2,
     "explain": {
-      "en": "systemd runs as the Linux system and service manager (PID 1); it starts and supervises services. containerd and CRI-O are CRI-capable container runtimes, while cri-dockerd is an adapter for Docker Engine.",
-      "ko": "systemd는 Linux 시스템 및 서비스 관리자(PID 1)로 실행되어 서비스를 시작하고 감독합니다. containerd와 CRI-O는 CRI를 지원하는 컨테이너 런타임이고 cri-dockerd는 Docker Engine용 adapter입니다."
+      "en": "systemd manages Linux systems and services; it is not a CRI implementation. CRI-O and containerd provide CRI runtime support, while dockershim was the built-in Docker Engine adapter and was removed in Kubernetes 1.24. This comparison concerns component roles, not a claim that historical dockershim is supported by current kubelets. A systemd cgroup driver also does not turn systemd itself into a CRI runtime.",
+      "ko": "systemd는 Linux 시스템과 서비스를 관리하며 CRI 구현체가 아닙니다. CRI-O와 containerd는 CRI 런타임을 지원하고, dockershim은 Docker Engine용 내장 어댑터였으나 Kubernetes 1.24에서 제거됐습니다. 이 비교는 구성 요소의 역할을 묻는 것이며 구형 dockershim이 현재 kubelet에서 지원된다는 뜻은 아닙니다. systemd cgroup 드라이버를 사용한다고 systemd 자체가 CRI 런타임이 되는 것도 아닙니다."
     },
-    "ref": "https://systemd.io/"
+    "ref": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/"
   },
   {
     "id": "local-098",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "Cluster networking · 자체 연습",
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "What capability does the Kubernetes network model require for Pods on different nodes?",
-      "ko": "서로 다른 노드의 Pod에 대해 Kubernetes 네트워크 model이 요구하는 capability는 무엇입니까?"
+      "en": "Which statement describes the standard Kubernetes Pod network model, before intentional network segmentation is applied?",
+      "ko": "의도적인 네트워크 분리를 적용하기 전의 표준 Kubernetes Pod 네트워크 모델을 설명하는 것은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Pod-to-Pod communication without requiring application-specific proxies or address translation",
-        "A shared host filesystem mounted into every Pod",
-        "A separate REST API server for every node",
-        "A cache that copies every container image between nodes"
+        "Pods can communicate directly with other Pods across nodes using Pod IPs, without Pod-to-Pod NAT",
+        "Each destination Pod must first be exposed through a Service before another Pod can reach it",
+        "A Pod IP is visible only within that Pod and cannot be addressed by other Pods",
+        "Service objects initiate connections to other Service objects from their virtual Service IPs"
       ],
       "ko": [
-        "애플리케이션-특정 proxy나 address translation을 요구하지 않는 Pod-to-Pod communication",
-        "모든 Pod에 mount되는 shared 호스트 filesystem",
-        "각 노드마다 별도의 REST API server",
-        "모든 컨테이너 이미지를 노드 간 복사하는 cache"
+        "Pod는 Pod IP를 사용해 다른 노드의 Pod와 Pod 간 NAT 없이 직접 통신할 수 있음",
+        "다른 Pod가 접근하려면 모든 대상 Pod를 먼저 Service로 노출해야 함",
+        "Pod IP는 해당 Pod 내부에서만 보이며 다른 Pod가 주소로 사용할 수 없음",
+        "Service 오브젝트가 자신의 가상 Service IP에서 다른 Service 오브젝트로 연결을 시작함"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Kubernetes networking expects Pods to communicate directly with one another across nodes, subject to the cluster network implementation, without requiring application-specific proxies or address translation. Storage, API servers, and image distribution are separate concerns.",
-      "ko": "Kubernetes networking은 클러스터 네트워크 implementation에 따라 서로 다른 노드의 Pod가 애플리케이션-특정 proxy나 address translation 없이 직접 통신할 수 있기를 기대합니다. 스토리지, API server, 이미지 distribution은 별도의 관심사입니다."
+      "en": "The standard model gives each Pod a cluster-wide IP and direct cross-node Pod connectivity without Pod-to-Pod NAT. A Service is not required for direct Pod-IP communication. Service IPs are stable virtual destinations that route to backend Pods, not source addresses of independently running Service objects. NetworkPolicy or other intentional segmentation can restrict traffic; this is a model requirement, not a promise that every connection is always allowed.",
+      "ko": "표준 모델은 각 Pod에 클러스터 전체에서 사용하는 IP와 Pod 간 NAT 없는 노드 간 직접 연결을 제공합니다. Pod IP로 직접 통신할 때 Service는 필수가 아닙니다. Service IP는 백엔드 Pod로 라우팅하는 안정적인 가상 목적지이며, 독립적으로 실행되는 Service 오브젝트의 출발지 주소가 아닙니다. NetworkPolicy 등 의도적인 네트워크 분리는 트래픽을 제한할 수 있으므로, 모든 연결이 항상 허용된다는 뜻은 아닙니다."
     },
-    "ref": "https://kubernetes.io/docs/concepts/cluster-administration/networking/"
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/#the-kubernetes-network-model"
   },
   {
     "id": "local-099",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Cloud Native Application Delivery",
     "subtopic": "Rollout monitoring · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which command watches the rollout status of a Deployment until the latest rollout completes?",
-      "ko": "최신 rollout이 완료될 때까지 Deployment rollout 상태를 관찰하는 명령은 무엇입니까?"
+      "en": "Which kubectl rollout subcommand monitors rollout progress for a Deployment, DaemonSet, or StatefulSet?",
+      "ko": "Deployment, DaemonSet, StatefulSet의 롤아웃 진행 상황을 확인하는 kubectl rollout 하위 명령은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "kubectl rollout status deployment/web",
-        "kubectl rollout watch deployment/web",
-        "kubectl deployment progress web",
-        "kubectl get rollout deployment/web"
+        "kubectl rollout watch",
+        "kubectl rollout progress",
+        "kubectl rollout state",
+        "kubectl rollout status"
       ],
       "ko": [
-        "kubectl rollout 상태 deployment/web",
-        "kubectl rollout watch deployment/web",
-        "kubectl deployment progress web",
-        "kubectl get rollout deployment/web"
+        "kubectl rollout watch",
+        "kubectl rollout progress",
+        "kubectl rollout state",
+        "kubectl rollout status"
       ]
     },
-    "answer": 0,
+    "answer": 3,
     "explain": {
-      "en": "kubectl rollout status deployment/web watches and reports the Deployment's latest rollout until it completes by default. The status subcommand also supports DaemonSets and StatefulSets; the other command forms are not valid kubectl rollout commands.",
-      "ko": "kubectl rollout 상태 deployment/web은 기본적으로 Deployment의 latest rollout을 watch하고 완료될 때까지 상태를 보고합니다. 상태 subcommand는 DaemonSet과 StatefulSet도 지원하며 나머지 command 형식은 유효한 kubectl rollout command가 아닙니다."
+      "en": "The status subcommand reports rollout progress and, by default, watches the latest rollout until completion. Supply the resource type and name, for example kubectl rollout status deployment/web. The listed watch, progress, and state forms are not built-in rollout subcommands. The command tokens remain unchanged in either language.",
+      "ko": "status 하위 명령은 롤아웃 진행 상황을 보여 주며 기본적으로 최신 롤아웃이 완료될 때까지 관찰합니다. kubectl rollout status deployment/web처럼 리소스 종류와 이름을 지정해야 합니다. 보기의 watch, progress, state는 내장 rollout 하위 명령이 아닙니다. 명령 토큰은 번역하지 않고 그대로 사용합니다."
     },
     "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_status/"
-  },
-  {
-    "id": "local-100",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Distributed tracing · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "In distributed tracing, what does a span represent compared with a trace?",
-      "ko": "분산 tracing에서 trace와 비교할 때 span은 무엇을 나타냅니까?"
-    },
-    "choices": {
-      "en": [
-        "One operation or unit of work within a request trace",
-        "The complete end-to-end path of a request across services",
-        "A cumulative count of requests since process start",
-        "A log-retention policy for telemetry"
-      ],
-      "ko": [
-        "요청 trace 안의 하나의 operation 또는 work unit",
-        "여러 서비스를 가로지르는 요청의 완전한 end-to-end path",
-        "프로세스 시작 이후 요청의 cumulative 개수",
-        "telemetry의 log-retention 정책"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "A span represents one operation or unit of work, and related spans are assembled into a trace that shows the request's end-to-end path. A trace is not a counter or a retention policy.",
-      "ko": "span은 하나의 operation 또는 work unit을 나타내며, 관련 span이 모여 요청의 end-to-end path를 보여 주는 trace가 됩니다. trace는 counter나 retention 정책가 아닙니다."
-    },
-    "ref": "https://opentelemetry.io/docs/concepts/signals/traces/"
-  },
-  {
-    "id": "local-101",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "API objects and representations · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "How should a Kubernetes Pod or Service be understood when it is defined in YAML?",
-      "ko": "YAML로 정의된 Kubernetes Pod 또는 Service를 어떻게 이해해야 합니까?"
-    },
-    "choices": {
-      "en": [
-        "As a Kubernetes API object/resource commonly represented in YAML or JSON",
-        "As a YAML-only file that is not an API resource",
-        "As a container image format interpreted by the runtime",
-        "As a network packet format used by kube-proxy"
-      ],
-      "ko": [
-        "YAML 또는 JSON으로 흔히 표현되는 Kubernetes API 객체/리소스",
-        "API 리소스가 아닌 YAML 전용 파일",
-        "런타임이 해석하는 컨테이너 이미지 형식",
-        "kube-proxy가 사용하는 네트워크 packet 형식"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Pods and Services are Kubernetes API resources managed through the Kubernetes API. YAML and JSON are common serialization formats for manifest; they do not define the resource's object model.",
-      "ko": "Pod와 Service는 Kubernetes API를 통해 관리되는 Kubernetes API 리소스입니다. YAML과 JSON은 매니페스트에 사용하는 serialization 형식일 뿐 리소스의 객체 model 자체를 정의하지 않습니다."
-    },
-    "ref": "https://kubernetes.io/docs/reference/using-api/api-concepts/"
-  },
-  {
-    "id": "local-102",
-    "exam": "kcna",
-    "domain": "Container Orchestration",
-    "subtopic": "Selectorless Services · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "What must an operator provide for a Service that intentionally has no selector but should route to external backends?",
-      "ko": "의도적으로 selector가 없지만 external 백엔드으로 트래픽을 routing해야 하는 Service에 운영자가 제공해야 하는 것은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "A corresponding EndpointSlice (or endpoint mapping) created and maintained by Kubernetes",
-        "A second kube-apiserver dedicated to that Service",
-        "A Deployment that Kubernetes can use to infer every backend",
-        "A ClusterIP value that contains all backend addresses"
-      ],
-      "ko": [
-        "해당 Service를 위해 수동으로 생성하고 관리하는 대응 EndpointSlice(또는 endpoint mapping)",
-        "그 Service 전용의 두 번째 kube-apiserver",
-        "Kubernetes가 모든 백엔드를 추론할 수 있는 Deployment",
-        "모든 백엔드 address를 포함하는 ClusterIP 값"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Without a selector, Kubernetes does not automatically create EndpointSlices for the Service. An operator or different controller must define the corresponding EndpointSlice entries, including for backends outside the cluster.",
-      "ko": "selector가 없으면 Kubernetes가 해당 Service의 EndpointSlice를 자동으로 생성하지 않습니다. 따라서 운영자 또는 다른 controller가 클러스터 외부 백엔드를 포함한 대응 EndpointSlice entry를 정의해야 합니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors"
-  },
-  {
-    "id": "local-103",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Immutable ConfigMaps · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "What is the effect of setting `immutable: true` on a ConfigMap?",
-      "ko": "ConfigMap에서 `immutable: true`를 설정하면 어떤 효과가 있습니까?"
-    },
-    "choices": {
-      "en": [
-        "The ConfigMap's data cannot be changed after creation",
-        "The ConfigMap is encrypted automatically at rest",
-        "The ConfigMap is copied into every namespace",
-        "The ConfigMap can only be read by the kubelet"
-      ],
-      "ko": [
-        "생성 후 ConfigMap의 data를 변경할 수 없습니다",
-        "ConfigMap이 자동으로 at-rest encryption됩니다",
-        "ConfigMap이 모든 네임스페이스에 복사됩니다",
-        "kubelet만 ConfigMap을 읽을 수 있습니다"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "An immutable ConfigMap prevents later updates to its data. It does not provide secrecy or encryption, replicate the object across namespace, or restrict reads to the kubelet; use a Secret or additional controls for confidential data.",
-      "ko": "immutable ConfigMap은 이후 data update를 방지합니다. 이것이 secrecy나 encryption을 제공하거나 객체를 네임스페이스 간 복제하거나 kubelet에만 read를 허용하는 것은 아니며, confidential data에는 Secret 또는 추가 제어을 사용해야 합니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/configuration/configmap/#configmap-immutable"
   },
   {
     "id": "local-104",
     "exam": "kcna",
     "domain": "Kubernetes Fundamentals",
-    "subtopic": "Pod scheduling unit · 자체 연습",
+    "subtopic": "Pod definition · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "What does a Kubernetes Pod package for scheduling?",
-      "ko": "Kubernetes Pod는 스케줄링을 위해 무엇을 묶습니까?"
+      "en": "Which description correctly defines a Kubernetes Pod?",
+      "ko": "Kubernetes Pod를 올바르게 정의한 설명은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "One or more co-located containers sharing specified network and storage resources",
-        "Every replica of a Deployment across the whole cluster",
-        "A complete worker node and its operating system",
-        "Only a container image before it is started"
+        "A group of one or more co-located containers in Kubernetes",
+        "A networked application in Kubernetes",
+        "A storage volume in Kubernetes",
+        "A single container in Kubernetes"
       ],
       "ko": [
-        "지정된 네트워크와 스토리지 리소스를 공유하며 함께 배치되는 하나 이상의 컨테이너",
-        "클러스터 전체에 있는 Deployment의 모든 replica",
-        "worker node와 그 운영 체제 전체",
-        "시작되기 전의 컨테이너 이미지만"
+        "Kubernetes에서 함께 배치되는 하나 이상의 컨테이너 그룹",
+        "Kubernetes의 네트워크 애플리케이션",
+        "Kubernetes의 스토리지 볼륨",
+        "Kubernetes의 단일 컨테이너"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "A Pod is the smallest deployable unit and groups one or more containers that are co-located and co-scheduled, with shared context such as network and storage resources. A Pod is not a node or a container image.",
-      "ko": "Pod는 가장 작은 배포 단위이며 네트워크와 스토리지 같은 공유 환경을 사용하는 하나 이상의 컨테이너를 함께 배치합니다. Pod는 노드 전체나 컨테이너 이미지가 아닙니다."
+      "en": "A Pod is the smallest deployable unit: one or more co-located and co-scheduled containers with shared context such as networking and storage. It may hold one container, but its definition is not restricted to a single container. A volume or a networked application does not define this grouping unit.",
+      "ko": "Pod는 네트워크와 스토리지 같은 환경을 공유하며 함께 배치·스케줄링되는 하나 이상의 컨테이너를 묶는 가장 작은 배포 단위입니다. 컨테이너 하나를 담을 수 있지만 단일 컨테이너로만 정의되지는 않습니다. 볼륨이나 네트워크 애플리케이션은 이 그룹 단위의 정의가 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/workloads/pods/"
-  },
-  {
-    "id": "local-106",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Incident management · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which activity belongs to incident management during a production incident?",
-      "ko": "production 인시던트 중 인시던트 관리에 해당하는 활동는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "Assigning response roles and coordinating work to restore normal operations",
-        "Planning capacity for a future traffic increase",
-        "Writing a post-incident review after service restoration",
-        "Benchmarking a proposed change before the next release"
-      ],
-      "ko": [
-        "정상 operation을 복구하기 위해 응답 역할을 배정하고 work를 조정하는 것",
-        "향후 트래픽 증가를 위한 capacity를 planning하는 것",
-        "서비스 복구 후 post-인시던트 review를 작성하는 것",
-        "다음 릴리스 전 제안된 change를 benchmark하는 것"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "incident management structures response roles and coordination while the incident is active, helping limit disruption and restore normal operations. Capacity planning, pre-release benchmarking, and post-incident review are valuable SRE practices but belong to other phases of reliability work.",
-      "ko": "인시던트 관리는 인시던트가 active한 동안 응답 역할과 coordination을 구조화하여 disruption을 제한하고 정상 operation을 복구하도록 돕습니다. capacity planning, 릴리스 전 benchmarking, post-인시던트 review도 중요한 SRE practice이지만 신뢰성 work의 다른 phase에 해당합니다."
-    },
-    "ref": "https://sre.google/sre-book/managing-incidents/"
-  },
-  {
-    "id": "local-107",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Dynamic volume provisioning · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "When does dynamic provisioning create backing storage for a PersistentVolumeClaim?",
-      "ko": "동적 프로비저닝은 PersistentVolumeClaim을 위해 언제 backing 스토리지를 생성합니까?"
-    },
-    "choices": {
-      "en": [
-        "When no existing PersistentVolume matches and the StorageClass provisioner's binding condition are met",
-        "Immediately for every claim, even if a matching PersistentVolume already exists",
-        "Only after an administrator manually creates every PersistentVolume",
-        "When the kubelet converts the claim into a ConfigMap"
-      ],
-      "ko": [
-        "일치하는하는 기존 PersistentVolume이 없고 StorageClass provisioner의 바인딩 조건이 충족될 때",
-        "일치하는하는 PersistentVolume이 있어도 모든 claim에 대해 즉시",
-        "administrator가 모든 PersistentVolume을 수동으로 생성한 후에만",
-        "kubelet이 claim을 ConfigMap으로 변환할 때"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "dynamic provisioning can create a volume on demand when a claim cannot bind to an existing PersistentVolume and the referenced StorageClass and provisioner can satisfy it. Binding and provisioning may also wait for applicable condition such as volume-binding mode and topology; it is not an unconditional immediate action for every claim.",
-      "ko": "claim이 기존 PersistentVolume에 bind되지 않고 참조한 StorageClass와 provisioner가 요청을 충족할 수 있을 때 동적 프로비저닝은 필요에 따라 볼륨을 생성할 수 있습니다. 바인딩과 provisioning은 볼륨-바인딩 mode와 topology 같은 조건에 따라 기다릴 수도 있으므로 모든 claim에 대해 무조건 즉시 수행되는 것은 아닙니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/"
-  },
-  {
-    "id": "local-108",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Cloud cost management · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "What is the central aim of FinOps-style cloud cost management?",
-      "ko": "FinOps 방식의 cloud cost 관리의 핵심 목표은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "Make technology value and cost visible so teams can make data-driven optimization decisions",
-        "Freeze all technology spending regardless of business value",
-        "Move every workload to a single cloud provider",
-        "Let only the finance department decide how engineering uses technology"
-      ],
-      "ko": [
-        "technology 값와 cost를 visible하게 하여 팀이 data-driven optimization decision을 내리게 하는 것",
-        "business 값와 관계없이 모든 technology spending을 동결하는 것",
-        "모든 워크로드를 단일 cloud provider로 이동하는 것",
-        "finance department만 engineering의 technology 사용 방식을 결정하게 하는 것"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "FinOps is a collaborative operating practice that creates financial accountability, improves visibility, and helps teams optimize technology value and cost through data-driven decisions. It is not simply a blanket spending freeze or a finance-only process.",
-      "ko": "FinOps는 financial accountability와 visibility를 높이고 data-driven decision을 통해 technology 값와 cost를 optimize하도록 돕는 collaborative operating practice입니다. 단순한 일괄 spending freeze나 finance-만 프로세스가 아닙니다."
-    },
-    "ref": "https://www.finops.org/introduction/what-is-finops/"
   },
   {
     "id": "local-109",
@@ -3399,27 +3015,27 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "What is a common role of a CNCF Ambassador?",
-      "ko": "CNCF Ambassador의 일반적인 역할은 무엇입니까?"
+      "en": "Which responsibility best reflects the CNCF Ambassador program's main mission?",
+      "ko": "CNCF Ambassador 프로그램의 주된 사명을 가장 잘 나타내는 책임은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Promoting cloud-native adoption through community leadership, mentoring, event, and advocacy",
-        "Approving every CNCF project's production code before release",
-        "Allocating a project's operating budget and signing vendor contracts",
-        "Setting a project's technical roadmap and release criteria"
+        "Supporting communities, organizing events, and advocating for cloud-native adoption and CNCF projects",
+        "Managing foundation operations, budgets, sponsorships, and agreements",
+        "Developing Kubernetes features by writing code, planning releases, and coordinating development",
+        "Directing project governance by guiding development, reviewing code, and approving changes"
       ],
       "ko": [
-        "community leadership, mentoring, 이벤트, advocacy를 통해 cloud-native adoption을 촉진하는 것",
-        "릴리스 전에 모든 CNCF 프로젝트의 production code를 승인하는 것",
-        "프로젝트 operating budget을 배정하고 vendor contract에 서명하는 것",
-        "프로젝트의 technical roadmap과 릴리스 criteria를 정하는 것"
+        "커뮤니티를 지원하고 행사를 조직하며 클라우드 네이티브 도입과 CNCF 프로젝트를 알리는 것",
+        "재단의 운영·예산·후원·계약을 관리하는 것",
+        "코드 작성·릴리스 계획·개발 조정을 통해 Kubernetes 기능을 개발하는 것",
+        "개발 방향 제시·코드 검토·변경 승인을 통해 프로젝트 거버넌스를 이끄는 것"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "CNCF Ambassadors extend CNCF's community mission through leadership, mentorship, event, and advocacy that help make cloud native more widely understood and adopted. Project maintainers or technical leadership set roadmaps and release criteria; finance and project governance roles handle budgets and approvals.",
-      "ko": "CNCF Ambassador는 leadership, mentorship, 이벤트, advocacy를 통해 cloud native를 더 널리 이해하고 채택하도록 CNCF community mission을 확장합니다. 프로젝트 maintainer 또는 technical leadership이 roadmap과 릴리스 criteria를 정하고 finance와 프로젝트 거버넌스 역할이 budget과 approval을 담당합니다."
+      "en": "CNCF describes Ambassadors as extending its community mission through leadership and mentorship. Community support, events, and advocacy fit that role. Foundation business operations, Kubernetes feature development, and project governance are different responsibilities. An Ambassador may separately be a contributor or maintainer, but the program role does not itself grant project release or code-approval authority.",
+      "ko": "CNCF는 Ambassador를 리더십과 멘토링으로 커뮤니티 사명을 확장하는 역할로 설명합니다. 커뮤니티 지원·행사·홍보가 그 역할에 부합합니다. 재단 사업 운영, Kubernetes 기능 개발, 프로젝트 거버넌스는 다른 책임입니다. Ambassador가 별도로 기여자나 유지관리자일 수는 있지만, 프로그램 역할 자체가 프로젝트 릴리스나 코드 승인 권한을 부여하는 것은 아닙니다."
     },
     "ref": "https://www.cncf.io/people/ambassadors/"
   },
@@ -3528,7 +3144,7 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "style": "exam",
     "q": {
       "en": "Which rollout strategy does a Kubernetes Deployment use by default?",
-      "ko": "Kubernetes Deployment가 기본적으로 사용하는 rollout 전략는 무엇입니까?"
+      "ko": "Kubernetes Deployment가 기본적으로 사용하는 롤아웃 전략은 무엇입니까?"
     },
     "choices": {
       "en": [
@@ -3547,39 +3163,39 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "answer": 0,
     "explain": {
       "en": "A Deployment defaults to RollingUpdate, which incrementally replaces old Pods with new ones. Recreate is an alternative Deployment strategy; Blue/Green and Canary are rollout patterns that require additional resources or traffic handling rather than being this default strategy.",
-      "ko": "Deployment의 기본 전략는 RollingUpdate이며 이전 Pod를 새로운 Pod로 점진적으로 교체합니다. Recreate는 대안 Deployment 전략이고 Blue/Green과 Canary는 추가 리소스나 트래픽 handling이 필요한 rollout pattern이지 이 기본 전략가 아닙니다."
+      "ko": "Deployment의 기본 전략은 RollingUpdate이며, 기존 Pod를 새 Pod로 점진적으로 교체합니다. Recreate는 다른 Deployment 전략입니다. Blue/Green과 Canary는 추가 리소스나 트래픽 분배가 필요한 배포 방식이며 Deployment의 기본 전략이 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy"
   },
   {
     "id": "local-117",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "NetworkPolicy isolation · 자체 연습",
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "What can a NetworkPolicy change for selected Pods?",
-      "ko": "NetworkPolicy는 선택한 Pod에 대해 무엇을 변경할 수 있습니까?"
+      "en": "Which behavior does Kubernetes NetworkPolicy define for selected Pods?",
+      "ko": "Kubernetes NetworkPolicy는 선택한 Pod에 대해 어떤 동작을 정의합니까?"
     },
     "choices": {
       "en": [
-        "The allowed ingress and egress traffic, making the Pods isolated for the directions covered by policy",
-        "The node labels used to schedule the selected Pods",
-        "The container image and restart behavior of the selected Pods",
-        "The API permission of the selected Pods' ServiceAccount"
+        "Allowed ingress and egress traffic, with isolation determined separately for each direction",
+        "Automatic encryption and obfuscation of all network traffic",
+        "Blocking every loopback connection and all traffic from the Pod's own node",
+        "Automatic recording of network security events"
       ],
       "ko": [
-        "허용되는 ingress와 egress 트래픽을 변경하여 정책가 적용되는 방향에서 Pod를 isolated 상태로 만들 수 있습니다",
-        "선택한 Pod를 schedule할 때 사용하는 노드 label을 변경합니다",
-        "선택한 Pod의 컨테이너 이미지와 restart behavior를 변경합니다",
-        "선택한 Pod의 ServiceAccount API 권한을 변경합니다"
+        "인그레스·이그레스 허용 트래픽과 방향별로 결정되는 격리 상태",
+        "모든 네트워크 트래픽의 자동 암호화와 난독화",
+        "모든 루프백 연결과 Pod가 실행되는 노드의 모든 트래픽 차단",
+        "네트워크 보안 이벤트의 자동 기록"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "NetworkPolicy selects Pods and defines allowed ingress and egress traffic. Applying policy to a direction makes the selected Pods isolated for that direction; actual enforcement requires a network plugin that supports NetworkPolicy.",
-      "ko": "NetworkPolicy는 Pod를 선택하고 허용되는 ingress와 egress 트래픽을 정의합니다. 특정 direction에 정책를 적용하면 선택된 Pod가 해당 direction에서 isolated 상태가 되며, 실제 enforcement에는 NetworkPolicy를 지원하는 네트워크 plugin이 필요합니다."
+      "en": "NetworkPolicy selects Pods and declares allowed ingress and egress flows. A direction becomes isolated when an applicable policy covers it; enforcement requires a supporting network plugin. NetworkPolicy itself does not encrypt traffic or log security events. Under the standard API model, a Pod cannot block access to itself, and traffic to or from its own node is allowed.",
+      "ko": "NetworkPolicy는 Pod를 선택하고 허용되는 인그레스·이그레스 흐름을 선언합니다. 적용되는 정책이 특정 방향을 다루면 해당 방향이 격리되며, 실제 적용에는 이를 지원하는 네트워크 플러그인이 필요합니다. NetworkPolicy 자체는 트래픽을 암호화하거나 보안 이벤트를 기록하지 않습니다. 표준 API 모델에서는 Pod 자신에 대한 접근을 차단할 수 없고, 그 Pod가 실행되는 노드와의 트래픽은 허용됩니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
   },
@@ -3591,61 +3207,29 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "Which resource constraints are especially important to etcd cluster performance?",
-      "ko": "etcd 클러스터 performance에 특히 중요한 리소스 제약 조건는 무엇입니까?"
+      "en": "Which resource pair is especially important to etcd performance because requests must be replicated between members and written to durable storage?",
+      "ko": "요청을 멤버 사이에 복제하고 영구 저장소에 기록해야 하는 etcd의 성능에서 특히 중요한 리소스 조합은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Network throughput/latency and disk I/O latency",
-        "CPU and memory only; storage latency is irrelevant",
-        "Kubernetes DNS latency and Service port allocation",
-        "Container image pull speed and Pod restart policy"
+        "Network throughput and disk I/O",
+        "CPU and disk capacity",
+        "CPU and RAM",
+        "Network throughput and CPU"
       ],
       "ko": [
-        "네트워크 throughput/latency와 disk I/O latency",
-        "CPU와 memory만이며 스토리지 latency는 무관합니다",
-        "Kubernetes DNS latency와 Service port allocation",
-        "컨테이너 이미지 pull speed와 Pod restart 정책"
+        "네트워크 처리량과 디스크 I/O",
+        "CPU와 디스크 용량",
+        "CPU와 RAM",
+        "네트워크 처리량과 CPU"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "etcd uses networked consensus communication and durable writes, so network latency/throughput and storage I/O latency are important performance constraints. CPU and memory still matter, but they are not the complete diagnosis.",
-      "ko": "etcd는 네트워크 consensus communication과 durable write를 사용하므로 네트워크 latency/throughput과 스토리지 I/O latency가 중요한 performance 제약 조건입니다. CPU와 memory도 중요하지만 완전한 diagnosis는 아닙니다."
+      "en": "etcd consensus commits require member communication and durable disk writes. Network I/O latency and disk I/O latency set a physical lower bound on commit latency; adequate network bandwidth and fast storage also aid throughput and recovery. CPU, memory, and storage capacity still matter, and these two resources alone do not guarantee performance for every workload.",
+      "ko": "etcd의 합의 커밋에는 멤버 간 통신과 디스크에 대한 영구 기록이 필요합니다. 네트워크 I/O 지연과 디스크 I/O 지연은 커밋 지연의 물리적 하한을 결정하며, 충분한 네트워크 대역폭과 빠른 저장소는 처리량과 복구에도 도움이 됩니다. CPU, 메모리, 저장 용량도 중요하므로 이 두 리소스만으로 모든 워크로드의 성능을 보장한다는 뜻은 아닙니다."
     },
-    "ref": "https://etcd.io/docs/v3.5/learning/why/"
-  },
-  {
-    "id": "local-119",
-    "exam": "kcna",
-    "domain": "Cloud Native Application Delivery",
-    "subtopic": "Manifest application · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "Which command applies a declarative workload manifest and can update an existing resource?",
-      "ko": "declarative 워크로드 매니페스트를 apply하고 기존 리소스를 update할 수 있는 명령는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "`kubectl apply -f manifest.yaml`",
-        "`kubectl create -f manifest.yaml`",
-        "`helm install app ./chart`",
-        "`kubectl get -f manifest.yaml`"
-      ],
-      "ko": [
-        "`kubectl apply -f 매니페스트.yaml`",
-        "`kubectl create -f 매니페스트.yaml`",
-        "`helm install app ./chart`",
-        "`kubectl get -f 매니페스트.yaml`"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "kubectl apply submits a declarative configuration and can reconcile changes to an existing resource. kubectl create is primarily a create operation, Helm installs charts, and kubectl get reads resource state.",
-      "ko": "kubectl apply는 declarative configuration을 제출하고 existing resource의 변경을 reconcile할 수 있습니다. kubectl create는 주로 create operation이고 Helm은 chart를 install하며 kubectl get은 resource state를 읽습니다."
-    },
-    "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_apply/"
+    "ref": "https://etcd.io/docs/v3.6/op-guide/performance/"
   },
   {
     "id": "local-120",
@@ -3655,59 +3239,59 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which set best describes core container-orchestration responsibilities?",
-      "ko": "컨테이너 orchestration의 core responsibility를 가장 잘 나타내는 조합은 무엇입니까?"
+      "en": "Which group describes the core runtime responsibilities of a container orchestration system?",
+      "ko": "컨테이너 오케스트레이션 시스템의 핵심 런타임 책임을 나타내는 조합은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Scheduling containers, scaling instances, and managing container status",
-        "Building application source code, storing Git commits, and writing documentation",
-        "Assigning public DNS names, issuing certificates, and billing cloud accounts",
-        "Designing UI screens, compiling kernels, and managing databases"
+        "Scheduling containers, scaling replicas, and managing container health",
+        "Building container images, scaling replicas, and managing container health",
+        "Debugging application code and managing container health",
+        "Storing container images, scaling replicas, and managing container health"
       ],
       "ko": [
-        "컨테이너를 스케줄링하고 instance를 scale하며 컨테이너 상태를 관리하는 것",
-        "애플리케이션 소스 code를 빌드하고 Git commit을 저장하며 documentation을 작성하는 것",
-        "퍼블릭 DNS name을 할당하고 certificate를 발급하며 cloud account를 billing하는 것",
-        "UI screen을 설계하고 kernel을 compile하며 데이터베이스를 관리하는 것"
+        "컨테이너 스케줄링, 복제본 확장·축소, 컨테이너 상태 점검과 복구",
+        "컨테이너 이미지 빌드, 복제본 확장·축소, 컨테이너 상태 점검과 복구",
+        "애플리케이션 코드 디버깅과 컨테이너 상태 점검·복구",
+        "컨테이너 이미지 저장, 복제본 확장·축소, 컨테이너 상태 점검과 복구"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Container orchestration coordinates placement, scaling, and status/lifecycle management of containers. Source builds, billing, UI design, and database administration are separate concerns.",
-      "ko": "컨테이너 orchestration은 컨테이너의 placement, scaling, 상태/lifecycle 관리를 조정합니다. 소스 빌드, billing, UI design, 데이터베이스 administration은 별도의 관심사입니다."
+      "en": "Container orchestration coordinates workload placement, scaling, and health management, including restarting or replacing failed containers. Image creation belongs to build tooling and image storage to registries. Kubernetes can expose logs and debugging facilities, but application-code debugging is not the core orchestration task that replaces scheduling in this list.",
+      "ko": "컨테이너 오케스트레이션은 워크로드 배치, 확장·축소, 실패한 컨테이너의 재시작·교체 등 상태 관리를 조정합니다. 이미지 생성은 빌드 도구, 이미지 저장은 레지스트리의 역할입니다. Kubernetes가 로그와 디버깅 기능을 제공할 수는 있지만, 애플리케이션 코드 디버깅이 이 조합에서 스케줄링을 대신하는 핵심 오케스트레이션 작업은 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/overview/"
   },
   {
     "id": "local-121",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Cloud Native Architecture",
     "subtopic": "Hybrid cloud · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which scenario best illustrates a hybrid cloud?",
-      "ko": "다음 중 hybrid cloud를 가장 잘 보여 주는 시나리오는 무엇입니까?"
+      "en": "Which description fits a hybrid-cloud architecture without adding unsupported restrictions?",
+      "ko": "근거 없는 제한을 추가하지 않고 하이브리드 클라우드 아키텍처를 설명하는 것은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "An organization integrates its on-premises private cloud with a public cloud so workloads or data can move or burst between them",
-        "An organization uses only a private cloud isolated from every public provider",
-        "An organization uses multiple unrelated public-cloud accounts with no private infrastructure",
-        "A single public-cloud region runs all workloads without connection to another environment"
+        "Integrating distinct public and private cloud infrastructures, which can include an on-premises private cloud",
+        "Combining public and private cloud resources only when every data center belongs to the same provider",
+        "Combining only public-cloud services while excluding data centers in different availability zones",
+        "Combining public and private cloud resources while prohibiting serverless functions"
       ],
       "ko": [
-        "조직이 on-premises private cloud를 public cloud와 연결하여 workload나 data를 두 환경 사이에서 이동하거나 필요할 때 public cloud로 확장합니다",
-        "조직이 모든 public provider와 격리된 private cloud만 사용합니다",
-        "조직이 private infrastructure 없이 서로 연결되지 않은 여러 public-cloud account를 사용합니다",
-        "하나의 public-cloud region이 다른 환경과 연결되지 않은 채 모든 workload를 실행합니다"
+        "서로 구별되는 퍼블릭·프라이빗 클라우드 인프라를 연결하며 온프레미스 프라이빗 클라우드도 포함할 수 있음",
+        "모든 데이터센터가 같은 제공자에 속할 때만 퍼블릭·프라이빗 클라우드 리소스를 결합함",
+        "서로 다른 가용 영역의 데이터센터를 제외하면서 퍼블릭 클라우드 서비스만 결합함",
+        "서버리스 함수를 금지하면서 퍼블릭·프라이빗 클라우드 리소스를 결합함"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "NIST defines hybrid cloud as a composition of two or more distinct cloud infrastructures, such as private, community, or public clouds, that remain unique entities but are bound by technology enabling data and application portability. For example, an on-premises private cloud can be integrated with a public cloud so workloads can burst into the public cloud during demand spikes.",
-      "ko": "NIST는 hybrid cloud를 private, community 또는 public cloud처럼 서로 구별되는 두 개 이상의 cloud infrastructure를 결합한 구성으로 정의합니다. 각 infrastructure는 고유한 entity로 남지만 data와 application portability를 가능하게 하는 기술로 연결됩니다. 예를 들어 on-premises private cloud는 수요가 급증할 때 workload를 public cloud로 확장할 수 있습니다."
+      "en": "NIST describes hybrid cloud as distinct cloud infrastructures that remain separate entities but are connected by technology enabling data and application portability. Public/private integration with an on-premises private cloud is one valid case. Hybrid cloud does not require a single provider, exclude other availability zones, or prohibit serverless functions; those are unsupported restrictions in the distractors.",
+      "ko": "NIST는 서로 구별되는 클라우드 인프라가 별도 구성으로 유지되면서 데이터와 애플리케이션 이동을 가능하게 하는 기술로 연결된 구성을 하이브리드 클라우드로 설명합니다. 온프레미스 프라이빗 클라우드를 포함한 퍼블릭·프라이빗 통합은 그 사례입니다. 단일 제공자만 사용하거나 다른 가용 영역을 제외하거나 서버리스 함수를 금지해야 한다는 요구는 없으므로 오답 보기의 제한은 근거가 없습니다."
     },
     "ref": "https://csrc.nist.gov/glossary/term/hybrid_cloud"
   },
@@ -3719,91 +3303,91 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "What does a Kubernetes Service endpoint represent?",
-      "ko": "Kubernetes Service endpoint는 무엇을 나타냅니까?"
+      "en": "In Kubernetes Service routing, what do endpoint records describe?",
+      "ko": "Kubernetes Service 라우팅에서 엔드포인트 기록은 무엇을 나타냅니까?"
     },
     "choices": {
       "en": [
-        "The IP address and port of an actual backend, commonly a matching Pod",
-        "The Service's virtual ClusterIP used as the client entry point",
-        "The label selector that identifies which Pods belong to the Service",
-        "The URL used to reach the Kubernetes API server"
+        "Kubernetes records containing the IP addresses of Service backends, commonly matching Pods",
+        "The Kubernetes cluster's API-server endpoint",
+        "The name of a special Pod in the kube-system namespace",
+        "A public IP address that is necessarily reachable from the Internet"
       ],
       "ko": [
-        "실제 백엔드(일반적으로 일치하는 Pod)의 IP address와 port",
-        "client entry point로 사용하는 Service의 virtual ClusterIP",
-        "Service에 속하는 Pod를 식별하는 label selector",
-        "Kubernetes API server에 접근하는 URL"
+        "Service 백엔드(일반적으로 선택된 Pod)의 IP 주소를 포함하는 Kubernetes 기록",
+        "Kubernetes 클러스터의 API 서버 엔드포인트",
+        "kube-system 네임스페이스의 특별한 Pod 이름",
+        "반드시 인터넷에서 접근할 수 있는 공인 IP 주소"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "EndpointSlice resources track the IP addresses and ports of Service backends, commonly matching Pods, and are updated as the backend set changes. A Service's ClusterIP is a virtual entry point and its selector is a matching rule, not a backend endpoint.",
-      "ko": "EndpointSlice 리소스는 Service 백엔드(일반적으로 일치하는 Pod)의 IP address와 port를 추적하고 백엔드 set이 바뀌면 update됩니다. Service의 ClusterIP는 virtual entry point이고 selector는 일치하는 규칙이지 백엔드 endpoint가 아닙니다."
+      "en": "Service endpoint objects record backend addresses rather than an API-server URL, a special system Pod name, or guaranteed public reachability. The older Endpoints API grouped backend addresses; current EndpointSlice objects efficiently track backend IPs, ports, and conditions. The Endpoints API is deprecated since Kubernetes v1.33; new integrations should use EndpointSlice.",
+      "ko": "Service 엔드포인트 오브젝트는 API 서버 URL, 특별한 시스템 Pod 이름, 인터넷 접근이 보장된 공인 주소가 아니라 백엔드 주소를 기록합니다. 기존 Endpoints API는 백엔드 주소를 묶었고, 현재 EndpointSlice 오브젝트는 백엔드 IP·포트·상태를 효율적으로 추적합니다. Endpoints API는 Kubernetes v1.33부터 사용 중단 예정 상태이므로 새 연동에는 EndpointSlice를 사용해야 합니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/"
   },
   {
     "id": "local-123",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Cloud Native Architecture",
     "subtopic": "Cloud-native agility · 자체 연습",
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "What capability is a stated benefit of cloud-native practices combined with robust automation?",
-      "ko": "robust automation과 결합된 cloud-native practice의 stated benefit은 무엇입니까?"
+      "en": "Which organizational benefit explains the value of cloud-native architecture beyond its technology choices or novelty?",
+      "ko": "기술 구성이나 새로움 자체를 넘어 클라우드 네이티브 아키텍처의 가치를 설명하는 조직적 이점은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Making high-impact changes frequently and predictably with minimal toil",
-        "Eliminating the need for all operational monitoring",
-        "Requiring every service to share one deployment unit",
-        "Preventing workload from running in public or hybrid clouds"
+        "Reducing delivery barriers so teams can innovate more rapidly",
+        "Using a stack of containers, microservices, and pipelines",
+        "Being described as a modern approach to application deployment and pipelines",
+        "Being described as bleeding-edge technology and services"
       ],
       "ko": [
-        "최소한의 toil로 high-impact change를 자주, 예측 가능하게 수행하는 것",
-        "모든 operational monitoring의 필요를 없애는 것",
-        "모든 서비스가 하나의 deployment unit을 공유하도록 요구하는 것",
-        "퍼블릭 또는 hybrid cloud에서 워크로드가 실행되는 것을 방지하는 것"
+        "제공·배포 과정의 장벽을 줄여 팀이 더 빠르게 혁신하도록 돕는 것",
+        "컨테이너·마이크로서비스·파이프라인으로 구성된 스택을 사용하는 것",
+        "애플리케이션 배포와 파이프라인에 현대적인 접근 방식이라고 불리는 것",
+        "최신 첨단 기술과 서비스라고 불리는 것"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "The cloud-native definition says robust automation lets organizations make high-impact changes frequently and predictably with minimal toil and clear separation of concerns. This is a benefit, not a claim that monitoring or operational work disappears.",
-      "ko": "CNCF 정의은 robust automation이 organization이 최소 toil과 clear separation of 관심사s로 high-impact change를 자주, 예측 가능하게 수행하도록 한다고 설명합니다. 이는 benefit이지 monitoring이나 operational work가 사라진다는 뜻은 아닙니다."
+      "en": "Cloud-native practices and robust automation enable frequent, predictable changes with less toil, helping teams innovate faster. Containers, microservices, and pipelines describe technologies; modern or bleeding-edge labels do not themselves explain organizational value. This benefit reduces delivery barriers rather than removing every technical, financial, or organizational constraint.",
+      "ko": "클라우드 네이티브 방식과 견고한 자동화는 반복 운영 작업을 줄이면서 변경을 자주, 예측 가능하게 적용하도록 하여 팀의 빠른 혁신을 돕습니다. 컨테이너·마이크로서비스·파이프라인은 기술 구성을 설명하며, 현대적이거나 최신이라는 표현 자체는 조직적 가치를 설명하지 않습니다. 이 이점은 제공·배포의 장벽을 줄인다는 뜻이지 모든 기술·비용·조직 제약을 없앤다는 뜻은 아닙니다."
     },
-    "ref": "https://glossary.cncf.io/cloud-native-tech"
+    "ref": "https://glossary.cncf.io/cloud-native-tech/"
   },
   {
     "id": "local-124",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "Restricted capabilities · 자체 연습",
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "Which capability may a Linux Pod add back under the Kubernetes Restricted Pod Security Standard after dropping `ALL` capabilities?",
-      "ko": "`ALL` capability를 drop한 뒤 Kubernetes Restricted Pod Security Standard에서 Linux Pod가 다시 add할 수 있는 capability는 무엇입니까?"
+      "en": "Under the Kubernetes Restricted Pod Security Standard, which capability may a Linux container add back after dropping ALL?",
+      "ko": "Kubernetes Restricted Pod Security Standard에서 Linux 컨테이너가 ALL을 제거한 뒤 다시 추가할 수 있는 capability는 무엇입니까?"
     },
     "choices": {
       "en": [
         "NET_BIND_SERVICE",
-        "SYS_ADMIN",
-        "NET_RAW",
-        "SYS_PTRACE"
+        "CHOWN",
+        "SYS_CHROOT",
+        "SETUID"
       ],
       "ko": [
         "NET_BIND_SERVICE",
-        "SYS_ADMIN",
-        "NET_RAW",
-        "SYS_PTRACE"
+        "CHOWN",
+        "SYS_CHROOT",
+        "SETUID"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Restricted permits containers to drop ALL capabilities and add back only NET_BIND_SERVICE. The capability rule is Linux-specific in the documented policy; the other listed capabilities are not permitted add-backs.",
-      "ko": "Restricted 정책는 컨테이너가 ALL capability를 drop한 뒤 NET_BIND_SERVICE만 다시 add하도록 허용합니다. 문서화된 정책의 이 capability 규칙은 Linux에 적용되며 다른 capability는 허용된 add-back이 아닙니다."
+      "en": "Restricted requires Linux containers to drop ALL capabilities and permits only NET_BIND_SERVICE as an add-back. CHOWN, SYS_CHROOT, and SETUID appear in the less restrictive Baseline allowlist but are not allowed add-backs under Restricted. The capability control is OS-specific and is not applied to Windows Pods in the same way.",
+      "ko": "Restricted는 Linux 컨테이너가 모든 capability를 제거하도록 요구하고 NET_BIND_SERVICE만 다시 추가하도록 허용합니다. CHOWN, SYS_CHROOT, SETUID는 덜 엄격한 Baseline 허용 목록에는 있지만 Restricted에서 다시 추가할 수는 없습니다. capability 제어는 운영체제별 규칙이므로 Windows Pod에는 같은 방식으로 적용되지 않습니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted"
   },
@@ -3815,61 +3399,29 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which pair can change a Deployment's desired replica count?",
-      "ko": "Deployment의 희망하는 replica 수를 변경할 수 있는 pair는 무엇입니까?"
+      "en": "Which statement correctly describes kubectl methods for changing a Deployment's desired replica count?",
+      "ko": "Deployment의 목표 복제본 수를 변경하는 kubectl 방법을 올바르게 설명한 것은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "`kubectl scale deployment/web --replicas=5` and `kubectl edit deployment/web`",
-        "`kubectl rollout restart deployment/web` and `kubectl set image deployment/web app:v2`",
-        "`kubectl logs deployment/web` and `kubectl get deployment/web`",
-        "`kubectl expose deployment/web` and `kubectl port-forward deployment/web 8080:80`"
+        "Both kubectl scale deployment/web --replicas=5 and editing spec.replicas with kubectl edit deployment/web are supported",
+        "Only kubectl edit deployment/web can change the replica count",
+        "Only kubectl scale-up deployment/web --replicas=5 can change the replica count",
+        "Only kubectl scale deployment/web --replicas=5 can change the replica count"
       ],
       "ko": [
-        "`kubectl scale deployment/web --replicas=5`와 `kubectl edit deployment/web`",
-        "`kubectl rollout restart deployment/web`와 `kubectl set image deployment/web app:v2`",
-        "`kubectl logs deployment/web`와 `kubectl get deployment/web`",
-        "`kubectl expose deployment/web`와 `kubectl port-forward deployment/web 8080:80`"
+        "kubectl scale deployment/web --replicas=5와 kubectl edit deployment/web로 spec.replicas를 편집하는 방법을 모두 지원함",
+        "kubectl edit deployment/web만 복제본 수를 변경할 수 있음",
+        "kubectl scale-up deployment/web --replicas=5만 복제본 수를 변경할 수 있음",
+        "kubectl scale deployment/web --replicas=5만 복제본 수를 변경할 수 있음"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "kubectl scale changes the replica count imperatively, while kubectl edit opens the Deployment so its declarative replica configuration can be changed. Restarting, changing the image, inspecting, exposing, or forwarding traffic does not directly change the desired replica count.",
-      "ko": "kubectl scale은 replica 수를 imperative하게 변경하고 kubectl edit은 Deployment를 열어 declarative replica 설정을 변경합니다. restart, image 변경, inspect, expose, 트래픽 forwarding은 desired replica 수를 직접 변경하지 않습니다."
+      "en": "kubectl scale updates the desired replica count, and kubectl edit can update the Deployment's spec.replicas field. Neither method is exclusive. kubectl scale-up is not a standard kubectl subcommand; the command is scale. Editing a live object is an imperative operation, not the declarative apply workflow.",
+      "ko": "kubectl scale은 목표 복제본 수를 갱신하고, kubectl edit으로 Deployment의 spec.replicas 필드를 수정할 수도 있습니다. 어느 한 방법만 가능한 것은 아닙니다. kubectl scale-up은 표준 kubectl 하위 명령이 아니며 올바른 명령은 scale입니다. 실행 중인 오브젝트를 직접 편집하는 것은 명령형 작업이지 선언형 apply 흐름이 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/"
-  },
-  {
-    "id": "local-126",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "containerd · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "Which description best fits containerd?",
-      "ko": "containerd를 가장 잘 설명한 것은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "An industry-standard container runtime emphasizing simplicity, robustness, portability, and lifecycle/image/storage management",
-        "A Kubernetes scheduler component that assigns Pods to nodes",
-        "An OCI image builder that compiles application source code",
-        "An API-server extension that stores Kubernetes object"
-      ],
-      "ko": [
-        "simplicity, robustness, portability와 lifecycle/이미지/스토리지 관리에 중점을 둔 industry-standard 컨테이너 런타임",
-        "Pod를 노드에 할당하는 Kubernetes scheduler 구성 요소",
-        "애플리케이션 소스 code를 compile하는 OCI 이미지 builder",
-        "Kubernetes 객체를 저장하는 API-server extension"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "containerd is an industry-standard runtime that manages a host's container lifecycle, including image transfer/storage, execution, supervision, and related networking. It is not a scheduler, image builder, or API-server storage extension.",
-      "ko": "containerd는 호스트의 컨테이너 lifecycle을 관리하는 industry-standard 런타임으로 이미지 transfer/스토리지, 실행, supervision 및 관련 networking을 포함합니다. scheduler, 이미지 builder 또는 API-server 스토리지 extension이 아닙니다."
-    },
-    "ref": "https://containerd.io/"
   },
   {
     "id": "local-127",
@@ -3879,27 +3431,27 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "What changes in vertical scaling compared with horizontal scaling?",
-      "ko": "horizontal scaling과 비교할 때 vertical scaling에서는 무엇이 바뀝니까?"
+      "en": "What changes when an application deployment is scaled vertically to meet demand?",
+      "ko": "수요에 맞춰 애플리케이션 배포를 수직 확장·축소할 때 무엇이 바뀝니까?"
     },
     "choices": {
       "en": [
-        "The resources assigned to an existing application instance, such as CPU or memory, rather than the number of instances",
-        "The number of application instances, while per-instance resources stay fixed",
-        "Only the DNS name of a Service",
-        "Only the number of worker nodes, never Pod resources"
+        "The resources allocated to each application instance, such as CPU or memory",
+        "The number of different applications deployed",
+        "The number of node instances in the cluster",
+        "The number of instances of the same application"
       ],
       "ko": [
-        "instance 수가 아니라 기존 애플리케이션 instance에 할당된 CPU나 memory 같은 리소스",
-        "instance당 리소스는 고정하고 애플리케이션 instance 수",
-        "Service의 DNS name만",
-        "Pod 리소스는 절대 바꾸지 않고 worker 노드 수만"
+        "CPU·메모리처럼 애플리케이션 인스턴스마다 할당되는 리소스",
+        "배포한 서로 다른 애플리케이션의 수",
+        "클러스터의 노드 인스턴스 수",
+        "같은 애플리케이션의 인스턴스 수"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Vertical scaling rightsizes already-running workload instances by changing resources such as CPU or memory. Horizontal scaling changes how many instances (Pods) run. Kubernetes VPA is designed to adjust resource requests and limits for the former case.",
-      "ko": "vertical scaling은 CPU나 memory 같은 리소스를 변경하여 이미 실행 중인 워크로드 instance를 rightsizing합니다. horizontal scaling은 실행되는 instance(Pod) 수를 변경합니다. Kubernetes VPA는 전자의 리소스 요청와 limit을 조정하도록 설계되었습니다."
+      "en": "Vertical scaling changes per-instance resource allocations, for example CPU or memory. Horizontal application scaling changes the number of replicas, while node scaling changes cluster capacity. Adding unrelated applications is neither of these. Kubernetes VPA adjusts Pod resource allocations; applying a change may resize a Pod in place or recreate it depending on the update mode and cluster support.",
+      "ko": "수직 확장·축소는 CPU·메모리처럼 인스턴스당 리소스 할당을 변경합니다. 애플리케이션의 수평 확장·축소는 복제본 수를, 노드 확장·축소는 클러스터 용량을 변경합니다. 무관한 애플리케이션을 추가하는 것은 둘 중 어느 것도 아닙니다. Kubernetes VPA는 Pod 리소스 할당을 조정하며, 변경 적용 시에는 갱신 모드와 클러스터 지원에 따라 제자리 크기 변경 또는 Pod 재생성이 일어날 수 있습니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/"
   },
@@ -3916,22 +3468,22 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "choices": {
       "en": [
-        "A text document containing image-build instructions read by Docker to assemble an image",
-        "A Bash script that runs as the container's long-lived process",
-        "A prebuilt running container instance",
-        "A Kubernetes manifest that schedules Pods on nodes"
+        "A Bash script for automatically building a Docker image",
+        "A configuration file choosing the registry to which an image is pushed",
+        "A text file of build instructions used to assemble a container image",
+        "An image layer produced by a running container and stored on its host"
       ],
       "ko": [
-        "Docker가 이미지를 assemble할 때 읽는 이미지 빌드 명령을 담은 텍스트 문서",
-        "컨테이너의 long-lived 프로세스로 실행되는 Bash script",
-        "미리 빌드된 실행 중인 컨테이너 instance",
-        "노드에 Pod를 schedule하는 Kubernetes 매니페스트"
+        "Docker 이미지를 자동으로 빌드하는 Bash 스크립트",
+        "이미지를 푸시할 레지스트리를 선택하는 설정 파일",
+        "컨테이너 이미지를 구성하는 빌드 지침을 담은 텍스트 파일",
+        "실행 중인 컨테이너가 생성하여 호스트에 저장한 이미지 레이어"
       ]
     },
-    "answer": 0,
+    "answer": 2,
     "explain": {
-      "en": "A Dockerfile is a text document containing instructions used to build a container image. It is distinct from a Bash script, a running container, and a Kubernetes workload manifest.",
-      "ko": "Dockerfile은 컨테이너 이미지를 빌드하는 데 사용하는 명령을 담은 텍스트 문서입니다. Bash script, 실행 중인 컨테이너, Kubernetes 워크로드 매니페스트와는 구별됩니다."
+      "en": "A Dockerfile is a text document of image-build instructions such as FROM, COPY, and RUN. It is not a Bash script, a registry-push destination configuration, or an already-created image layer. RUN may invoke a shell command, but Dockerfile syntax as a whole is not Bash syntax.",
+      "ko": "Dockerfile은 FROM, COPY, RUN 같은 이미지 빌드 지침을 담은 텍스트 문서입니다. Bash 스크립트나 레지스트리 푸시 대상 설정 파일, 이미 생성된 이미지 레이어가 아닙니다. RUN이 셸 명령을 실행할 수는 있지만 Dockerfile 전체 문법이 Bash 문법인 것은 아닙니다."
     },
     "ref": "https://docs.docker.com/reference/dockerfile/"
   },
@@ -3968,102 +3520,6 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "ref": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/"
   },
   {
-    "id": "local-131",
-    "exam": "kcna",
-    "domain": "Container Orchestration",
-    "subtopic": "Dual-stack Services · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "How can a Service request both IPv4 and IPv6 cluster IPs when dual-stack networking is enabled?",
-      "ko": "dual-stack networking이 enabled일 때 Service가 IPv4와 IPv6 클러스터 IP를 모두 요청하려면 어떻게 합니까?"
-    },
-    "choices": {
-      "en": [
-        "Set `spec.ipFamilyPolicy` to `PreferDualStack` or `RequireDualStack`, with the result depending on cluster support and policy",
-        "Set `spec.ipFamilyPolicy` to `SingleStack`, which always allocates both families",
-        "Set a NetworkPolicy rule; it allocates Service IP families",
-        "Use an Ingress hostname; Service IP-family allocation is inferred from DNS"
-      ],
-      "ko": [
-        "`spec.ipFamilyPolicy`를 `PreferDualStack` 또는 `RequireDualStack`로 설정하며 결과는 cluster support와 policy에 따라 달라집니다",
-        "`spec.ipFamilyPolicy`를 `SingleStack`으로 설정하면 항상 두 family를 할당합니다",
-        "NetworkPolicy 규칙을 설정하면 Service IP family가 할당됩니다",
-        "Ingress hostname을 사용하면 Service IP family allocation이 DNS에서 추론됩니다"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "A Service's `ipFamilyPolicy` controls whether it is single-stack or dual-stack. PreferDualStack requests both families when available and can fall back to single-stack; RequireDualStack fails creation if dual-stack is unavailable. The cluster's configured ranges and network support also matter.",
-      "ko": "Service의 `ipFamilyPolicy`가 single-stack 또는 dual-stack 여부를 제어합니다. PreferDualStack은 가능할 때 두 family를 요청하고 single-stack으로 fallback할 수 있으며 RequireDualStack은 dual-stack이 불가능하면 creation이 실패합니다. cluster의 configured range와 network support도 중요합니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/services-networking/dual-stack/"
-  },
-  {
-    "id": "local-132",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Security context and Pod Security Admission · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which statement correctly distinguishes a security context from Pod Security Admission?",
-      "ko": "보안 context와 Pod Security Admission을 올바르게 구분한 설명은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "A security context configures Pod/container settings such as identities and capabilities, while Pod Security Admission enforces policy levels on Pod creation",
-        "Pod Security Admission sets each container process UID, while securityContext labels the namespace for admission",
-        "A security context is only a namespace admission mode, while Pod Security Admission sets seccomp syscalls for one container",
-        "They are two names for the same per-container field"
-      ],
-      "ko": [
-        "보안 context는 식별자와 capability 같은 Pod/컨테이너 설정을 구성하고 Pod Security Admission은 Pod 생성 시 정책 level을 enforce합니다",
-        "Pod Security Admission은 각 컨테이너 프로세스 UID를 설정하고 securityContext는 네임스페이스에 admission label을 붙입니다",
-        "보안 context는 네임스페이스 admission mode일 뿐이고 Pod Security Admission은 한 컨테이너의 seccomp syscall을 설정합니다",
-        "둘은 같은 per-컨테이너 필드의 다른 이름입니다"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "A security context configures privilege and access-control settings for a Pod or container, including options such as user/group identity, capabilities, seccomp, and AppArmor. Pod Security Admission is an admission controller that applies Pod Security Standards at namespace-scoped policy levels; it can reject a violating Pod, but it is not itself a seccomp or AppArmor profile.",
-      "ko": "보안 context는 user/group 식별자, capability, seccomp, AppArmor 등을 포함하여 Pod 또는 컨테이너의 privilege와 access-제어 설정을 구성합니다. Pod Security Admission은 네임스페이스 범위의 정책 level에서 Pod Security Standards를 적용하는 admission controller이며, 위반 Pod를 reject할 수 있지만 seccomp나 AppArmor profile 자체는 아닙니다."
-    },
-    "ref": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
-  },
-  {
-    "id": "local-133",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "OIDC authentication · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "What does OIDC provide when configured as a Kubernetes authentication method?",
-      "ko": "OIDC를 Kubernetes authentication method로 configure하면 무엇을 제공합니까?"
-    },
-    "choices": {
-      "en": [
-        "Authentication of users with JWTs issued by an OpenID Connect identity provider",
-        "RBAC authorization rule without authenticating the user",
-        "A service identity certificate that authenticates every workload to every peer",
-        "Automatic encryption of every Pod-to-Pod packet"
-      ],
-      "ko": [
-        "OpenID Connect 식별자 provider가 발급한 JWT를 사용한 user authentication",
-        "user를 authenticate하지 않고 RBAC authorization 규칙을 제공하는 것",
-        "모든 워크로드를 모든 peer에 authenticate하는 서비스 식별자 certificate",
-        "모든 Pod-to-Pod packet의 automatic encryption"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Kubernetes can use JWTs from an OpenID Connect identity provider to authenticate API users. Authentication establishes identity; authorization, such as RBAC decisions, remains a separate step.",
-      "ko": "Kubernetes는 OpenID Connect 식별자 provider의 JWT를 사용하여 API user를 authenticate할 수 있습니다. authentication은 식별자를 확립하고 RBAC decision 같은 authorization은 별도의 step으로 남습니다."
-    },
-    "ref": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens"
-  },
-  {
     "id": "local-134",
     "exam": "kcna",
     "domain": "Container Orchestration",
@@ -4096,38 +3552,6 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"
   },
   {
-    "id": "local-136",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Distributed tracing instrumentation · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Where is distributed tracing primarily implemented for an application?",
-      "ko": "애플리케이션의 분산 tracing은 주로 어디에서 구현됩니까?"
-    },
-    "choices": {
-      "en": [
-        "In the application layer by instrumenting code, propagating trace context, and exporting trace data",
-        "In a log collector that stores text event without trace context",
-        "In a metrics exporter that aggregates counters and gauges without request spans",
-        "In a registry scanner that records image findings instead of application operations"
-      ],
-      "ko": [
-        "code를 instrument하고 trace context를 전파하며 trace data를 export하는 애플리케이션 계층에서",
-        "trace context 없이 text 이벤트를 저장하는 log collector에서",
-        "요청 span 없이 counter와 gauge를 집계하는 metrics exporter에서",
-        "애플리케이션 operation 대신 이미지 finding을 기록하는 registry scanner에서"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "distributed tracing is implemented at the application layer: instrumented code creates spans, propagates trace context across service boundaries, and exports trace data to a tracing backend. The cluster scheduler and image registry do not create application trace context.",
-      "ko": "분산 tracing은 애플리케이션 계층에서 구현됩니다. instrumented code가 span을 만들고 서비스 boundary를 넘어 trace context를 전파하며 trace data를 tracing 백엔드로 export합니다. 클러스터 scheduler와 이미지 registry는 애플리케이션 trace context를 만들지 않습니다."
-    },
-    "ref": "https://opentelemetry.io/docs/concepts/signals/traces/"
-  },
-  {
     "id": "local-137",
     "exam": "kcna",
     "domain": "Cloud Native Architecture",
@@ -4158,38 +3582,6 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
       "ko": "CloudEvents는 서비스, 플랫폼, 시스템 전반에서 이벤트를 선언하고 전달하기 쉽도록 이벤트 data를 공통 방식으로 설명하는 specification입니다. workflow engine으로 동작하거나 하나의 broker transport를 강제하거나 deployment 매니페스트를 대체하지 않고 이벤트 data를 표준화합니다."
     },
     "ref": "https://cloudevents.io/"
-  },
-  {
-    "id": "local-138",
-    "exam": "kcna",
-    "domain": "Container Orchestration",
-    "subtopic": "Node controller health handling · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "What does the node controller do when a node becomes unreachable?",
-      "ko": "노드가 unreachable 상태가 되면 노드 controller는 무엇을 합니까?"
-    },
-    "choices": {
-      "en": [
-        "It updates the Node Ready condition to Unknown when the node is unreachable",
-        "The kubelet direct changes the Ready condition to Unknown after it stops receiving heartbeats",
-        "The scheduler changes the Ready condition to Unknown while selecting different node",
-        "The API server changes the Ready condition to Unknown without a controller"
-      ],
-      "ko": [
-        "노드가 unreachable이면 Node Ready 조건을 Unknown으로 update합니다",
-        "heartbeat를 받지 못하면 kubelet이 Ready 조건을 직접 Unknown으로 변경합니다",
-        "다른 노드를 선택하는 동안 scheduler가 Ready 조건을 Unknown으로 변경합니다",
-        "controller 없이 API server가 Ready 조건을 Unknown으로 변경합니다"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "The node controller monitors node status and updates the Node Ready condition to Unknown when a node becomes unreachable. Subsequent handling, such as taints and any toleration-driven eviction, is a separate remediation path; this question concerns the status condition update.",
-      "ko": "노드 controller는 노드 상태를 monitor하고 노드가 unreachable이면 Node Ready 조건을 Unknown으로 update합니다. 이후 taint와 toleration에 따른 eviction 같은 처리는 별도의 remediation 경로이며, 이 질문은 상태 조건 update에 관한 것입니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/architecture/nodes/"
   },
   {
     "id": "local-139",
@@ -4226,7 +3618,7 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
   {
     "id": "local-140",
     "exam": "kcna",
-    "domain": "Cloud Native Architecture",
+    "domain": "Container Orchestration",
     "subtopic": "Service mesh capabilities · 자체 연습",
     "difficulty": "medium",
     "style": "exam",
@@ -4282,10 +3674,10 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "answer": 0,
     "explain": {
-      "en": "Apache Mesos is cluster-management software that abstracts and schedules resources across a cluster and can support containerized workload. It is distinct from CRI-O, OpenStack, and Docker image tooling.",
-      "ko": "Apache Mesos는 클러스터 리소스를 추상화하고 schedule하며 containerized 워크로드를 지원할 수 있는 클러스터-관리 software입니다. CRI-O, OpenStack, Docker 이미지 tooling과는 다릅니다."
+      "en": "Apache Mesos was a cluster manager that isolated and allocated resources to frameworks supporting workloads, including containers. It is distinct from CRI-O, OpenStack, and Docker image tooling. Apache retired Mesos in August 2025 and completed its move to the Attic in October 2025; this is historical ecosystem knowledge, not a recommendation of a maintained orchestration platform.",
+      "ko": "Apache Mesos는 컨테이너 등 워크로드를 지원하는 프레임워크에 리소스를 격리·할당하는 클러스터 관리자였습니다. CRI-O, OpenStack, Docker 이미지 도구와는 다릅니다. Apache는 2025년 8월 Mesos를 종료했고 같은 해 10월 Attic으로 이전을 완료했습니다. 이 문항은 과거 생태계 지식을 다루며 현재 유지보수되는 오케스트레이션 플랫폼을 추천하는 것이 아닙니다."
     },
-    "ref": "https://mesos.apache.org/"
+    "ref": "https://attic.apache.org/projects/mesos.html"
   },
   {
     "id": "local-142",
@@ -4320,38 +3712,6 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "ref": "https://kubernetes.io/docs/reference/using-api/"
   },
   {
-    "id": "local-143",
-    "exam": "kcna",
-    "domain": "Container Orchestration",
-    "subtopic": "Resource metrics API · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "What does metrics-server expose to Kubernetes clients?",
-      "ko": "metrics-server는 Kubernetes client에 무엇을 expose합니까?"
-    },
-    "choices": {
-      "en": [
-        "Node and Pod resource metrics through the metrics.k8s.io Metrics API, used by kubectl top and autoscaling integrations",
-        "Application logs through the core Kubernetes API",
-        "Container images through a registry API",
-        "NetworkPolicy decisions through the admission API"
-      ],
-      "ko": [
-        "metrics.k8s.io Metrics API를 통한 node와 Pod resource 메트릭이며 kubectl top과 autoscaling 통합에서 사용됩니다",
-        "core Kubernetes API를 통한 애플리케이션 log",
-        "registry API를 통한 컨테이너 이미지",
-        "admission API를 통한 NetworkPolicy decision"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "metrics-server collects resource usage from kubelets and exposes node and Pod metrics through the metrics.k8s.io API. Clients such as kubectl top and autoscaling integrations use this resource-metrics API; it is not the application log or image API.",
-      "ko": "metrics-server는 kubelet에서 resource usage를 수집하고 metrics.k8s.io API를 통해 node와 Pod 메트릭을 expose합니다. kubectl top과 autoscaling 통합 같은 client가 이 resource-metrics API를 사용하며 application log나 image API가 아닙니다."
-    },
-    "ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/"
-  },
-  {
     "id": "local-145",
     "exam": "kcna",
     "domain": "Kubernetes Fundamentals",
@@ -4359,59 +3719,59 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which API version name follows Kubernetes API versioning conventions?",
-      "ko": "다음 중 Kubernetes API versioning convention을 따르는 이름은 무엇입니까?"
+      "en": "Which group of API version names follows Kubernetes version naming syntax?",
+      "ko": "Kubernetes API 버전 이름의 명명 형식에 맞는 조합은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "apps/v1beta1",
-        "apps/beta1",
-        "apps/version1",
-        "apps/v1-preview"
+        "v1alpha1, v2beta3, v2",
+        "alpha1v1, beta3v3, v2",
+        "alpha1, beta3, v2",
+        "v1alpha1, v2beta3, 2.0"
       ],
       "ko": [
-        "apps/v1beta1",
-        "apps/beta1",
-        "apps/version1",
-        "apps/v1-preview"
+        "v1alpha1, v2beta3, v2",
+        "alpha1v1, beta3v3, v2",
+        "alpha1, beta3, v2",
+        "v1alpha1, v2beta3, 2.0"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Kubernetes API versions use a group followed by a version such as apps/v1beta1; the version component uses v<major>alpha<stage> or v<major>beta<stage>, while stable versions use forms such as v1. The other strings do not follow that convention.",
-      "ko": "Kubernetes API version은 group 뒤에 apps/v1beta1 같은 version을 사용합니다. version 부분은 v<major>alpha<stage> 또는 v<major>beta<stage> 형식이며 안정적인 version은 v1 같은 형식입니다. 나머지 문자열은 이 convention을 따르지 않습니다."
+      "en": "Kubernetes version names use forms such as v1alpha1 for alpha, v2beta3 for beta, and v2 for stable. Prefixing alpha/beta before the major version, omitting v<major>, or using 2.0 does not follow this convention. A valid name does not prove that a particular API group currently serves that version; availability must be checked separately.",
+      "ko": "Kubernetes 버전 이름은 알파의 v1alpha1, 베타의 v2beta3, 안정 버전의 v2 같은 형식을 사용합니다. alpha·beta를 메이저 버전보다 앞에 놓거나 v<major>를 생략하거나 2.0을 쓰면 이 규칙에 맞지 않습니다. 이름의 형식이 올바르다고 해서 특정 API 그룹이 현재 그 버전을 제공한다는 뜻은 아니며, 제공 여부는 따로 확인해야 합니다."
     },
     "ref": "https://kubernetes.io/docs/reference/using-api/"
   },
   {
     "id": "local-146",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Cloud Native Application Delivery",
     "subtopic": "Container logs · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
       "en": "Which command retrieves logs from the previous terminated ruby container in Pod web-1?",
-      "ko": "Pod web-1의 이전에 종료된 ruby 컨테이너 log를 가져오는 명령은 무엇입니까?"
+      "ko": "Pod web-1에 있는 ruby 컨테이너의 이전 종료된 인스턴스에서 로그를 가져오는 명령은 무엇입니까?"
     },
     "choices": {
       "en": [
         "kubectl logs -p -c ruby web-1",
-        "kubectl logs -f -c ruby web-1",
-        "kubectl describe pod web-1 -c ruby",
-        "kubectl get logs web-1 --previous-container ruby"
+        "kubectl logs -c ruby web-1",
+        "kubectl logs -p ruby web-1",
+        "kubectl logs -p -c web-1 ruby"
       ],
       "ko": [
         "kubectl logs -p -c ruby web-1",
-        "kubectl logs -f -c ruby web-1",
-        "kubectl describe pod web-1 -c ruby",
-        "kubectl get logs web-1 --previous-container ruby"
+        "kubectl logs -c ruby web-1",
+        "kubectl logs -p ruby web-1",
+        "kubectl logs -p -c web-1 ruby"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "kubectl logs -p selects the previous terminated instance, and -c ruby selects the named container in the multi-container Pod. The -f option streams current logs, while describe and get logs are not the command forms for this request.",
-      "ko": "kubectl logs -p는 이전에 종료된 instance를 선택하고 -c ruby는 multi-container Pod에서 이름이 ruby인 container를 선택합니다. -f는 현재 log를 stream하며 describe와 get logs는 이 요청에 맞는 명령 형식이 아닙니다."
+      "en": "The -p (--previous) flag requests the previous terminated container instance, -c ruby selects the container, and web-1 names the Pod. Omitting -p requests the current instance. The remaining alternatives fail to specify this Pod/container pairing correctly; exchanging the -c value and Pod name targets the wrong objects.",
+      "ko": "-p(--previous)는 이전에 종료된 컨테이너 인스턴스를 요청하고, -c ruby는 컨테이너를 선택하며, web-1은 Pod 이름입니다. -p를 생략하면 현재 인스턴스의 로그를 요청합니다. 나머지 명령은 이 Pod·컨테이너 조합을 올바르게 지정하지 않으며, -c 값과 Pod 이름을 바꾸면 다른 대상을 지정하게 됩니다."
     },
     "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/"
   },
@@ -4423,27 +3783,27 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "Which layout best represents a highly available Kubernetes cluster using external etcd rather than stacked etcd?",
-      "ko": "stacked etcd가 아닌 external etcd를 사용하는 고가용성 Kubernetes 클러스터 배치로 가장 적절한 것은 무엇입니까?"
+      "en": "Which host layout matches the documented kubeadm high-availability topology with external etcd?",
+      "ko": "외부 etcd를 사용하는 문서화된 kubeadm 고가용성 토폴로지에 맞는 호스트 배치는 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Three control-plane hosts plus three separate etcd hosts, for six hosts total",
-        "One control-plane host plus one etcd host, with all other hosts used only for Pods",
-        "Three control-plane hosts sharing one external etcd host as the only quorum configuration",
-        "Three worker hosts with no etcd members because the API server stores all cluster status"
+        "Six hosts: three control-plane hosts and three separate etcd hosts",
+        "Four hosts: two control-plane hosts and two etcd hosts",
+        "Four hosts: one control-plane host and three etcd hosts",
+        "Three hosts: control-plane components and etcd share each host"
       ],
       "ko": [
-        "3개의 제어-plane 호스트와 별도의 3개 etcd 호스트로 총 6개 호스트",
-        "1개의 제어-plane 호스트와 1개의 etcd 호스트만 두고 나머지는 Pod 전용 호스트로 사용",
-        "3개의 제어-plane 호스트가 quorum 구성원 하나뿐인 external etcd 호스트 하나를 공유",
-        "3개의 worker 호스트만 두고 etcd 구성원은 두지 않음; API server가 모든 클러스터 상태를 저장"
+        "6개 호스트: 제어 플레인 3개와 별도 etcd 3개",
+        "4개 호스트: 제어 플레인 2개와 etcd 2개",
+        "4개 호스트: 제어 플레인 1개와 etcd 3개",
+        "3개 호스트: 각 호스트에 제어 플레인 구성 요소와 etcd를 함께 배치"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "With external etcd, the etcd members run separately from the control-plane hosts. A common highly available layout uses three control-plane hosts and three etcd hosts, providing separate redundancy and an odd-sized etcd quorum; stacked etcd places an etcd member on each control-plane host instead.",
-      "ko": "external etcd에서는 etcd member가 control-plane host와 분리되어 실행됩니다. 일반적인 고가용성 배치는 3개의 control-plane host와 3개의 etcd host를 사용하여 별도의 redundancy와 홀수 etcd quorum을 제공하며, stacked etcd는 각 control-plane host에 etcd member를 함께 배치합니다."
+      "en": "The documented external-etcd HA topology uses at least three control-plane hosts and three separate etcd hosts, totaling six. Two etcd members lose quorum if one fails, and a single control-plane host is not redundant. Co-locating etcd with control-plane components describes stacked etcd rather than external etcd. This count is for the documented separate-host topology, not every possible custom HA architecture.",
+      "ko": "문서의 외부 etcd 고가용성 토폴로지는 제어 플레인 호스트 최소 3개와 별도 etcd 호스트 최소 3개로 총 6개를 사용합니다. etcd 멤버가 2개이면 하나가 실패할 때 정족수를 잃고, 제어 플레인 호스트가 하나뿐이면 중복성이 없습니다. 제어 플레인과 etcd를 같은 호스트에 두는 것은 외부 etcd가 아니라 stacked etcd 구성입니다. 이 수는 문서화된 별도 호스트 토폴로지의 기준이지 모든 사용자 정의 고가용성 아키텍처의 보편적 요구는 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/"
   },
@@ -4460,56 +3820,24 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "choices": {
       "en": [
-        "kube-scheduler",
-        "kubelet",
+        "etcd",
+        "kube-controller-manager",
         "kube-proxy",
-        "etcd"
+        "kube-scheduler"
       ],
       "ko": [
-        "kube-scheduler",
-        "kubelet",
+        "etcd",
+        "kube-controller-manager",
         "kube-proxy",
-        "etcd"
+        "kube-scheduler"
       ]
     },
-    "answer": 0,
+    "answer": 3,
     "explain": {
-      "en": "The kube-scheduler watches for Pods without a node assignment and selects a feasible node using resources, constraints, and scheduling policies. The kubelet runs Pods after assignment; kube-proxy handles Service networking, and etcd stores cluster status.",
-      "ko": "kube-scheduler는 노드가 지정되지 않은 Pod를 감시하고 리소스, 제약 조건, 스케줄링 정책를 사용해 실행 가능한 노드를 선택합니다. kubelet은 배치 후 Pod를 실행하고, kube-proxy는 Service 네트워크를 처리하며, etcd는 클러스터 상태를 저장합니다."
+      "en": "The kube-scheduler watches Pods without node assignments and selects a feasible node using resources, constraints, and scheduling policies. Controller-manager runs reconciliation controllers, kube-proxy implements Service networking, and etcd stores cluster API data.",
+      "ko": "kube-scheduler는 노드가 지정되지 않은 Pod를 감시하고 리소스, 제약 조건, 스케줄링 정책에 따라 실행 가능한 노드를 선택합니다. controller-manager는 조정 컨트롤러를 실행하고 kube-proxy는 Service 네트워크를 구현하며 etcd는 클러스터 API 데이터를 저장합니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/"
-  },
-  {
-    "id": "local-155",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "PersistentVolumeClaims · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "What does a PersistentVolumeClaim primarily provide for a Pod?",
-      "ko": "PersistentVolumeClaim은 Pod에 주로 무엇을 제공합니까?"
-    },
-    "choices": {
-      "en": [
-        "A request for persistent storage that can bind to a PersistentVolume or trigger dynamic provisioning",
-        "The backing storage volume itself, with no claim object",
-        "A StorageClass policy that provisions every volume automatically",
-        "A scheduler rule that selects a node by label"
-      ],
-      "ko": [
-        "PersistentVolume에 바인딩되거나 동적 프로비저닝을 요청하는 스토리지 claim",
-        "claim 객체 없이 backing 스토리지 볼륨 자체",
-        "모든 볼륨을 자동 provisioning하는 StorageClass 정책",
-        "label로 노드를 선택하는 scheduler 규칙"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "A PVC is a request for storage. It can bind to a matching PersistentVolume, while a StorageClass can provide a policy for dynamic provisioning; the PV is the backing volume and the scheduler is unrelated.",
-      "ko": "PVC는 스토리지를 요청하는 객체입니다. 일치하는 PersistentVolume에 바인딩할 수 있고 StorageClass는 동적 프로비저닝 정책를 제공할 수 있습니다. PV는 backing 볼륨이며 scheduler와는 별개입니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/"
   },
   {
     "id": "local-156",
@@ -4544,38 +3872,6 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "ref": "https://kubernetes.io/docs/concepts/architecture/#etcd"
   },
   {
-    "id": "local-157",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Pod networking · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "How do containers in the same Pod normally communicate over the network?",
-      "ko": "같은 Pod의 컨테이너들은 일반적으로 네트워크를 통해 어떻게 통신합니까?"
-    },
-    "choices": {
-      "en": [
-        "They share the Pod network namespace, IP address, and port space, so they can use localhost",
-        "Each container receives an unrelated Pod IP and cannot use localhost",
-        "They automatically share the host's network namespace",
-        "They communicate only through an external LoadBalancer"
-      ],
-      "ko": [
-        "Pod 네트워크 네임스페이스, IP address, port space를 공유하므로 localhost를 사용할 수 있습니다",
-        "각 컨테이너가 서로 무관한 Pod IP를 받아 localhost를 사용할 수 없습니다",
-        "자동으로 호스트의 네트워크 네임스페이스를 공유합니다",
-        "외부 LoadBalancer를 통해서만 통신합니다"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Containers in one Pod share the Pod network namespace and normally the Pod IP and port space. They can reach one different through localhost, although host networking is a separate optional configuration.",
-      "ko": "하나의 Pod에 있는 컨테이너들은 Pod 네트워크 네임스페이스와 일반적으로 Pod IP 및 port space를 공유하므로 localhost로 서로 접근할 수 있습니다. 호스트 네트워크는 별도의 optional 구성입니다."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/workloads/pods/#pod-networking"
-  },
-  {
     "id": "local-159",
     "exam": "kcna",
     "domain": "Kubernetes Fundamentals",
@@ -4588,88 +3884,24 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "choices": {
       "en": [
-        "Both manage Pods from a declared Pod template",
-        "Both guarantee stable ordinal identity and ordered rollout",
-        "Both are node-level agents that run containers direct",
-        "Both replace Services for network discovery"
+        "Both manage Pods based on a declared container template",
+        "Both support the OnDelete update strategy",
+        "Both provide ordered, graceful deployment and scaling",
+        "Both preserve a stable individual identity for every Pod"
       ],
       "ko": [
-        "둘 다 선언된 Pod 템플릿으로부터 Pod를 관리합니다",
-        "둘 다 안정적인 ordinal 식별자와 ordered rollout을 보장합니다",
-        "둘 다 컨테이너를 직접 실행하는 노드-level agent입니다",
-        "둘 다 네트워크 discovery를 위해 Service를 대체합니다"
+        "둘 다 선언된 컨테이너 템플릿을 기반으로 Pod를 관리한다",
+        "둘 다 OnDelete 업데이트 전략을 지원한다",
+        "둘 다 순서 있는 정상 배포와 확장·축소를 제공한다",
+        "둘 다 각 Pod의 고정된 개별 식별자를 유지한다"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Both controllers manage Pods from a declared template, but StatefulSet additionally provides stable network identity and, when volumeClaimTemplates are used, persistent storage for each replica. These properties make StatefulSet useful for stateful databases; Deployment is generally for stateless replicas.",
-      "ko": "두 controller 모두 선언된 Pod template으로 Pod를 관리하지만 StatefulSet은 stable network identity를 추가로 제공하고 volumeClaimTemplates를 사용하면 replica마다 persistent storage도 제공합니다. 따라서 stateful database에 유용하며 Deployment는 일반적으로 stateless replica용입니다."
+      "en": "Both manage Pods from a declared template. OnDelete, stable per-Pod identities, and StatefulSet-style ordered lifecycle management are not shared Deployment guarantees. The shared-template property describes desired configuration; live Pods from different rollout revisions need not have identical specs.",
+      "ko": "둘 다 선언된 템플릿으로 Pod를 관리합니다. OnDelete, Pod별 고정 식별자, StatefulSet 방식의 순서 있는 생명주기 관리는 Deployment와 공유하는 보장이 아닙니다. 공통 템플릿은 원하는 구성을 뜻하며 서로 다른 롤아웃 리비전의 실제 Pod 사양이 항상 같다는 뜻은 아닙니다."
     },
-    "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/"
-  },
-  {
-    "id": "local-161",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Container image builds · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "Why are multi-stage builds and minimal base images commonly used for container images?",
-      "ko": "컨테이너 이미지에서 multi-stage 빌드와 최소한의 base 이미지를 사용하는 일반적인 이유는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "They keep build tools and unnecessary packages out of the final runtime image",
-        "They always include all intermediate build stages in the final runtime image",
-        "They require every stage to use the same base image",
-        "They remove all runtime dependency requirements from the application"
-      ],
-      "ko": [
-        "최종 실행 이미지에서 빌드 도구와 불필요한 패키지를 제외합니다",
-        "모든 중간 빌드 단계를 최종 실행 이미지에 항상 포함합니다",
-        "모든 stage가 동일한 base image를 사용해야 합니다",
-        "애플리케이션의 모든 실행 시 dependency 요구 사항을 제거합니다"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Multi-stage builds can keep compilers and other build tools out of the final runtime image by copying only the needed artifacts into a later stage. This reduces image contents and attack surface, but it does not guarantee shorter builds or remove runtime dependencies.",
-      "ko": "multi-stage build는 필요한 artifact만 이후 stage로 복사하여 compiler와 기타 빌드 도구를 최종 실행 이미지에서 제외할 수 있습니다. 따라서 이미지 내용과 attack surface를 줄일 수 있지만 빌드 시간이 짧아지거나 runtime dependency가 제거된다는 보장은 없습니다."
-    },
-    "ref": "https://docs.docker.com/build/building/multi-stage/"
-  },
-  {
-    "id": "local-163",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "PromQL filtering · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "Which PromQL expression selects http_requests_total samples whose job label is apiserver?",
-      "ko": "PromQL에서 job label이 apiserver인 http_requests_total sample을 선택하는 expression은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "http_requests_total{job=\"apiserver\"}",
-        "http_requests_total WHERE job=\"apiserver\"",
-        "http_requests_total(job=\"apiserver\")",
-        "SELECT http_requests_total FROM job=\"apiserver\""
-      ],
-      "ko": [
-        "http_requests_total{job=\"apiserver\"}",
-        "http_requests_total WHERE job=\"apiserver\"",
-        "http_requests_total(job=\"apiserver\")",
-        "SELECT http_requests_total FROM job=\"apiserver\""
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "PromQL label selectors use braces and label matchers after the metric name. SQL WHERE syntax and function-call syntax are not PromQL selectors.",
-      "ko": "PromQL label selector는 메트릭 name 뒤에 중괄호와 label matcher를 사용합니다. SQL WHERE 문법과 기능-call 문법은 PromQL selector가 아닙니다."
-    },
-    "ref": "https://prometheus.io/docs/prometheus/latest/querying/basics/"
+    "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/"
   },
   {
     "id": "local-164",
@@ -4704,196 +3936,36 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "ref": "https://kubernetes.io/docs/concepts/services-networking/service/"
   },
   {
-    "id": "local-167",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "RBAC · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "Which Kubernetes authorization mode grants permissions through Roles or ClusterRoles and their bindings?",
-      "ko": "Role 또는 ClusterRole과 바인딩을 통해 권한을 부여하는 Kubernetes authorization mode는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "RBAC",
-        "Node authorization only",
-        "Webhook authentication",
-        "ABAC with no policy objects"
-      ],
-      "ko": [
-        "RBAC",
-        "Node authorization 만",
-        "Webhook authentication",
-        "ABAC with no 정책 객체"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "RBAC grants granular permissions to users, groups, and ServiceAccounts through Roles or ClusterRoles and RoleBindings or ClusterRoleBindings. Authentication and other authorization modes are separate concerns.",
-      "ko": "RBAC는 Role 또는 ClusterRole과 RoleBinding 또는 ClusterRoleBinding을 통해 user, group, ServiceAccount에 세밀한 권한을 부여합니다. authentication과 다른 authorization mode는 별도 관심사입니다."
-    },
-    "ref": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/"
-  },
-  {
-    "id": "local-174",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Platform engineering · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "What is a typical responsibility of a platform engineer?",
-      "ko": "Platform engineer의 일반적인 책임은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "Building reusable self-service platforms and delivery automation for development teams",
-        "Implementing business features for one application",
-        "Setting product-market priorities and sales targets",
-        "Performing financial audits of cloud spending"
-      ],
-      "ko": [
-        "개발팀용 셀프서비스 플랫폼과 배포 자동화 구축",
-        "개별 애플리케이션의 비즈니스 기능 구현",
-        "제품의 시장 우선순위와 영업 목표 결정",
-        "클라우드 지출에 대한 재무 감사 수행"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Platform engineers build and automate reusable infrastructure and delivery capabilities that help teams ship software. The role is broader than application coding and does not replace every organizational function.",
-      "ko": "플랫폼 engineer는 개발 팀이 안전하게 software를 제공하도록 self-서비스 플랫폼과 infrastructure automation을 구축합니다. 애플리케이션 기능 전체나 다른 전문 팀의 역할을 모두 대체하지는 않습니다."
-    },
-    "ref": "https://tag-app-delivery.cncf.io/whitepapers/platforms"
-  },
-  {
     "id": "local-175",
     "exam": "kcna",
-    "domain": "Cloud Native Architecture",
+    "domain": "Kubernetes Fundamentals",
     "subtopic": "kubectl describe · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which kubectl command displays detailed information and events for an existing resource?",
-      "ko": "기존 resource의 상세 정보와 event를 표시하는 kubectl command는 무엇입니까?"
+      "en": "Which kubectl subcommand collects information about an existing resource in a Kubernetes cluster?",
+      "ko": "Kubernetes 클러스터에 존재하는 리소스의 정보를 확인하는 kubectl 하위 명령은 무엇입니까?"
     },
     "choices": {
       "en": [
         "kubectl describe",
-        "kubectl get --watch",
-        "kubectl explain only",
-        "kubectl label"
+        "kubectl list",
+        "kubectl expose",
+        "kubectl explain"
       ],
       "ko": [
         "kubectl describe",
-        "kubectl get --watch",
-        "kubectl explain만 사용",
-        "kubectl label"
+        "kubectl list",
+        "kubectl expose",
+        "kubectl explain"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "kubectl describe retrieves detailed information about a named resource and commonly includes events. kubectl get lists resource data, explain documents fields, and label changes metadata.",
-      "ko": "kubectl describe는 지정한 resource의 상세 정보와 일반적으로 event를 보여줍니다. kubectl get은 resource data를 나열하고 explain은 필드를 문서화하며 label은 metadata를 변경합니다."
+      "en": "Describe retrieves an existing object's details and commonly includes associated events. Explain documents API fields rather than the live object's state; expose creates a Service. List is not a built-in kubectl subcommand. Supply the resource type and, when appropriate, its name after describe.",
+      "ko": "describe는 기존 오브젝트의 상세 정보와 일반적으로 관련 이벤트를 보여 줍니다. explain은 실제 오브젝트 상태가 아니라 API 필드를 설명하고 expose는 Service를 생성합니다. list는 kubectl의 내장 하위 명령이 아닙니다. describe 뒤에 리소스 종류와 필요에 따라 이름을 지정합니다."
     },
     "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_describe/"
-  },
-  {
-    "id": "local-176",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Microservices · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which architectural goal is commonly associated with cloud-native microservices?",
-      "ko": "cloud-native microservices와 일반적으로 연관된 architectural goal은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "Independent service evolution with resilience to individual component failure",
-        "One process and one database for every feature with no network calls",
-        "A requirement that every service share one deployment artifact",
-        "Eliminating all operational automation"
-      ],
-      "ko": [
-        "개별 구성 요소 장애에 견디면서 서비스를 독립적으로 발전시키기",
-        "모든 capability를 하나의 tightly coupled 프로세스와 데이터베이스로 구성",
-        "모든 서비스가 하나의 릴리스 산출물를 공유해야 한다는 requirement",
-        "automation을 피하고 서비스를 수동으로 운영"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Microservices split capabilities into independently deployable services and commonly seek resilience so one component failure does not take down the whole application. They add operational complexity and do not require one shared artifact.",
-      "ko": "microservices는 capability를 독립적으로 배포할 수 있는 서비스로 나누고 한 구성 요소 장애가 전체를 중단하지 않도록 복원력를 추구합니다. 대신 운영 복잡성이 커지며 하나의 shared 산출물를 요구하지 않습니다."
-    },
-    "ref": "https://www.cncf.io/blog/2025/03/18/building-scalable-agile-and-secure-apis-with-kubernetes-and-microservices"
-  },
-  {
-    "id": "local-177",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "kubectl create deployment · 자체 연습",
-    "difficulty": "easy",
-    "style": "exam",
-    "q": {
-      "en": "What does kubectl create deployment nginx --image=nginx --replicas=2 request?",
-      "ko": "kubectl create deployment nginx --image=nginx --replicas=2는 무엇을 요청합니까?"
-    },
-    "choices": {
-      "en": [
-        "Create a Deployment using nginx with a desired replica count of 2",
-        "Create two standalone Pods without a Deployment controller",
-        "Update an existing Deployment without changing its replica count",
-        "Create a Deployment and expose it through a new Service"
-      ],
-      "ko": [
-        "nginx를 사용하며 희망 복제 수가 2인 Deployment 생성",
-        "Deployment 컨트롤러 없이 독립적인 Pod 두 개 생성",
-        "복제 수 변경 없이 기존 Deployment 업데이트",
-        "Deployment와 이를 노출하는 새 Service를 함께 생성"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "The command requests a Deployment named nginx whose desired replica count is two and whose Pod template uses the nginx image. It does not request a Service, and the desired count is not an immediate guarantee that two Pods are ready.",
-      "ko": "이 명령은 nginx image를 사용하는 Pod template과 희망 복제 수 2를 가진 nginx Deployment를 요청합니다. Service를 요청하지 않으며 두 Pod가 즉시 Ready가 된다는 보장은 아닙니다."
-    },
-    "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/kubectl_create_deployment/"
-  },
-  {
-    "id": "local-179",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Service mesh scale · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which situation most strongly motivates adopting a service mesh?",
-      "ko": "Service mesh 도입이 가장 필요한 상황은 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "Many services need consistent traffic policies, mTLS, and request-level telemetry",
-        "A batch job needs more temporary disk space",
-        "A team needs a repository for versioned container images",
-        "A stateful application needs volume-backup retention rules"
-      ],
-      "ko": [
-        "여러 서비스에 일관된 트래픽 정책, mTLS, 요청 단위 관측이 필요함",
-        "배치 작업의 임시 디스크 공간을 늘려야 함",
-        "버전별 컨테이너 이미지를 보관할 저장소가 필요함",
-        "상태 저장 애플리케이션의 볼륨 백업 보존 규칙이 필요함"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "A service mesh is most useful when many service-to-service communications need consistent traffic policy, mTLS, and request-level telemetry. It also adds operational overhead, so a simple batch job, image repository, or storage-retention rule alone does not justify it.",
-      "ko": "여러 서비스 간 통신에 일관된 트래픽 정책, mTLS, 요청 단위 관측이 필요할 때 service mesh가 특히 유용합니다. 운영 overhead도 추가하므로 단순한 배치 작업, 이미지 저장소 또는 스토리지 보존 규칙만으로는 도입을 정당화하기 어렵습니다."
-    },
-    "ref": "https://istio.io/latest/about/service-mesh/"
   },
   {
     "id": "local-180",
@@ -4930,45 +4002,45 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
   {
     "id": "local-181",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "PV reclaim policy · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
       "en": "Which PersistentVolume reclaim policy preserves storage for administrator action after claim deletion?",
-      "ko": "claim 삭제 후 관리자가 조치할 수 있도록 스토리지를 보존하는 PersistentVolume reclaim 정책는 무엇입니까?"
+      "ko": "연결된 PVC를 삭제한 뒤 관리자가 수동으로 회수하도록 스토리지를 남기는 PersistentVolume의 회수 정책은 무엇입니까?"
     },
     "choices": {
       "en": [
         "Retain",
         "Delete",
         "Recycle",
-        "WaitForFirstConsumer"
+        "claimRef"
       ],
       "ko": [
         "Retain",
         "Delete",
         "Recycle",
-        "WaitForFirstConsumer"
+        "claimRef"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "Retain preserves the PersistentVolume and underlying storage for manual reclamation after the claim is released. Recycle is deprecated, Delete removes supported backing storage, and WaitForFirstConsumer is a volume-binding mode rather than a reclaim policy.",
-      "ko": "Retain은 claim이 해제된 뒤 관리자가 수동으로 회수할 수 있도록 PersistentVolume과 기반 스토리지를 보존합니다. Recycle은 deprecated이며 Delete는 지원되는 기반 스토리지를 제거하고 WaitForFirstConsumer는 reclaim policy가 아니라 volume binding mode입니다."
+      "en": "Retain allows manual reclamation: after the PVC is deleted, the PV and storage remain released for administrator action rather than automatic reuse. The reclaim policy belongs to the PV, not a PVC field. claimRef records the volume/claim binding, Delete removes supported backing storage, and Recycle is a deprecated scrubbing policy.",
+      "ko": "Retain은 수동 회수를 허용합니다. PVC를 삭제하면 PV와 스토리지는 자동으로 재사용되는 대신 관리자의 조치를 기다리는 해제 상태로 남습니다. 회수 정책은 PVC의 필드가 아니라 PV에 속합니다. claimRef는 볼륨과 클레임의 연결을 나타내고, Delete는 지원되는 기반 스토리지를 제거하며 Recycle은 폐기된 데이터 정리 정책입니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/"
   },
   {
     "id": "local-183",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "Falco · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
       "en": "What does Falco primarily monitor for runtime security?",
-      "ko": "런타임 보안를 위해 Falco는 주로 무엇을 monitor합니까?"
+      "ko": "Falco는 런타임 보안을 위해 주로 무엇을 감시합니까?"
     },
     "choices": {
       "en": [
@@ -4986,8 +4058,8 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     },
     "answer": 0,
     "explain": {
-      "en": "Falco observes runtime system calls and related events and applies rules to detect suspicious or anomalous activity. It is not merely an image registry scanner or resource parser.",
-      "ko": "Falco는 런타임 시스템 call과 관련 이벤트를 관찰하고 규칙로 suspicious 활동를 탐지합니다. 빌드-time 이미지 scan, admission validation, metrics collection은 별도 기능입니다."
+      "en": "Falco observes runtime system calls and related events and applies rules to detect suspicious activity. Image scanning, admission validation, and resource-metric collection are separate functions.",
+      "ko": "Falco는 실행 중인 시스템 호출과 관련 이벤트를 관찰하고 규칙을 적용하여 의심스러운 활동을 탐지합니다. 이미지 스캔, 어드미션 검증, 리소스 메트릭 수집은 서로 다른 기능입니다."
     },
     "ref": "https://falco.org/docs/"
   },
@@ -5031,123 +4103,91 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which hierarchy best describes Kubernetes workload placement?",
-      "ko": "Kubernetes 워크로드 placement hierarchy로 가장 적절한 것은 무엇입니까?"
+      "en": "Which order correctly represents Kubernetes workload placement?",
+      "ko": "Kubernetes 워크로드가 배치되는 구조를 올바르게 나타낸 순서는 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Nodes belong to a cluster; each Pod runs on one node and groups one or more containers",
-        "One Pod's containers are scheduled independently across several nodes",
-        "Every container is assigned its own Kubernetes node",
-        "A Service owns the nodes on which its selected Pods run"
+        "Containers → Pods → Cluster → Nodes",
+        "Nodes → Cluster → Containers → Pods",
+        "Cluster → Nodes → Pods → Containers",
+        "Pods → Cluster → Containers → Nodes"
       ],
       "ko": [
-        "클러스터는 노드로 구성되며 각 Pod는 한 노드에서 하나 이상의 컨테이너를 묶어 실행",
-        "한 Pod의 컨테이너를 여러 노드에 독립적으로 스케줄링",
-        "컨테이너마다 전용 Kubernetes 노드를 할당",
-        "Service가 선택한 Pod를 실행하는 노드들을 소유"
+        "컨테이너 → Pod → 클러스터 → 노드",
+        "노드 → 클러스터 → 컨테이너 → Pod",
+        "클러스터 → 노드 → Pod → 컨테이너",
+        "Pod → 클러스터 → 컨테이너 → 노드"
       ]
     },
-    "answer": 0,
+    "answer": 2,
     "explain": {
-      "en": "Kubernetes workload hierarchy places nodes in a cluster, runs each Pod on one node, and groups one or more containers in a Pod. Containers in one Pod are co-located rather than independently scheduled across nodes.",
-      "ko": "Kubernetes workload hierarchy에서 노드는 클러스터에 속하고 각 Pod는 하나의 노드에서 실행되며 하나 이상의 컨테이너를 묶습니다. 한 Pod의 컨테이너는 노드마다 독립적으로 스케줄링되지 않고 함께 배치됩니다."
+      "en": "A cluster contains nodes; each scheduled Pod runs on one node and groups one or more co-located containers. The order is Cluster → Nodes → Pods → Containers. This is workload placement, not a claim that a Node is the API ownerReference of every Pod.",
+      "ko": "클러스터는 노드로 구성됩니다. 스케줄링된 각 Pod는 한 노드에서 실행되며 함께 배치된 하나 이상의 컨테이너를 묶습니다. 따라서 순서는 클러스터 → 노드 → Pod → 컨테이너입니다. 이는 워크로드 배치 구조이며 모든 Pod의 API ownerReference가 Node라는 뜻은 아닙니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/overview/components/"
   },
   {
     "id": "local-189",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Cloud Native Architecture",
     "subtopic": "Metrics · 자체 연습",
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which observability signal is best suited to plotting resource consumption over time?",
-      "ko": "시간에 따른 리소스 consumption을 plot하는 데 가장 적합한 관측성 signal은 무엇입니까?"
+      "en": "Which observability data stream is most useful for plotting resource consumption and forecasting resource exhaustion?",
+      "ko": "리소스 사용량을 그래프로 나타내고 고갈을 예측하는 데 가장 유용한 관측성 데이터 흐름은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Metrics",
-        "Logs",
+        "stdout",
         "Traces",
-        "Events"
+        "Logs",
+        "Metrics"
       ],
       "ko": [
-        "메트릭",
-        "로그",
+        "stdout",
         "트레이스",
-        "이벤트"
+        "로그",
+        "메트릭"
       ]
     },
-    "answer": 0,
+    "answer": 3,
     "explain": {
-      "en": "Metrics are numeric time-series observations useful for plotting resource usage over time. Logs are event records, traces represent request flows across components, and events record discrete state changes.",
-      "ko": "메트릭은 시간에 따른 리소스 사용량을 그래프로 나타내기 좋은 숫자 시계열 관측값입니다. 로그는 이벤트 기록이고 트레이스는 구성 요소 사이의 요청 흐름을 나타내며 이벤트는 개별 상태 변화를 기록합니다."
+      "en": "Metrics provide numeric time-series observations of usage and capacity, supporting trend analysis and exhaustion forecasts. Logs record discrete events, traces describe request paths, and stdout is an output stream that may carry logs. Metrics support forecasting but do not guarantee an accurate future prediction.",
+      "ko": "메트릭은 사용량과 용량을 숫자 시계열로 제공하므로 추세 분석과 고갈 예측에 적합합니다. 로그는 개별 이벤트를 기록하고 트레이스는 요청 경로를 설명하며 stdout은 로그 등을 전달할 수 있는 출력 스트림입니다. 메트릭은 예측을 지원하지만 미래를 정확히 보장하지는 않습니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/cluster-administration/monitoring/"
   },
   {
-    "id": "local-192",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "Linkerd service mesh · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which capability is associated with Linkerd as a service mesh?",
-      "ko": "서비스 mesh인 Linkerd와 연관된 capability는 무엇입니까?"
-    },
-    "choices": {
-      "en": [
-        "Managing service-to-service traffic, policy, and telemetry without requiring application-code changes",
-        "Replacing the Kubernetes API server and storing all cluster status",
-        "Assigning every Pod to a node as the cluster scheduler",
-        "Building and distributing container images as a registry"
-      ],
-      "ko": [
-        "애플리케이션 code 변경 없이 서비스 간 트래픽, 정책, telemetry를 관리",
-        "Kubernetes API server를 대체하고 모든 클러스터 상태를 저장",
-        "클러스터 scheduler로서 모든 Pod를 노드에 할당",
-        "registry로서 컨테이너 이미지를 빌드하고 배포"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Linkerd is a service mesh that provides service-to-service traffic management, policy enforcement, and telemetry. It operates alongside workload and does not replace the API server, scheduler, or image registry.",
-      "ko": "Linkerd는 서비스 간 트래픽 관리, 정책 enforcement, telemetry를 제공하는 서비스 mesh입니다. 워크로드와 함께 동작하며 API server, scheduler, 이미지 registry를 대체하지 않습니다."
-    },
-    "ref": "https://linkerd.io/2.16/overview/"
-  },
-  {
     "id": "local-193",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "Ephemeral containers · 자체 연습",
-    "difficulty": "medium",
+    "difficulty": "easy",
     "style": "exam",
     "q": {
-      "ko": "ephemeral 컨테이너의 주된 목적은 무엇입니까?",
-      "en": "What is the primary purpose of an ephemeral container?"
+      "en": "What is an ephemeral container in Kubernetes?",
+      "ko": "Kubernetes의 ephemeral 컨테이너는 무엇입니까?"
     },
     "choices": {
       "en": [
-        "A temporary debug container added to an existing Pod",
-        "A new Pod scheduled onto a separate node",
-        "A replacement for the Pod’s regular application container",
-        "A sidecar that remains after the Pod is deleted"
+        "A specialized container defined by running as root for security applications",
+        "A specialized container that runs temporarily in an existing Pod",
+        "A specialized container that extends and enhances the main application container",
+        "A specialized container that runs before application containers"
       ],
       "ko": [
-        "기존 Pod에 임시로 추가하는 디버그 컨테이너",
-        "별도 노드에 스케줄되는 새 Pod",
-        "Pod의 일반 애플리케이션 컨테이너를 대체하는 구성",
-        "Pod 삭제 후에도 남는 sidecar"
+        "보안 애플리케이션을 위해 root로 실행하는 것으로 정의되는 특수 컨테이너",
+        "기존 Pod에서 임시로 실행되는 특수 컨테이너",
+        "주 애플리케이션 컨테이너를 확장·보완하는 특수 컨테이너",
+        "애플리케이션 컨테이너보다 먼저 실행되는 특수 컨테이너"
       ]
     },
-    "answer": 0,
+    "answer": 1,
     "explain": {
-      "ko": "ephemeral 컨테이너는 문제 해결을 위해 기존 Pod에 임시로 추가되며 Pod의 일반 컨테이너를 대체하거나 영구적인 스토리지를 제공하지 않습니다.",
-      "en": "An ephemeral container is added temporarily to an existing Pod for troubleshooting and does not replace the Pod's normal containers or provide persistent storage."
+      "en": "An ephemeral container runs temporarily in an existing Pod, commonly for interactive troubleshooting. Root execution is not its defining property. Enhancing the main container describes a sidecar role, while initialization before application startup describes init-container behavior. An ephemeral container does not replace the regular application container.",
+      "ko": "ephemeral 컨테이너는 기존 Pod에서 임시로 실행되며 주로 대화형 문제 해결에 사용됩니다. root 실행 여부가 정의 조건은 아닙니다. 주 컨테이너를 보완하는 것은 사이드카 역할이고 애플리케이션 시작 전 초기화는 init 컨테이너 동작입니다. ephemeral 컨테이너는 일반 애플리케이션 컨테이너를 대체하지 않습니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/"
   },
@@ -5159,123 +4199,59 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "ko": "cloud-native 애플리케이션을 가장 잘 설명하는 것은 무엇입니까?",
-      "en": "Which statement best describes a cloud-native application?"
+      "en": "Which statement best describes a cloud-native application?",
+      "ko": "클라우드 네이티브 애플리케이션을 가장 잘 설명한 것은 무엇입니까?"
     },
     "choices": {
-      "ko": [
-        "cloud scalability, 복원력, automation, dynamic 서비스를 활용하도록 설계됨",
-        "어떤 cloud VM에서 실행되기만 하면 cloud-native임",
-        "automation과 분산 서비스를 피해야 함",
-        "컨테이너 이미지 형식만으로 정의됨"
-      ],
       "en": [
-        "It is designed to use cloud scalability, resilience, automation, and dynamic services",
-        "It is cloud-native merely because it runs on any cloud VM",
-        "It must avoid automation and distributed services",
-        "It is defined only by its container image format"
+        "A monolithic application that has been containerized and moved to the cloud",
+        "An application designed for scalability and to take advantage of cloud services",
+        "An application designed to run every function in a separate container",
+        "Any application that runs at a cloud provider and uses its services"
+      ],
+      "ko": [
+        "컨테이너화되어 클라우드로 옮겨진 모놀리식 애플리케이션",
+        "확장성을 갖추고 클라우드 서비스를 활용하도록 설계된 애플리케이션",
+        "모든 기능을 별도의 컨테이너에서 실행하도록 설계된 애플리케이션",
+        "클라우드 제공자에서 실행되고 그 서비스를 사용하는 모든 애플리케이션"
       ]
     },
-    "answer": 0,
+    "answer": 1,
     "explain": {
-      "ko": "cloud-native 설계는 elasticity, 복원력, automation, dynamic 관리되는 서비스 같은 cloud capability를 활용하며, 변경 없는 워크로드를 cloud에서 실행하는 것만으로 충분하지 않습니다.",
-      "en": "Cloud-native design uses cloud capabilities such as elasticity, resilience, automation, and dynamic managed services; simply running an unchanged workload on a cloud is not sufficient."
+      "en": "Cloud-native design intentionally uses cloud capabilities to build scalable, resilient and manageable systems. Merely containerizing or relocating an application, or merely using a provider service, is insufficient. Every function need not have a separate container, and a monolith is not automatically excluded. The listed design-oriented description is the best fit, not an exhaustive definition or a public-cloud-only requirement.",
+      "ko": "클라우드 네이티브 설계는 클라우드 기능을 의도적으로 활용해 확장 가능하고 복원력 있으며 관리 가능한 시스템을 만듭니다. 단순한 컨테이너화, 실행 위치 변경, 제공자 서비스 사용만으로는 충분하지 않습니다. 모든 기능이 별도 컨테이너를 가져야 하는 것도 아니며 모놀리식 구조가 자동으로 제외되는 것도 아닙니다. 보기 중 설계 중심 설명이 가장 적합하지만 완전한 정의나 퍼블릭 클라우드 전용 조건은 아닙니다."
     },
     "ref": "https://github.com/cncf/toc/blob/main/DEFINITION.md"
   },
   {
-    "id": "local-195",
-    "exam": "kcna",
-    "domain": "Cloud Native Architecture",
-    "subtopic": "CNCF governance · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "en": "Which approach conflicts with open community governance?",
-      "ko": "어떤 접근 방식이 개방형 커뮤니티 거버넌스에 어긋납니까?"
-    },
-    "choices": {
-      "en": [
-        "Making unilateral private decisions without contributor input",
-        "Open discussion followed by transparent consensus or a vote",
-        "Documented proposals reviewed by maintainers and working groups",
-        "Published decisions with a clear contributor feedback process"
-      ],
-      "ko": [
-        "기여자 의견 없이 비공개적으로 일방적인 결정을 내림",
-        "공개 토론 후 합의 또는 투표를 진행함",
-        "문서화된 제안을 검토함",
-        "피드백 절차를 거쳐 결정을 공개함"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "en": "Making unilateral private decisions without contributor input conflicts with open community governance. Discussion, documented proposals, review, and transparent consensus or voting are compatible governance practices.",
-      "ko": "기여자 의견 없이 비공개적으로 일방적인 결정을 내리는 것은 개방형 커뮤니티 거버넌스에 어긋납니다. 공개 토론, 합의 또는 투표, 문서화된 제안 검토, 피드백을 반영한 결정 공개는 개방형 거버넌스에 부합합니다."
-    },
-    "ref": "https://www.cncf.io/about/who-we-are/"
-  },
-  {
-    "id": "local-196",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Garbage collection · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "ko": "객체가 eligible해지면 Kubernetes garbage collection은 무엇을 제거합니까?",
-      "en": "What does Kubernetes garbage collection remove when objects become eligible?"
-    },
-    "choices": {
-      "en": [
-        "Eligible API objects such as terminated Pods, completed Jobs, and dependents with missing owners",
-        "API objects still referenced by a live owner",
-        "Running Pods that are still part of an active workload",
-        "Container-runtime images and logs on a node"
-      ],
-      "ko": [
-        "종료된 Pod, 완료된 Job, 소유자가 없는 dependent 같은 eligible API 객체",
-        "실행 중인 소유자가 여전히 참조하는 API 객체",
-        "활성 워크로드에 속한 실행 중인 Pod",
-        "노드의 컨테이너-런타임 이미지와 log"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "ko": "Kubernetes garbage collection은 ownership과 lifecycle 규칙에 따라 eligible API 객체와 dependent를 제거합니다. kubelet은 노드-level 컨테이너와 이미지 garbage collection을 별도로 처리합니다.",
-      "en": "Kubernetes garbage collection removes eligible API objects and dependents according to ownership and lifecycle rules. Kubelet separately handles node-level container and image garbage collection."
-    },
-    "ref": "https://kubernetes.io/docs/concepts/architecture/garbage-collection/"
-  },
-  {
     "id": "local-197",
     "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
+    "domain": "Container Orchestration",
     "subtopic": "Node eviction · 자체 연습",
-    "difficulty": "medium",
+    "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "For an ordinary non-DaemonSet Pod, what default NoExecute toleration period applies after a node is NotReady or unreachable?",
-      "ko": "일반적인 non-DaemonSet Pod에서 노드가 NotReady 또는 unreachable 상태가 된 뒤 기본 NoExecute toleration 기간은 얼마입니까?"
+      "en": "What is the commonly documented default eviction wait when a node's Ready condition is Unknown or False?",
+      "ko": "노드의 Ready 조건이 Unknown 또는 False일 때 일반적으로 문서화된 기본 축출 대기 시간은 얼마입니까?"
     },
     "choices": {
       "en": [
-        "300 seconds",
-        "30 seconds",
-        "0 seconds",
-        "Indefinitely"
+        "Thirty seconds",
+        "Thirty minutes",
+        "One minute",
+        "Five minutes"
       ],
       "ko": [
-        "300초",
         "30초",
-        "0초",
-        "무기한"
+        "30분",
+        "1분",
+        "5분"
       ]
     },
-    "answer": 0,
+    "answer": 3,
     "explain": {
-      "en": "The standard default NoExecute tolerations for not-ready and unreachable taints are 300 seconds for an ordinary Pod. This is not an exact timer that starts at the first missed heartbeat, and not every modern taint-eviction path should be attributed to the node controller.",
-      "ko": "일반적인 Pod에 적용되는 not-ready 및 unreachable taint의 표준 기본 NoExecute toleration은 300초입니다. 첫 heartbeat 누락 순간부터 정확히 시작하는 타이머라는 뜻은 아니며, 모든 최신 taint 기반 eviction 경로를 node controller의 동작으로 설명해서도 안 됩니다."
+      "en": "Five minutes is the conventional default period. For ordinary Pods, the modern taint-based path represents this with default 300-second NoExecute tolerations for not-ready and unreachable taints. It is not a universal exact eviction deadline: DaemonSet tolerations, custom tolerations, rate limits and disabled controllers can change actual behavior. Do not confuse this with the first missed-heartbeat instant or attribute every modern eviction to the node controller.",
+      "ko": "일반적인 기본 기간은 5분입니다. 현대의 taint 기반 경로에서는 일반 Pod의 not-ready·unreachable taint에 대한 기본 300초 NoExecute toleration으로 표현됩니다. 이것은 모든 Pod에 적용되는 정확한 축출 마감 시각이 아닙니다. DaemonSet의 toleration, 사용자 설정, 속도 제한, 컨트롤러 비활성화 등에 따라 실제 동작은 달라질 수 있습니다. 첫 heartbeat 누락 시점과 혼동하거나 모든 현대적 축출을 노드 컨트롤러에 귀속해서는 안 됩니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/architecture/nodes/"
   },
@@ -5310,38 +4286,6 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
       "en": "VPA adjusts resource requests and limits for Pods, while HPA changes replica count and Cluster Autoscaler changes node count."
     },
     "ref": "https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler"
-  },
-  {
-    "id": "local-199",
-    "exam": "kcna",
-    "domain": "Kubernetes Fundamentals",
-    "subtopic": "Privilege escalation · 자체 연습",
-    "difficulty": "medium",
-    "style": "exam",
-    "q": {
-      "ko": "프로세스가 parent보다 더 많은 privilege를 얻지 못하게 하는 Pod 보안 setting은 무엇입니까?",
-      "en": "Which Pod security setting prevents a process from gaining more privileges than its parent?"
-    },
-    "choices": {
-      "ko": [
-        "allowPrivilegeEscalation: false",
-        "hostNetwork: true",
-        "privileged: true",
-        "serviceAccountName: 기본"
-      ],
-      "en": [
-        "allowPrivilegeEscalation: false",
-        "hostNetwork: true",
-        "privileged: true",
-        "serviceAccountName: default"
-      ]
-    },
-    "answer": 0,
-    "explain": {
-      "ko": "allowPrivilegeEscalation을 false로 설정하면 no_new_privs 동작이 활성화되어 프로세스가 parent보다 더 많은 privilege를 얻지 못합니다. 호스트 networking과 식별자 setting과는 다릅니다.",
-      "en": "Setting allowPrivilegeEscalation to false enables no_new_privs behavior so a process cannot gain more privilege than its parent. It is distinct from host networking and identity settings."
-    },
-    "ref": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
   },
   {
     "id": "local-200",
@@ -6503,29 +5447,29 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "A team leaves a public object store readable by everyone. Which conclusion best fits shared responsibility?",
-      "ko": "팀이 공개된 object store를 모든 사람이 읽을 수 있게 두었습니다. 공유 책임 모델에 맞는 결론은 무엇입니까?"
+      "en": "A team intends to keep confidential data in managed cloud object storage private, but accidentally allows public reads. Which shared-responsibility conclusion explains the exposure?",
+      "ko": "팀은 관리형 클라우드 객체 스토리지의 기밀 데이터를 비공개로 유지하려 했지만 실수로 공개 읽기를 허용했습니다. 이 노출을 설명하는 공유 책임 모델의 결론은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "The customer owns the object-store access policy",
-        "The provider secures the service but does not choose each customer policy",
-        "Kubernetes configuration does not remove cloud storage exposure",
+        "The provider is responsible for configuring every customer's data-access policy",
+        "The provider's at-rest encryption keeps data private even when public reads are allowed",
+        "A Kubernetes NetworkPolicy automatically blocks outside users from the public cloud-storage endpoint",
         "The customer misconfigured its data access; the provider's physical security does not make the object private"
       ],
       "ko": [
-        "customer가 object-store access policy를 책임짐",
-        "provider는 service를 보호하지만 각 customer policy를 선택하지 않음",
-        "Kubernetes configuration이 cloud storage 노출을 제거하지 않음",
+        "제공자가 모든 고객의 데이터 접근 정책을 구성할 책임이 있다",
+        "공개 읽기를 허용해도 제공자의 저장 데이터 암호화가 데이터를 비공개로 유지한다",
+        "Kubernetes NetworkPolicy가 외부 사용자의 공개 클라우드 스토리지 엔드포인트 접근을 자동으로 막는다",
         "고객이 data access를 잘못 구성한 것이며 provider의 물리적 보안이 object를 비공개로 만들지는 않습니다"
       ]
     },
     "answer": 3,
     "explain": {
-      "en": "The customer controlled the object-store permission and left it public. A provider's facility security does not override customer access settings.",
-      "ko": "고객이 object-store 권한을 공개로 설정했기 때문에 누구나 object를 읽을 수 있었습니다. provider의 물리적 시설 보안은 고객의 access 설정을 대신하지 않습니다."
+      "en": "The customer controls data-access permissions in managed object storage; the provider secures the underlying infrastructure. The accidental public permission violates the team's privacy requirement. At-rest encryption does not revoke public read authorization, and a Kubernetes NetworkPolicy does not govern outside clients accessing the cloud-storage service.",
+      "ko": "관리형 객체 스토리지에서 고객은 데이터 접근 권한을 관리하고 제공자는 기반 인프라를 보호합니다. 실수로 허용한 공개 읽기는 팀의 비공개 요구를 위반합니다. 저장 데이터 암호화가 공개 읽기 권한을 취소하지 않으며 Kubernetes NetworkPolicy가 클라우드 스토리지 서비스에 접근하는 외부 클라이언트를 통제하지도 않습니다."
     },
-    "ref": "https://kubernetes.io/docs/concepts/security/overview/"
+    "ref": "https://aws.amazon.com/compliance/shared-responsibility-model/"
   },
   {
     "id": "local-241",
@@ -7431,29 +6375,29 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "Which component reconciles desired resource state and creates or updates dependent objects?",
-      "ko": "desired resource state를 조정하고 dependent object를 생성하거나 update하는 component는 무엇입니까?"
+      "en": "Which control-plane component hosts built-in controllers that reconcile API objects, such as creating Pods for a ReplicaSet?",
+      "ko": "ReplicaSet을 위한 Pod 생성처럼 API 객체의 원하는 상태를 조정하는 내장 컨트롤러를 실행하는 제어 플레인 구성 요소는 무엇입니까?"
     },
     "choices": {
       "en": [
-        "kube-apiserver validates and persists requests",
-        "kube-scheduler",
-        "kubelet realizes Pod state on its assigned node",
-        "etcd stores state but does not reconcile desired resources"
+        "kube-apiserver",
+        "kube-controller-manager",
+        "kubelet",
+        "etcd"
       ],
       "ko": [
-        "kube-apiserver는 request를 validate하고 persist함",
-        "kube-scheduler",
-        "kubelet은 assigned node에서 Pod state를 실현함",
-        "etcd는 state를 저장하지만 desired resource를 reconcile하지 않음"
+        "kube-apiserver",
+        "kube-controller-manager",
+        "kubelet",
+        "etcd"
       ]
     },
     "answer": 1,
     "explain": {
-      "en": "The scheduler selects a suitable node using resource and placement constraints; it does not reconcile objects, run containers, or store cluster state.",
-      "ko": "scheduler는 resource와 placement constraint를 바탕으로 적합한 node를 선택합니다. object reconciliation, container 실행과 cluster state 저장은 scheduler의 역할이 아닙니다."
+      "en": "kube-controller-manager runs built-in control loops that reconcile API resource state. A ReplicaSet controller requests Pod creation through the API server; kubelet runs assigned Pod containers, and etcd stores state. kube-scheduler selects a node for an unscheduled Pod rather than reconciling a ReplicaSet's replica count.",
+      "ko": "kube-controller-manager는 API 리소스의 원하는 상태를 조정하는 내장 제어 루프를 실행합니다. ReplicaSet 컨트롤러는 API 서버를 통해 Pod 생성을 요청하고, kubelet은 배정된 Pod의 컨테이너를 실행하며, etcd는 상태를 저장합니다. kube-scheduler는 노드가 배정되지 않은 Pod의 실행 노드를 선택할 뿐 ReplicaSet의 복제본 수를 조정하지 않습니다."
     },
-    "ref": "https://kubernetes.io/docs/concepts/security/"
+    "ref": "https://kubernetes.io/docs/concepts/architecture/controller/"
   },
   {
     "id": "local-270",
@@ -9063,27 +8007,27 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "medium",
     "style": "exam",
     "q": {
-      "en": "A user can read Pods but cannot create them despite two Roles. What should the reviewer check first?",
-      "ko": "user가 Pod를 read할 수 있지만 두 Role이 있어도 create할 수 없습니다. reviewer가 먼저 확인할 것은 무엇입니까?"
+      "en": "A user's two RoleBindings in `team-a` correctly name the user and reference Roles for core-API `pods`. RBAC allows `get` and `list` but denies `create`. Which rule condition explains this?",
+      "ko": "`team-a`의 두 RoleBinding은 사용자를 올바른 주체로 지정하고 코어 API 그룹의 `pods`에 대한 Role을 참조합니다. RBAC는 `get`과 `list`를 허용하지만 `create`는 거부합니다. 이를 설명하는 규칙 조건은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "Whether any binding actually grants create on Pods in the requested namespace and API group",
-        "Whether a Role contains an explicit deny",
-        "Whether the RoleBinding names the intended subject",
-        "Whether the Role grants get/list but omits create"
+        "Neither bound Role grants the `create` verb for `pods`",
+        "One Role contains an explicit deny rule",
+        "Both RoleBindings name a different user",
+        "The Role evaluated later cancels the earlier Role's permissions"
       ],
       "ko": [
-        "요청한 namespace와 API group에서 어떤 binding도 Pod create를 grant하는지",
-        "Role에 explicit deny가 있는지",
-        "RoleBinding이 의도한 subject를 지정하는지",
-        "Role이 get/list만 grant하고 create를 omit하는지"
+        "연결된 어느 Role도 `pods`에 대한 `create` 동작을 허용하지 않음",
+        "한 Role에 명시적 거부 규칙이 있음",
+        "두 RoleBinding의 주체가 다른 사용자로 설정됨",
+        "나중에 평가한 Role이 앞선 Role의 허용 권한을 취소함"
       ]
     },
     "answer": 0,
     "explain": {
-      "en": "RBAC permissions are the union of grants; a missing create verb or wrong resource group explains denial, not an explicit deny.",
-      "ko": "RBAC 권한은 grant의 union이며 create verb 누락 또는 잘못된 resource group이 denial의 원인이지 explicit deny가 아닙니다."
+      "en": "RBAC permissions are the union of grants from the relevant bindings. The subject, namespace, and resource group are already correct here; neither Role grants `create`. Granting `get` or `list` does not imply permission to create Pods. RBAC has no explicit deny rules, and one Role does not cancel another Role's grants.",
+      "ko": "RBAC 권한은 관련 바인딩이 부여한 허용 권한의 합집합입니다. 이 사례에서는 주체·네임스페이스·리소스 그룹이 이미 올바르지만, 어느 Role도 `create`를 허용하지 않습니다. `get`이나 `list` 권한이 있다고 Pod 생성 권한까지 생기는 것은 아닙니다. RBAC에는 명시적 거부 규칙이 없으며 한 Role이 다른 Role의 허용 권한을 취소하지도 않습니다."
     },
     "ref": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/"
   },
@@ -11208,28 +10152,28 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "style": "exam",
     "q": {
       "en": "Why does mTLS not replace application authorization?",
-      "ko": "mTLS가 application authorization을 대체하지 않는 이유는 무엇입니까?"
+      "ko": "mTLS가 애플리케이션 인가를 대체할 수 없는 이유는 무엇입니까?"
     },
     "choices": {
       "en": [
         "It identifies transport peers but does not decide which business operation a peer may perform",
-        "It provides encryption and peer authentication but not method-level authorization",
+        "It cannot authenticate service identities and therefore provides encryption only",
         "It replaces the need for service authorization policy",
         "It grants every authenticated peer the same business role"
       ],
       "ko": [
-        "transport peer를 식별하지만 어떤 business operation을 수행할지는 결정하지 않음",
-        "encryption과 peer authentication은 제공하지만 method-level authorization은 제공하지 않음",
-        "service authorization policy가 필요 없어짐",
-        "모든 authenticated peer에 같은 business role을 부여함"
+        "통신 상대를 식별하지만 상대가 수행할 수 있는 업무 동작은 결정하지 않음",
+        "서비스 신원을 인증할 수 없어 암호화만 제공함",
+        "서비스 인가 정책이 불필요해짐",
+        "인증된 모든 통신 상대에게 같은 업무 역할을 부여함"
       ]
     },
     "answer": 0,
     "explain": {
       "en": "mTLS authenticates the transport peers and encrypts their connection, but it does not know whether that peer may read or mutate a particular business object. Application authorization must make that decision.",
-      "ko": "mTLS는 transport peer를 authentication하고 connection을 encryption하지만 해당 peer가 특정 business object를 read·mutate할 수 있는지는 결정하지 않습니다. 그 판단은 application authorization이 해야 합니다."
+      "ko": "mTLS는 통신 상대의 신원을 인증하고 연결을 암호화하지만, 상대가 특정 업무 객체를 읽거나 변경할 권한이 있는지는 결정하지 않습니다. 그 판단은 애플리케이션 인가 또는 별도의 서비스 인가 정책이 해야 합니다."
     },
-    "ref": "https://kubernetes.io/docs/concepts/cluster-administration/addons/"
+    "ref": "https://istio.io/latest/docs/concepts/security/"
   },
   {
     "id": "local-388",
@@ -11623,29 +10567,29 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
     "difficulty": "easy",
     "style": "exam",
     "q": {
-      "en": "What is the security benefit of a private image repository?",
-      "ko": "비공개 image repository의 보안 이점은 무엇입니까?"
+      "en": "Which benefit does a private container-image repository's access-control policy provide?",
+      "ko": "비공개 컨테이너 이미지 저장소의 접근 제어 정책이 제공하는 이점은 무엇입니까?"
     },
     "choices": {
       "en": [
-        "It restricts access but does not prove artifact safety",
-        "It restricts who can read or write artifacts and supports auditability",
-        "It does not remove the need for signatures",
-        "Tag immutability requires an explicit registry setting"
+        "It proves that every stored image is free of vulnerabilities",
+        "It limits which identities may pull or push images in the repository",
+        "It replaces Kubernetes RBAC checks for Pods using those images",
+        "It makes all image tags immutable without a separate policy"
       ],
       "ko": [
-        "access를 제한하지만 artifact safety를 증명하지 않음",
-        "artifact를 read 또는 write할 주체를 제한하고 auditability를 지원함",
-        "signature 필요성을 제거하지 않음",
-        "tag immutability에는 명시적 registry setting이 필요함"
+        "저장된 모든 이미지에 취약점이 없음을 증명함",
+        "저장소에서 이미지를 내려받거나 업로드할 수 있는 주체를 제한함",
+        "해당 이미지를 사용하는 Pod의 Kubernetes RBAC 검사를 대체함",
+        "별도 정책 없이 모든 이미지 태그를 변경 불가능하게 만듦"
       ]
     },
     "answer": 1,
     "explain": {
-      "en": "Repository permissions determine which identities may read or write artifacts and leave an audit trail of those actions. They do not prove artifact safety or eliminate signature checks, and immutability needs explicit registry policy.",
-      "ko": "repository permission은 어떤 identity가 artifact를 read·write할 수 있는지 결정하고 그 action의 audit trail을 남깁니다. 이것만으로 artifact 안전성이 증명되거나 signature check가 불필요해지지 않으며 immutability에는 별도 registry policy가 필요합니다."
+      "en": "Registry access control authorizes repository operations such as pulling and pushing images for selected identities. It does not verify image safety, replace Kubernetes RBAC, or imply immutable tags. Vulnerability scanning, signature verification, and immutable-tag policies address different properties.",
+      "ko": "레지스트리 접근 제어는 허용된 주체에게 이미지 내려받기·업로드 같은 저장소 작업 권한을 부여합니다. 이미지의 안전성을 검증하거나 Kubernetes RBAC를 대체하거나 태그 변경을 자동으로 금지하지는 않습니다. 취약점 검사, 서명 검증, 태그 변경 금지 정책은 각각 다른 속성을 다룹니다."
     },
-    "ref": "https://kubernetes.io/docs/concepts/containers/images/"
+    "ref": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policies.html"
   },
   {
     "id": "local-401",
@@ -12446,5 +11390,1989 @@ window.QUIZ_BANKS=window.QUIZ_BANKS||{};window.QUIZ_BANKS.local=[
       "ko": "actionable output은 workload owner가 Pod 보안 finding을 재현하고 manifest를 수정하며 audit context를 보존하게 합니다."
     },
     "ref": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+  },
+  {
+    "id": "local-486",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Selectorless Service endpoints · 자체 연습",
+    "difficulty": "medium",
+    "style": "exam",
+    "q": {
+      "en": "Which Service configuration needs separately supplied backend endpoint mappings rather than Kubernetes automatically deriving them from matching Pods?",
+      "ko": "다음 중 Kubernetes가 일치하는 Pod에서 백엔드 엔드포인트를 자동 생성하지 않아, 엔드포인트 매핑을 별도로 제공해야 하는 Service 구성은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "A ClusterIP Service without a selector",
+        "A LoadBalancer Service with a matching Pod selector",
+        "A NodePort Service with a matching Pod selector",
+        "A ClusterIP Service with a matching Pod selector"
+      ],
+      "ko": [
+        "selector가 없는 ClusterIP Service",
+        "일치하는 Pod selector를 지정한 LoadBalancer Service",
+        "일치하는 Pod selector를 지정한 NodePort Service",
+        "일치하는 Pod selector를 지정한 ClusterIP Service"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "For a selectorless ClusterIP Service, Kubernetes cannot discover matching Pods or automatically create its EndpointSlices. An operator or another controller must supply the backend mappings. The other listed Services have Pod selectors, so the endpoint controller can derive their backends. Current Kubernetes uses EndpointSlice; the older Endpoints API is deprecated. ExternalName is a separate DNS-alias case, not the selectorless ClusterIP configuration in this question.",
+      "ko": "selector가 없는 ClusterIP Service에서는 Kubernetes가 일치하는 Pod를 찾거나 EndpointSlice를 자동 생성할 수 없습니다. 운영자 또는 별도 컨트롤러가 백엔드 매핑을 제공해야 합니다. 나머지 보기에는 Pod selector가 있으므로 엔드포인트 컨트롤러가 백엔드를 찾을 수 있습니다. 현재 Kubernetes는 EndpointSlice를 사용하며, 이전 Endpoints API는 deprecated 상태입니다. ExternalName은 별도의 DNS 별칭 방식이며, 이 문항의 selector 없는 ClusterIP 구성과 다릅니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors"
+  },
+  {
+    "id": "local-488",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Linkerd service mesh · 자체 연습",
+    "difficulty": "medium",
+    "style": "exam",
+    "q": {
+      "en": "An operator wants transparent service-to-service traffic control, access policy, and telemetry without modifying application code. Which listed project is the lightweight service mesh for this job?",
+      "ko": "운영자가 애플리케이션 코드를 수정하지 않고 서비스 간 트래픽 제어, 접근 정책, 텔레메트리를 적용하려고 합니다. 이 목적에 맞는 경량 서비스 메시 프로젝트는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Linkerd",
+        "NetworkPolicy",
+        "kube-proxy",
+        "NGINX"
+      ],
+      "ko": [
+        "Linkerd",
+        "NetworkPolicy",
+        "kube-proxy",
+        "NGINX"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "Linkerd is a Kubernetes service mesh whose transparent lightweight proxies provide observability, reliability, and security without application-code changes. NetworkPolicy describes network access rules; kube-proxy implements Service forwarding; a generic NGINX reverse proxy is not, by itself, the transparent service mesh described here.",
+      "ko": "Linkerd는 경량 투명 프록시로 애플리케이션 코드 변경 없이 관측성, 신뢰성, 보안을 제공하는 Kubernetes 서비스 메시입니다. NetworkPolicy는 네트워크 접근 규칙을 정의하고 kube-proxy는 Service 전달을 구현합니다. 일반적인 NGINX 리버스 프록시만으로는 이 문항에서 요구하는 투명 서비스 메시가 구성되지 않습니다."
+    },
+    "ref": "https://linkerd.io/docs/overview/"
+  },
+  {
+    "id": "local-493",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Incident management roles · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which role usually owns the design, rehearsal, and operation of a service's incident-management process?",
+      "ko": "서비스의 인시던트 관리 절차를 설계하고 훈련하며 운영하는 일을 일반적으로 맡는 역할은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Site Reliability Engineers",
+        "Project Managers",
+        "Application Developers",
+        "Quality Engineers"
+      ],
+      "ko": [
+        "사이트 신뢰성 엔지니어(SRE)",
+        "프로젝트 관리자",
+        "애플리케이션 개발자",
+        "품질 엔지니어"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "SRE work commonly includes emergency response, on-call preparation, and rehearsing operational incident procedures. Project managers coordinate project delivery, developers implement application changes, and quality engineers focus on testing; all may participate in an incident, but SRE is the usual reliability-focused role among these choices. Actual ownership depends on the organization rather than being an exclusive authority of every SRE team.",
+      "ko": "SRE 업무에는 일반적으로 긴급 대응, 온콜 준비, 운영 인시던트 절차 훈련이 포함됩니다. 프로젝트 관리자는 프로젝트 수행을 조정하고, 개발자는 애플리케이션 변경을 구현하며, 품질 엔지니어는 테스트에 집중합니다. 모두 인시던트에 참여할 수 있지만, 보기 중 신뢰성 운영을 중심으로 이 절차를 맡는 일반적인 역할은 SRE입니다. 실제 담당 팀은 조직에 따라 달라지며 SRE만 수행할 수 있다는 뜻은 아닙니다."
+    },
+    "ref": "https://sre.google/sre-book/managing-incidents/"
+  },
+  {
+    "id": "local-495",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "kubectl field documentation · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "You need the schema documentation for a Deployment's spec.replicas field, rather than the current replica value of a particular Deployment. Which command performs that lookup?",
+      "ko": "특정 Deployment의 현재 복제본 수가 아니라 spec.replicas 필드의 스키마 문서를 확인하려고 합니다. 어떤 명령을 사용해야 합니까?"
+    },
+    "choices": {
+      "en": [
+        "kubectl explain deployment.spec.replicas",
+        "kubectl get deployment.spec.replicas",
+        "kubectl describe deployment.spec.replicas",
+        "kubectl explain deployment --spec.replicas"
+      ],
+      "ko": [
+        "kubectl explain deployment.spec.replicas",
+        "kubectl get deployment.spec.replicas",
+        "kubectl describe deployment.spec.replicas",
+        "kubectl explain deployment --spec.replicas"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "kubectl explain accepts TYPE.FIELDNAME[.FIELDNAME] and retrieves field documentation from the server's OpenAPI schema. deployment.spec.replicas identifies the nested replicas field. get and describe inspect live resource instances rather than using this schema-field path; --spec.replicas is not an explain flag.",
+      "ko": "kubectl explain은 TYPE.FIELDNAME[.FIELDNAME] 형식을 받아 서버의 OpenAPI 스키마에서 필드 문서를 조회합니다. deployment.spec.replicas는 중첩된 replicas 필드를 지정합니다. get과 describe는 이 스키마 필드 경로가 아니라 실제 리소스 인스턴스를 조회하며, --spec.replicas는 explain의 옵션이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_explain/"
+  },
+  {
+    "id": "local-500",
+    "exam": "kcna",
+    "domain": "Cloud Native Application Delivery",
+    "subtopic": "Executing commands in a Pod · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Using the Kubernetes API, which command starts a new command inside a container of an existing running Pod?",
+      "ko": "Kubernetes API를 통해 이미 실행 중인 Pod의 컨테이너 안에서 새 명령을 실행하려면 어떤 명령을 사용해야 합니까?"
+    },
+    "choices": {
+      "en": [
+        "kubectl exec POD -- COMMAND",
+        "docker exec CONTAINER COMMAND",
+        "kubectl run POD -- COMMAND",
+        "kubectl attach -i POD"
+      ],
+      "ko": [
+        "kubectl exec POD -- COMMAND",
+        "docker exec CONTAINER COMMAND",
+        "kubectl run POD -- COMMAND",
+        "kubectl attach -i POD"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "kubectl exec invokes a command in an existing Pod container, with -- separating kubectl arguments from the container command. docker exec targets a Docker Engine container, not a Pod through the Kubernetes API. kubectl run creates a Pod; attach connects to an existing container process's streams rather than starting a new command.",
+      "ko": "kubectl exec는 기존 Pod 컨테이너에서 명령을 실행하며, --는 kubectl 인수와 컨테이너 명령을 구분합니다. docker exec는 Kubernetes API의 Pod가 아니라 Docker Engine 컨테이너를 대상으로 합니다. kubectl run은 Pod를 생성하고, attach는 새 명령을 시작하는 대신 기존 컨테이너 프로세스의 입출력 스트림에 연결합니다."
+    },
+    "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_exec/"
+  },
+  {
+    "id": "local-501",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Creating a headless Service · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which field setting creates a headless Kubernetes Service without allocating a virtual cluster IP?",
+      "ko": "가상 클러스터 IP를 할당하지 않는 헤드리스 Kubernetes Service를 만들려면 어떤 필드를 설정해야 합니까?"
+    },
+    "choices": {
+      "en": [
+        "spec.clusterIP: None",
+        "spec.ClusterIP: headless",
+        "spec.ClusterIP: 0.0.0.0",
+        "spec.ClusterIP: localhost"
+      ],
+      "ko": [
+        "spec.clusterIP: None",
+        "spec.ClusterIP: headless",
+        "spec.ClusterIP: 0.0.0.0",
+        "spec.ClusterIP: localhost"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "For a Service of type ClusterIP, explicitly set spec.clusterIP to the string None. Leaving the field unset allows normal cluster-IP allocation. Field names are case-sensitive: clusterIP is correct, whereas ClusterIP is not. headless, 0.0.0.0, and localhost are not the special headless value.",
+      "ko": "ClusterIP 유형의 Service에서 spec.clusterIP를 문자열 None으로 명시적으로 설정합니다. 필드를 생략하면 일반 클러스터 IP가 할당됩니다. 필드 이름은 대소문자를 구분하므로 clusterIP가 올바르며 ClusterIP는 올바르지 않습니다. headless, 0.0.0.0, localhost는 헤드리스용 특수 값이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/service/#headless-services"
+  },
+  {
+    "id": "local-507",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Smallest deployable unit · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which Kubernetes object is the smallest deployable computing unit for one or more containers?",
+      "ko": "하나 이상의 컨테이너를 실행하기 위한 Kubernetes의 가장 작은 배포 가능한 컴퓨팅 단위는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Pod",
+        "StatefulSet",
+        "Deployment",
+        "Container"
+      ],
+      "ko": [
+        "Pod",
+        "StatefulSet",
+        "Deployment",
+        "Container"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "A Pod is Kubernetes' smallest deployable unit and groups one or more co-located containers. Deployment and StatefulSet are higher-level workload resources that manage Pods. A container is executed by the runtime inside a Pod; it is not the independently scheduled Kubernetes deployment unit.",
+      "ko": "Pod는 Kubernetes의 가장 작은 배포 단위이며 함께 배치되는 하나 이상의 컨테이너를 묶습니다. Deployment와 StatefulSet은 Pod를 관리하는 상위 워크로드 리소스입니다. 컨테이너는 Pod 안에서 런타임이 실행하는 구성 요소이며, Kubernetes가 독립적으로 스케줄링하는 배포 단위는 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/pods/"
+  },
+  {
+    "id": "local-511",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Container-runtime identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which container runtime's official project description specifically emphasizes simplicity, robustness, and portability?",
+      "ko": "공식 프로젝트 소개에서 단순성·견고함·이식성을 강조하는 컨테이너 런타임은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "containerd",
+        "cri-o",
+        "lxd",
+        "kata-runtime"
+      ],
+      "ko": [
+        "containerd",
+        "cri-o",
+        "lxd",
+        "kata-runtime"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "containerd's official site uses those three qualities to describe its industry-standard container runtime. It manages the host's container lifecycle, including image transfer/storage and execution. This question identifies the documented project description; it does not claim that the other runtimes lack simplicity, robustness, or portability.",
+      "ko": "containerd 공식 사이트는 산업 표준 컨테이너 런타임을 소개하면서 이 세 가지 특성을 명시합니다. containerd는 이미지 전송·저장과 실행 등을 포함한 호스트의 컨테이너 수명주기를 관리합니다. 이 문항은 문서에 있는 프로젝트 소개의 대상을 찾는 것이며, 다른 런타임에 단순성·견고함·이식성이 없다고 주장하는 것은 아닙니다."
+    },
+    "ref": "https://containerd.io/"
+  },
+  {
+    "id": "local-514",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Serverless computing model · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which description best captures the serverless computing model?",
+      "ko": "서버리스 컴퓨팅 모델을 가장 잘 설명하는 것은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Providing backend services on demand, with server provisioning managed by the platform",
+        "Providing services for AI and ML operating systems",
+        "Providing services for quantum-computing operating systems",
+        "Providing services for cloud-computing operating systems"
+      ],
+      "ko": [
+        "플랫폼이 서버 준비를 관리하면서 필요에 따라 백엔드 서비스를 제공함",
+        "AI·ML 운영체제를 위한 서비스를 제공함",
+        "양자 컴퓨팅 운영체제를 위한 서비스를 제공함",
+        "클라우드 컴퓨팅 운영체제를 위한 서비스를 제공함"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "Serverless abstracts server provisioning and capacity management away from application developers and provides execution or backend services on demand. It is an operating and consumption model, not a definition based on a special AI/ML, quantum, or cloud operating system. Servers still exist, and developers remain responsible for application code and configuration.",
+      "ko": "서버리스는 서버 준비와 용량 관리를 애플리케이션 개발자로부터 분리하고 필요에 따라 실행 또는 백엔드 서비스를 제공합니다. 특정 AI·ML, 양자, 클라우드 운영체제로 정의되는 것이 아니라 운영·사용 모델을 나타냅니다. 서버가 실제로 없어지는 것은 아니며 개발자는 여전히 애플리케이션 코드와 설정에 책임을 집니다."
+    },
+    "ref": "https://glossary.cncf.io/serverless/"
+  },
+  {
+    "id": "local-516",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Open container standards · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which initiative develops open industry specifications for container formats and runtimes?",
+      "ko": "컨테이너 포맷과 런타임의 개방형 산업 사양을 개발하는 이니셔티브는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Open Container Initiative (OCI)",
+        "Linux Foundation Certification Group (LFCG)",
+        "Container Network Interface (CNI)",
+        "Container Runtime Interface (CRI)"
+      ],
+      "ko": [
+        "Open Container Initiative(OCI)",
+        "Linux Foundation Certification Group(LFCG)",
+        "Container Network Interface(CNI)",
+        "Container Runtime Interface(CRI)"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "OCI develops the runtime, image, and distribution specifications for interoperable containers. It was formed under the Linux Foundation; it should not be described as a CNCF subproject. CNI concerns container networking and CRI concerns kubelet/runtime integration, while the certification-group alternative is not the initiative responsible for these specifications.",
+      "ko": "OCI는 컨테이너 상호 운용성을 위한 런타임·이미지·배포 사양을 개발합니다. Linux Foundation 아래에서 설립되었으므로 CNCF 하위 프로젝트라고 설명해서는 안 됩니다. CNI는 컨테이너 네트워킹, CRI는 kubelet·런타임 연동을 다루며 자격인증 그룹을 가리키는 보기는 이 사양들의 개발 주체가 아닙니다."
+    },
+    "ref": "https://opencontainers.org/about/overview/"
+  },
+  {
+    "id": "local-519",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Service abstraction · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which Kubernetes abstraction groups application backends, usually Pods, and defines how clients can access them over the network?",
+      "ko": "일반적으로 Pod인 애플리케이션 백엔드를 논리적으로 묶고 클라이언트가 네트워크로 접근하는 방법을 정의하는 Kubernetes 추상화는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Service",
+        "Selector",
+        "Controller",
+        "Job"
+      ],
+      "ko": [
+        "Service",
+        "Selector",
+        "Controller",
+        "Job"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "A Service exposes a logical set of backend endpoints and decouples clients from changing Pod addresses. A label selector commonly identifies matching Pods, but selectorless Services also exist. A selector is a matching rule, a controller reconciles state, and a Job manages finite tasks; none is the Service network-access abstraction.",
+      "ko": "Service는 논리적 백엔드 엔드포인트 집합을 노출하여 클라이언트가 변하는 Pod 주소에 직접 의존하지 않도록 합니다. 보통 레이블 셀렉터로 Pod를 찾지만 셀렉터 없는 Service도 존재합니다. Selector는 일치 규칙, Controller는 상태 조정 구성 요소, Job은 유한 작업을 관리하는 리소스이며 Service의 네트워크 접근 추상화와는 다릅니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/service/"
+  },
+  {
+    "id": "local-522",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Pod persistent-storage reference · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "When using storage backed by a PersistentVolume, which resource does a Pod reference in its volume definition?",
+      "ko": "PersistentVolume으로 제공되는 저장소를 사용할 때 Pod의 볼륨 정의가 참조하는 리소스는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "PersistentVolumeClaim",
+        "StorageVolume",
+        "PersistentVolume",
+        "StorageClass"
+      ],
+      "ko": [
+        "PersistentVolumeClaim",
+        "StorageVolume",
+        "PersistentVolume",
+        "StorageClass"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "The Pod references a PersistentVolumeClaim using persistentVolumeClaim.claimName in its volumes definition. The claim is bound to a PersistentVolume, while a StorageClass describes provisioning policy. StorageVolume is not a standard core resource for this purpose. This is the PV-backed storage path; ephemeral volume types do not all require a PVC.",
+      "ko": "Pod는 volumes 정의의 persistentVolumeClaim.claimName으로 PersistentVolumeClaim을 참조합니다. 클레임은 PersistentVolume에 바인딩되고 StorageClass는 프로비저닝 정책을 설명합니다. StorageVolume은 이 용도의 표준 코어 리소스가 아닙니다. 이는 PV 기반 저장소를 사용하는 경로이며, 모든 임시 볼륨 유형에 PVC가 필요한 것은 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes"
+  },
+  {
+    "id": "local-523",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Cluster backing-store identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which key-value store is used as the backing store for Kubernetes cluster API data?",
+      "ko": "Kubernetes 클러스터의 API 데이터를 보존하는 백엔드 키-값 저장소는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "etcd",
+        "ZooKeeper",
+        "ControlPlaneStore",
+        "Redis"
+      ],
+      "ko": [
+        "etcd",
+        "ZooKeeper",
+        "ControlPlaneStore",
+        "Redis"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "etcd is Kubernetes' consistent, highly available key-value backing store for cluster API data. ZooKeeper and Redis are other data systems, not the standard Kubernetes API backing store, and ControlPlaneStore is not its component name. This concerns cluster object/state data, not all application files, volume contents, or logs.",
+      "ko": "etcd는 Kubernetes 클러스터 API 데이터를 보존하는 일관성과 고가용성을 갖춘 키-값 저장소입니다. ZooKeeper와 Redis는 다른 데이터 시스템이며 표준 Kubernetes API 백엔드 저장소가 아니고, ControlPlaneStore는 해당 구성 요소의 이름이 아닙니다. 여기서 말하는 데이터는 클러스터 오브젝트와 상태이며 모든 애플리케이션 파일·볼륨 내용·로그를 뜻하지는 않습니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/architecture/#etcd"
+  },
+  {
+    "id": "local-524",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Default shared Pod namespace · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed Linux namespace is shared by default by containers in the same Kubernetes Pod?",
+      "ko": "같은 Kubernetes Pod의 컨테이너들이 기본적으로 공유하는 Linux 네임스페이스는 보기 중 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Network",
+        "Host Network",
+        "Process ID",
+        "Process Name"
+      ],
+      "ko": [
+        "네트워크",
+        "호스트 네트워크",
+        "프로세스 ID",
+        "프로세스 이름"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "Containers in a Pod share its network namespace, including IP addresses and port space. Sharing the node's host network is a separate hostNetwork setting. Process-namespace sharing is an optional shareProcessNamespace setting, not the default. Process Name is not a separate Linux namespace type.",
+      "ko": "Pod 안의 컨테이너는 IP 주소와 포트 공간을 포함한 네트워크 네임스페이스를 공유합니다. 노드의 호스트 네트워크를 공유하는 것은 별도 hostNetwork 설정입니다. 프로세스 네임스페이스 공유는 선택적인 shareProcessNamespace 설정이며 기본값이 아닙니다. 프로세스 이름은 별도의 Linux 네임스페이스 유형이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/pods/#pod-networking"
+  },
+  {
+    "id": "local-471",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Control-plane component identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed component belongs to the Kubernetes control plane?",
+      "ko": "보기 중 Kubernetes 제어 플레인에 속하는 구성 요소는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "cloud-controller-manager",
+        "CoreDNS",
+        "kube-proxy",
+        "kubelet"
+      ],
+      "ko": [
+        "cloud-controller-manager",
+        "CoreDNS",
+        "kube-proxy",
+        "kubelet"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "cloud-controller-manager is an optional control-plane component that integrates Kubernetes with cloud-provider APIs. kubelet and kube-proxy are node components, and CoreDNS is a cluster DNS addon. Optional means the cloud controller need not exist in every cluster; it does not change its architectural role.",
+      "ko": "cloud-controller-manager는 Kubernetes와 클라우드 제공자 API를 연동하는 선택적 제어 플레인 구성 요소입니다. kubelet과 kube-proxy는 노드 구성 요소이고 CoreDNS는 클러스터 DNS 애드온입니다. 선택적이라는 것은 모든 클러스터에 클라우드 컨트롤러가 있어야 하는 것은 아니라는 뜻이며, 아키텍처상 역할이 달라지는 것은 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/architecture/"
+  },
+  {
+    "id": "local-457",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Storage operator identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed Kubernetes storage operator automates storage deployment and management to support self-healing and scaling?",
+      "ko": "보기 중 Kubernetes에서 스토리지 배포·관리를 자동화하고 자동 복구·확장을 지원하는 스토리지 오퍼레이터는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Rook",
+        "Kubernetes",
+        "Helm",
+        "Container Storage Interface (CSI)"
+      ],
+      "ko": [
+        "Rook",
+        "Kubernetes",
+        "Helm",
+        "Container Storage Interface (CSI)"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "Rook's operator automates Ceph deployment, configuration, provisioning, scaling, upgrades, and monitoring. Kubernetes is the platform, Helm is a package manager, and CSI is the interface used by storage drivers; they are not the storage-system operator in this comparison. Self-management capabilities depend on the storage system and operator configuration.",
+      "ko": "Rook 오퍼레이터는 Ceph의 배포·설정·프로비저닝·확장·업그레이드·모니터링을 자동화합니다. Kubernetes는 플랫폼, Helm은 패키지 관리자, CSI는 스토리지 드라이버가 사용하는 인터페이스이며 이 비교에서 묻는 스토리지 시스템 오퍼레이터가 아닙니다. 자동 관리 기능은 스토리지 시스템과 오퍼레이터 설정에 따라 동작합니다."
+    },
+    "ref": "https://rook.io/docs/rook/latest/Getting-Started/intro/"
+  },
+  {
+    "id": "local-461",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Container probe definition · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Within Kubernetes, what does a container probe refer to?",
+      "ko": "Kubernetes에서 컨테이너 프로브는 무엇을 뜻합니까?"
+    },
+    "choices": {
+      "en": [
+        "A mechanism that monitors the Kubernetes API itself",
+        "A pre-run execution scope issued by a kubectl agent",
+        "A diagnostic that the kubelet periodically performs on a container",
+        "A mechanism that records Kubernetes API logs"
+      ],
+      "ko": [
+        "Kubernetes API 자체를 감시하는 메커니즘",
+        "kubectl 에이전트가 실행 전에 발급하는 실행 범위",
+        "kubelet이 컨테이너에 주기적으로 수행하는 진단",
+        "Kubernetes API 로그를 기록하는 메커니즘"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "A probe is a diagnostic that the kubelet performs on a container, using an exec command or a network check such as HTTP, TCP, or gRPC. Liveness, readiness, and startup probes use their results for different lifecycle decisions. A probe is not API-server monitoring or audit logging, and kubectl is a client rather than the node agent performing these checks.",
+      "ko": "프로브는 kubelet이 컨테이너에 수행하는 진단으로, 명령 실행이나 HTTP·TCP·gRPC 같은 네트워크 검사를 사용합니다. 활성·준비·시작 프로브는 진단 결과를 서로 다른 생명주기 판단에 사용합니다. 프로브는 API 서버 모니터링이나 감사 로그가 아니며, kubectl은 이 검사를 수행하는 노드 에이전트가 아니라 클라이언트입니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes"
+  },
+  {
+    "id": "local-464",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Cluster DNS purpose · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "What is the main purpose of the cluster DNS service in Kubernetes?",
+      "ko": "Kubernetes 클러스터 DNS 서비스의 주된 역할은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Serve DNS for virtual machines running outside the cluster",
+        "Offer public DNS hosting where users register and manage zones for their own domains",
+        "Translate IPv6 requests into IPv4 requests for dual-stack Pods",
+        "Provide DNS names for Pods and Services so workloads can discover one another"
+      ],
+      "ko": [
+        "클러스터 밖에서 실행되는 가상 머신을 위한 DNS를 제공한다",
+        "사용자가 소유한 도메인의 영역을 등록·관리하는 공개 DNS 호스팅을 제공한다",
+        "듀얼 스택 Pod의 IPv6 요청을 IPv4 요청으로 변환한다",
+        "워크로드가 서로를 찾을 수 있도록 Pod와 Service의 DNS 이름을 제공한다"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "Cluster DNS publishes Service records and supports Pod DNS records according to the applicable configuration, enabling in-cluster name-based discovery. It is not a public-domain registration service or an IPv6-to-IPv4 translator. Pod records depend on naming and DNS configuration; the statement does not promise that every Pod automatically has a persistent individual DNS name.",
+      "ko": "클러스터 DNS는 Service의 DNS 레코드를 제공하고 설정에 따라 Pod의 DNS 레코드도 지원하여 클러스터 내부에서 이름으로 대상을 찾게 합니다. 공개 도메인 등록 서비스나 IPv6·IPv4 변환기가 아닙니다. Pod 레코드는 이름과 DNS 설정에 따라 달라지며, 모든 Pod에 영구적인 개별 DNS 이름이 자동 생성된다는 뜻은 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/"
+  },
+  {
+    "id": "local-468",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Namespace identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed construct provides logical resource grouping within one shared Kubernetes cluster?",
+      "ko": "하나의 공유 Kubernetes 클러스터 안에서 리소스를 논리적으로 그룹화하는 구성은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "namespaces",
+        "containers",
+        "hypervisors",
+        "cgroups"
+      ],
+      "ko": [
+        "네임스페이스(namespaces)",
+        "컨테이너(containers)",
+        "하이퍼바이저(hypervisors)",
+        "제어 그룹(cgroups)"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "Namespaces scope resource names and organize namespaced objects within a shared cluster. Describing them as virtual clusters is an old logical-grouping metaphor, not a promise of separate API servers, kernels, or automatic network isolation. Containers run processes, hypervisors virtualize machines, and cgroups account for and constrain process resources. Cluster-scoped objects such as Nodes are not divided by namespace.",
+      "ko": "네임스페이스는 공유 클러스터 안에서 리소스 이름의 범위를 정하고 네임스페이스 범위 객체를 구성합니다. 이를 가상 클러스터라고 부르는 표현은 오래된 논리적 그룹화 비유이며, 별도 API 서버·커널·자동 네트워크 격리를 보장하지 않습니다. 컨테이너는 프로세스를 실행하고, 하이퍼바이저는 머신을 가상화하며, cgroups는 프로세스의 자원 사용을 계산·제한합니다. Node 같은 클러스터 범위 객체는 네임스페이스로 나뉘지 않습니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/"
+  },
+  {
+    "id": "local-470",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "API resource discovery · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which command lists the API resource types supported by a Kubernetes cluster?",
+      "ko": "Kubernetes 클러스터가 지원하는 API 리소스 종류를 나열하는 명령은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "kubectl api-resources",
+        "kubectl get namespaces",
+        "kubectl api-versions",
+        "curl https://kubectrl/namespaces"
+      ],
+      "ko": [
+        "kubectl api-resources",
+        "kubectl get namespaces",
+        "kubectl api-versions",
+        "curl https://kubectrl/namespaces"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "kubectl api-resources prints the API resource types supported by the server. kubectl get namespaces lists Namespace instances, while kubectl api-versions lists API group/version identifiers. The supplied curl URL is not a standard API discovery request and does not list resource types. This is resource-type discovery, not field documentation from kubectl explain.",
+      "ko": "kubectl api-resources는 서버가 지원하는 API 리소스 종류를 출력합니다. kubectl get namespaces는 Namespace 인스턴스를, kubectl api-versions는 API 그룹·버전 식별자를 나열합니다. 보기의 curl URL은 표준 API 검색 요청이 아니며 리소스 종류를 나열하지 않습니다. 이는 kubectl explain으로 조회하는 필드 문서와 구별됩니다."
+    },
+    "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_api-resources/"
+  },
+  {
+    "id": "local-476",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Deployment and ReplicaSet relationship · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which statement describes the controller relationship between Deployments and ReplicaSets?",
+      "ko": "Deployment와 ReplicaSet의 컨트롤러 관계를 설명한 문장은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "A Deployment manages ReplicaSets to deliver declarative Pod updates",
+        "ReplicaSets handle stateful applications, and Deployments handle stateless applications",
+        "A Deployment is a running instance of a ReplicaSet",
+        "ReplicaSets belong to Jobs and CronJobs that use imperative Deployments"
+      ],
+      "ko": [
+        "Deployment는 ReplicaSet을 관리하여 Pod에 선언적 업데이트를 제공한다",
+        "ReplicaSet은 상태 저장 애플리케이션을, Deployment는 상태 비저장 애플리케이션을 담당한다",
+        "Deployment는 ReplicaSet의 실행 인스턴스이다",
+        "ReplicaSet은 명령형 Deployment를 사용하는 Job과 CronJob에 속한다"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "The Deployment controller manages ReplicaSets, and ReplicaSets maintain the desired number of Pods. A Deployment adds declarative rollout and revision management above ReplicaSets. ReplicaSet is not the stateful-identity controller; Deployment is not a runtime instance of it; Jobs and CronJobs form a separate workload-controller relationship.",
+      "ko": "Deployment 컨트롤러는 ReplicaSet을 관리하고 ReplicaSet은 원하는 Pod 수를 유지합니다. Deployment는 그 위에서 선언적 롤아웃과 리비전 관리를 제공합니다. ReplicaSet은 상태 저장 워크로드의 고정 식별자를 관리하는 컨트롤러가 아니며 Deployment는 ReplicaSet의 실행 인스턴스가 아닙니다. Job과 CronJob은 별도의 워크로드 컨트롤러 관계를 이룹니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"
+  },
+  {
+    "id": "local-479",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Application exposure resource · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed Kubernetes resource provides the networking abstraction used to expose an application?",
+      "ko": "애플리케이션을 노출하기 위한 네트워크 추상화를 제공하는 Kubernetes 리소스는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Port",
+        "Service",
+        "DNS",
+        "Deployment"
+      ],
+      "ko": [
+        "Port",
+        "Service",
+        "DNS",
+        "Deployment"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "A Service is the Kubernetes networking abstraction used to expose an application. A port is an endpoint attribute, DNS supplies names, and a Deployment manages workload Pods rather than the Service abstraction. Service behavior varies by type; a headless Service does not allocate a virtual cluster IP.",
+      "ko": "Service는 애플리케이션을 노출하는 Kubernetes 네트워크 추상화입니다. 포트는 엔드포인트의 속성이고 DNS는 이름을 제공하며 Deployment는 Service 추상화가 아니라 워크로드 Pod를 관리합니다. Service의 동작은 종류에 따라 다르며 헤드리스 Service는 가상 클러스터 IP를 할당하지 않습니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/service/"
+  },
+  {
+    "id": "local-480",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "DaemonSet definition · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which description matches the role of a Kubernetes DaemonSet?",
+      "ko": "Kubernetes DaemonSet의 역할에 맞는 설명은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "A workload that runs a copy of a Pod on each node in a specified set",
+        "A workload that maintains a stable number of replica Pods on arbitrary nodes",
+        "A workload that runs periodically according to a schedule",
+        "A workload that provides stable Pod identities and ordered management of a Pod set"
+      ],
+      "ko": [
+        "지정된 노드 집합의 각 노드에서 Pod 복사본을 실행하는 워크로드",
+        "임의의 노드에서 일정한 수의 복제 Pod를 유지하는 워크로드",
+        "일정에 따라 주기적으로 실행되는 워크로드",
+        "Pod의 고정 식별자와 Pod 집합의 순서 있는 관리를 제공하는 워크로드"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "A DaemonSet manages a Pod copy on all or selected eligible nodes, commonly for node-local agents. ReplicaSets maintain a replica count, CronJobs schedule Jobs, and StatefulSets provide stable identities and ordered lifecycle behavior. This describes the desired node coverage, not an absolute guarantee that every node always has exactly one running Pod during failures or surge updates.",
+      "ko": "DaemonSet은 모든 적격 노드 또는 선택된 적격 노드에서 Pod 복사본을 관리하며 노드별 에이전트에 흔히 사용됩니다. ReplicaSet은 복제 수를 유지하고 CronJob은 Job을 예약하며 StatefulSet은 고정 식별자와 순서 있는 생명주기 동작을 제공합니다. 이는 원하는 노드 적용 범위를 설명하는 것으로, 장애나 서지 업데이트 중에도 각 노드에 실행 중인 Pod가 항상 정확히 하나라는 절대 보장은 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/"
+  },
+  {
+    "id": "local-481",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Tracing signal identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which telemetry signal connects related operations to represent an end-to-end request flow through a distributed system?",
+      "ko": "분산 시스템을 거치는 요청의 전체 흐름을 나타내도록 관련 작업을 연결하는 텔레메트리 신호는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Metrics",
+        "Logs",
+        "Spans",
+        "Traces"
+      ],
+      "ko": [
+        "메트릭(Metrics)",
+        "로그(Logs)",
+        "스팬(Spans)",
+        "트레이스(Traces)"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "A trace connects related spans to represent a request's path through a system. A span represents one operation or unit of work within that trace. Metrics describe numerical measurements and logs record events; neither is the connected request-flow signal asked for here.",
+      "ko": "트레이스는 관련 스팬을 연결해 시스템 안에서 요청이 이동하는 경로를 나타냅니다. 스팬은 그 트레이스 안의 개별 작업 단위입니다. 메트릭은 수치 측정값을, 로그는 이벤트 기록을 나타내며 여기서 묻는 연결된 요청 흐름 신호 자체가 아닙니다."
+    },
+    "ref": "https://opentelemetry.io/docs/concepts/signals/traces/"
+  },
+  {
+    "id": "local-482",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Container runtime identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed Kubernetes component is a container runtime responsible for running containers?",
+      "ko": "보기 중 컨테이너 실행을 담당하는 컨테이너 런타임인 Kubernetes 구성 요소는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "etcd",
+        "CRI-O",
+        "cloud-controller-manager",
+        "kube-controller-manager"
+      ],
+      "ko": [
+        "etcd",
+        "CRI-O",
+        "cloud-controller-manager",
+        "kube-controller-manager"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "CRI-O implements the Container Runtime Interface and manages container execution using OCI runtimes. etcd stores cluster data, cloud-controller-manager integrates cloud-provider functions, and kube-controller-manager runs Kubernetes reconciliation controllers; those are not container runtimes.",
+      "ko": "CRI-O는 Container Runtime Interface를 구현하고 OCI 런타임을 사용해 컨테이너 실행을 관리합니다. etcd는 클러스터 데이터를 저장하고 cloud-controller-manager는 클라우드 제공자 기능을 연동하며 kube-controller-manager는 Kubernetes 조정 컨트롤러를 실행합니다. 이들은 컨테이너 런타임이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/"
+  },
+  {
+    "id": "local-484",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Service proxy identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed component configures Service forwarding rules on nodes, using operating-system packet filtering where available?",
+      "ko": "가능한 경우 운영체제의 패킷 필터링을 사용해 노드에 Service 전달 규칙을 구성하는 요소는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "kube-proxy",
+        "kubelet",
+        "etcd",
+        "kube-controller-manager"
+      ],
+      "ko": [
+        "kube-proxy",
+        "kubelet",
+        "etcd",
+        "kube-controller-manager"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "kube-proxy implements Service networking by maintaining node forwarding rules. kubelet manages node workloads, etcd stores API data, and kube-controller-manager runs reconciliation controllers. This does not mean kube-proxy handles every cluster packet; a networking implementation can also replace kube-proxy's Service-proxy function.",
+      "ko": "kube-proxy는 노드의 전달 규칙을 유지하여 Service 네트워킹을 구현합니다. kubelet은 노드 워크로드를 관리하고 etcd는 API 데이터를 저장하며 kube-controller-manager는 조정 컨트롤러를 실행합니다. kube-proxy가 모든 클러스터 패킷을 처리한다는 뜻은 아니며, 네트워크 구현체가 Service 프록시 기능을 대신할 수도 있습니다."
+    },
+    "ref": "https://kubernetes.io/docs/reference/networking/virtual-ips/"
+  },
+  {
+    "id": "local-489",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Immutable flag resource identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed Kubernetes resource supports the top-level boolean field immutable: true?",
+      "ko": "보기 중 최상위 불리언 필드 immutable: true를 지원하는 Kubernetes 리소스는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Deployment",
+        "Pod",
+        "ConfigMap",
+        "ReplicaSet"
+      ],
+      "ko": [
+        "Deployment",
+        "Pod",
+        "ConfigMap",
+        "ReplicaSet"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "ConfigMap supports the top-level immutable field; setting it to true prevents changes to its data. Secrets support the same feature but are not among these options. Other resources can have immutable individual fields, which is not the same as this top-level boolean switch.",
+      "ko": "ConfigMap은 최상위 immutable 필드를 지원하며 true로 설정하면 데이터 변경을 막습니다. Secret도 이 기능을 지원하지만 보기에는 없습니다. 다른 리소스에 변경 불가능한 개별 필드가 있다는 사실은 이 최상위 불리언 스위치를 지원한다는 뜻이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/configuration/configmap/#configmap-immutable"
+  },
+  {
+    "id": "local-491",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Container scheduling unit identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which Kubernetes resource packages co-located containers as a unit for scheduling?",
+      "ko": "함께 배치되는 컨테이너를 하나의 스케줄링 단위로 묶는 Kubernetes 리소스는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Pod",
+        "ContainerSet",
+        "ReplicaSet",
+        "Deployment"
+      ],
+      "ko": [
+        "Pod",
+        "ContainerSet",
+        "ReplicaSet",
+        "Deployment"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "A Pod packages one or more containers that are co-located and co-scheduled. ReplicaSets and Deployments manage Pods rather than replacing this container scheduling unit. ContainerSet is not a Kubernetes core API resource type.",
+      "ko": "Pod는 하나 이상의 컨테이너를 함께 배치하고 스케줄링하는 단위로 묶습니다. ReplicaSet과 Deployment는 Pod를 관리하며 이 컨테이너 스케줄링 단위를 대체하지 않습니다. ContainerSet은 Kubernetes 핵심 API의 리소스 종류가 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/pods/"
+  },
+  {
+    "id": "local-499",
+    "exam": "kcna",
+    "domain": "Cloud Native Application Delivery",
+    "subtopic": "Native workload deployment workflow · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed workflow deploys a Kubernetes workload with the standard client, without requiring an additional deployment tool?",
+      "ko": "별도의 배포 도구를 추가하지 않고 표준 클라이언트로 Kubernetes 워크로드를 배포하는 절차는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Create a Bash script and run it on a worker node",
+        "Create a Helm chart and install it with helm",
+        "Create a manifest and apply it with kubectl",
+        "Create a Python script and run it with kubectl"
+      ],
+      "ko": [
+        "Bash 스크립트를 만들고 워커 노드에서 실행한다",
+        "Helm 차트를 만들고 helm으로 설치한다",
+        "매니페스트를 만들고 kubectl로 적용한다",
+        "Python 스크립트를 만들고 kubectl로 실행한다"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "kubectl apply -f workload.yaml submits a manifest to the Kubernetes API. Helm requires an additional executable, and kubectl is not a Python interpreter. Running a script on a worker does not by itself specify submission of Kubernetes resources; scripts can wrap API calls, but that is not the deployment mechanism stated by that option.",
+      "ko": "kubectl apply -f workload.yaml은 매니페스트를 Kubernetes API에 제출합니다. Helm에는 별도 실행 파일이 필요하며 kubectl은 Python 인터프리터가 아닙니다. 워커에서 스크립트를 실행한다는 설명만으로 Kubernetes 리소스를 제출하는 절차가 정해지는 것은 아닙니다. 스크립트가 API 호출을 감쌀 수는 있지만 해당 보기에 그 배포 메커니즘은 제시되지 않았습니다."
+    },
+    "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_apply/"
+  },
+  {
+    "id": "local-526",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "nodeSelector matching attribute · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which node attribute does a PodSpec's nodeSelector match when choosing a node?",
+      "ko": "PodSpec의 nodeSelector는 노드를 선택할 때 노드의 어떤 속성을 비교합니까?"
+    },
+    "choices": {
+      "en": [
+        "Annotations",
+        "IP addresses",
+        "Hostnames",
+        "Labels"
+      ],
+      "ko": [
+        "어노테이션(Annotations)",
+        "IP 주소",
+        "호스트 이름",
+        "레이블(Labels)"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "nodeSelector matches node label key/value pairs; the selected node must satisfy every specified pair. Annotations and node IPs are not its matching input. A hostname can be selected through the kubernetes.io/hostname label, but that still uses the label mechanism rather than direct hostname matching.",
+      "ko": "nodeSelector는 노드 레이블의 키·값 조합을 비교하며 선택된 노드는 지정된 모든 조합을 만족해야 합니다. 어노테이션이나 노드 IP를 직접 비교하는 기능이 아닙니다. kubernetes.io/hostname 레이블로 호스트 이름을 선택할 수는 있지만 이것도 직접 호스트 이름을 비교하는 별도 방식이 아니라 레이블 메커니즘을 사용합니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector"
+  },
+  {
+    "id": "local-528",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "FinOps practice identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which practice creates financial accountability for variable cloud-resource spending?",
+      "ko": "변동하는 클라우드 리소스 지출에 재무적 책임성을 부여하는 실천 방식은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "FaaS",
+        "DevOps",
+        "CloudCost",
+        "FinOps"
+      ],
+      "ko": [
+        "FaaS",
+        "DevOps",
+        "CloudCost",
+        "FinOps"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "FinOps combines engineering, finance, and business collaboration to create financial accountability and data-driven technology-value decisions. FaaS is an execution model and DevOps is a broader delivery/operations practice. Current FinOps also covers technology spending beyond cloud; its goal is business value, not simply cutting every cost.",
+      "ko": "FinOps는 엔지니어링·재무·비즈니스 부문의 협업으로 재무적 책임성과 데이터 기반 기술 가치 판단을 제공합니다. FaaS는 실행 모델이고 DevOps는 더 넓은 전달·운영 실천 방식입니다. 현재 FinOps는 클라우드 외의 기술 지출도 다루며 목적은 모든 비용의 무조건적인 삭감이 아니라 비즈니스 가치입니다."
+    },
+    "ref": "https://www.finops.org/introduction/what-is-finops/"
+  },
+  {
+    "id": "local-529",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Image-size build technique identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed build practice directly helps keep the final container image small?",
+      "ko": "최종 컨테이너 이미지의 크기를 줄이는 데 직접 도움이 되는 빌드 방식은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Use a Dockerfile",
+        "Use multi-stage builds",
+        "Build images with different tags",
+        "Add a build.sh script"
+      ],
+      "ko": [
+        "Dockerfile을 사용한다",
+        "멀티 스테이지 빌드를 사용한다",
+        "서로 다른 태그로 이미지를 빌드한다",
+        "build.sh 스크립트를 추가한다"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "Multi-stage builds copy required artifacts into a final stage while leaving build tools and unwanted files behind. A Dockerfile or build script alone does not provide that separation, and changing tags does not remove image contents. The final size still depends on the base image and copied artifacts.",
+      "ko": "멀티 스테이지 빌드는 필요한 산출물만 최종 단계로 복사하여 빌드 도구와 불필요한 파일을 제외할 수 있습니다. Dockerfile이나 빌드 스크립트가 있다는 사실만으로 이런 분리가 이뤄지지는 않으며 태그를 바꿔도 이미지 내용이 줄어들지 않습니다. 최종 크기는 베이스 이미지와 복사한 산출물에도 달려 있습니다."
+    },
+    "ref": "https://docs.docker.com/build/building/multi-stage/"
+  },
+  {
+    "id": "local-532",
+    "exam": "kcna",
+    "domain": "Cloud Native Application Delivery",
+    "subtopic": "Horizontal application scaling definition · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "What does horizontal scaling of one application deployment change?",
+      "ko": "단일 애플리케이션 배포를 수평 확장·축소하면 어떤 값이 바뀝니까?"
+    },
+    "choices": {
+      "en": [
+        "The number of node instances in the cluster",
+        "The number of different applications deployed",
+        "The number of instances of that same application",
+        "The resources assigned to each application instance"
+      ],
+      "ko": [
+        "클러스터의 노드 인스턴스 수",
+        "배포한 서로 다른 애플리케이션의 수",
+        "같은 애플리케이션의 인스턴스 수",
+        "애플리케이션 인스턴스마다 할당한 리소스"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "Horizontal application scaling adds or removes replicas of the same application. Vertical scaling changes resources per instance, and node scaling changes cluster capacity. HPA can automate the workload replica count based on observed metrics; adding unrelated applications is not scaling the original application.",
+      "ko": "애플리케이션의 수평 확장·축소는 같은 애플리케이션의 복제본을 추가하거나 제거합니다. 수직 확장·축소는 인스턴스당 리소스를, 노드 확장·축소는 클러스터 용량을 바꿉니다. HPA는 관측된 메트릭에 따라 워크로드 복제본 수를 자동으로 조절할 수 있습니다. 무관한 애플리케이션을 추가하는 것은 원래 애플리케이션의 확장이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/"
+  },
+  {
+    "id": "local-533",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Service type count · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "How many Kubernetes Service types can you define?",
+      "ko": "Kubernetes에서 정의할 수 있는 Service 유형은 몇 개입니까?"
+    },
+    "choices": {
+      "en": [
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "ko": [
+        "2개",
+        "3개",
+        "4개",
+        "5개"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "The Service API defines four type values: ClusterIP, NodePort, LoadBalancer, and ExternalName. A headless Service uses ClusterIP with clusterIP: None; it is not a fifth type value.",
+      "ko": "Service API가 정의한 type 값은 ClusterIP, NodePort, LoadBalancer, ExternalName의 네 가지입니다. 헤드리스 Service는 ClusterIP에서 clusterIP: None을 설정한 것으로, 다섯 번째 type 값이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types"
+  },
+  {
+    "id": "local-534",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Deployment versus ReplicaSet distinctions · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which statement correctly distinguishes a Deployment from a ReplicaSet?",
+      "ko": "Deployment와 ReplicaSet의 차이를 올바르게 설명한 문장은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Deployments cannot set a desired replica count",
+        "ReplicaSets do not maintain a desired replica count",
+        "A Deployment is just a ReplicaSet plus annotations",
+        "A Deployment is a higher-level controller that manages ReplicaSets"
+      ],
+      "ko": [
+        "Deployment에서는 원하는 복제본 수를 설정할 수 없다",
+        "ReplicaSet은 원하는 복제본 수를 유지하지 않는다",
+        "Deployment는 ReplicaSet에 어노테이션만 추가한 것이다",
+        "Deployment는 ReplicaSet을 관리하는 상위 컨트롤러이다"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "A Deployment manages ReplicaSets and coordinates declarative application updates. Both resources specify a desired replica count; maintaining that count is the ReplicaSet's purpose. A Deployment is a separate higher-level API object, not merely an annotated ReplicaSet. Desired count is a reconciliation target, not an unconditional availability guarantee.",
+      "ko": "Deployment는 ReplicaSet을 관리하고 선언적 애플리케이션 업데이트를 조정합니다. 두 리소스 모두 원하는 복제본 수를 지정하며 그 수를 유지하는 것이 ReplicaSet의 목적입니다. Deployment는 별도의 상위 API 오브젝트이지 단순히 어노테이션이 붙은 ReplicaSet이 아닙니다. 원하는 복제본 수는 조정 목표이지 무조건적인 가용성 보장은 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/"
+  },
+  {
+    "id": "local-539",
+    "exam": "kcna",
+    "domain": "Cloud Native Application Delivery",
+    "subtopic": "HorizontalPodAutoscaler behavior · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "How does the HorizontalPodAutoscaler normally scale a workload in Kubernetes?",
+      "ko": "HorizontalPodAutoscaler는 일반적으로 Kubernetes 워크로드를 어떻게 확장·축소합니까?"
+    },
+    "choices": {
+      "en": [
+        "It changes the CPU or memory assigned to each Pod as load changes",
+        "It adds Pods when load rises but never removes Pods when load falls",
+        "It adds and removes a DaemonSet's Pods according to load",
+        "It adds or removes workload Pod replicas as load moves above or below the configured target"
+      ],
+      "ko": [
+        "부하에 따라 각 Pod에 할당한 CPU나 메모리를 바꾼다",
+        "부하가 증가하면 Pod를 추가하지만 감소해도 Pod를 제거하지 않는다",
+        "부하에 따라 DaemonSet의 Pod를 추가하거나 제거한다",
+        "부하가 설정한 목표보다 높거나 낮아지면 워크로드의 Pod 복제본을 추가하거나 제거한다"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "HPA changes the replica count of a workload that supports scaling, such as a Deployment. It can scale both up and down rather than resize each Pod, and it does not scale a DaemonSet. Replica bounds, tolerance, stabilization windows, and configured policies govern the actual change and timing.",
+      "ko": "HPA는 Deployment처럼 확장을 지원하는 워크로드의 복제본 수를 조절합니다. 각 Pod의 크기를 바꾸는 것이 아니라 확장과 축소를 모두 할 수 있으며 DaemonSet을 확장하지는 않습니다. 실제 변경량과 시점은 복제본 수의 상·하한, 허용 오차, 안정화 구간, 설정된 정책에 따라 달라집니다."
+    },
+    "ref": "https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/"
+  },
+  {
+    "id": "local-541",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Node Pod-execution component identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which component allows Kubernetes to run Pods across its nodes?",
+      "ko": "Kubernetes가 각 노드에서 Pod를 실행하도록 하는 구성 요소는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "The node server",
+        "The etcd static Pods",
+        "The API server",
+        "The kubelet"
+      ],
+      "ko": [
+        "노드 서버",
+        "etcd 정적 Pod",
+        "API 서버",
+        "kubelet"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "Kubelets are the node agents that manage assigned PodSpecs and ask the container runtime to run the Pod's containers. The API server exposes the Kubernetes API; etcd stores API state even when etcd itself is deployed as static Pods. Pod scheduling is a different responsibility from execution on a node.",
+      "ko": "kubelet은 각 노드의 에이전트로, 배정된 PodSpec을 관리하고 컨테이너 런타임에 Pod의 컨테이너 실행을 요청합니다. API 서버는 Kubernetes API를 제공하고 etcd는 정적 Pod로 배포되더라도 API 상태를 저장하는 역할입니다. Pod 스케줄링과 노드에서의 실행은 서로 다른 책임입니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/architecture/#kubelet"
+  },
+  {
+    "id": "local-542",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Recurring workload object identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which Kubernetes object is used to run a recurring workload?",
+      "ko": "반복적으로 실행하는 워크로드에 사용하는 Kubernetes 오브젝트는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Job",
+        "Batch",
+        "DaemonSet",
+        "CronJob"
+      ],
+      "ko": [
+        "Job",
+        "Batch",
+        "DaemonSet",
+        "CronJob"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "A CronJob creates Jobs on a repeating schedule. A Job manages work to completion but does not itself define a recurring schedule; a DaemonSet maintains Pods on eligible nodes rather than scheduling periodic runs. Batch is not the built-in recurring-workload object kind. CronJob scheduling is approximate, so workloads should tolerate missed or duplicate runs.",
+      "ko": "CronJob은 반복 일정에 따라 Job을 생성합니다. Job은 작업 완료를 관리하지만 자체적으로 반복 일정을 정의하지 않으며 DaemonSet은 주기적인 작업 실행이 아니라 대상 노드의 Pod를 유지합니다. Batch는 반복 워크로드를 나타내는 내장 오브젝트 종류가 아닙니다. CronJob의 일정 처리는 엄밀한 단일 실행 보장이 아니므로 작업은 누락이나 중복 실행에 대비해야 합니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/"
+  },
+  {
+    "id": "local-543",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Developer delivery-tool role identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "In DevOps, which role builds and automates continuous-delivery tools for developer teams?",
+      "ko": "DevOps에서 개발팀에 제공할 지속적 전달 도구를 구축하고 자동화하는 역할은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Application users",
+        "Application developers",
+        "Platform engineers",
+        "Cluster operators"
+      ],
+      "ko": [
+        "애플리케이션 사용자",
+        "애플리케이션 개발자",
+        "플랫폼 엔지니어",
+        "클러스터 운영자"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "This description matches the platform-engineering function of building reusable development and delivery capabilities for internal developer teams. Application users consume applications, developers focus on application features, and cluster operators focus on cluster operation. Teams collaborate and job titles vary; this is not a claim that developers or operators cannot contribute to automation.",
+      "ko": "이 설명은 내부 개발팀을 위해 재사용 가능한 개발·전달 기능을 구축하는 플랫폼 엔지니어링의 역할에 해당합니다. 애플리케이션 사용자는 앱을 사용하고 개발자는 앱 기능에, 클러스터 운영자는 클러스터 운영에 집중합니다. 팀은 협업하고 직함도 조직마다 다르므로 개발자나 운영자가 자동화에 기여할 수 없다는 뜻은 아닙니다."
+    },
+    "ref": "https://tag-app-delivery.cncf.io/whitepapers/platforms/"
+  },
+  {
+    "id": "local-545",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Cloud-native resilience quality identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Cloud-native architecture centered on microservices aims for robust systems with which overall quality?",
+      "ko": "마이크로서비스 중심의 클라우드 네이티브 아키텍처가 견고한 시스템에서 추구하는 전반적인 특성은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Fallback",
+        "Resiliency",
+        "Failover",
+        "High reachability"
+      ],
+      "ko": [
+        "대체 수단 전환(fallback)",
+        "복원력(resiliency)",
+        "장애 조치(failover)",
+        "높은 도달성(high reachability)"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "Resiliency is the broad system quality of handling failures and recovering, and the CNCF definition characterizes cloud-native systems as resilient. Fallback and failover are possible mechanisms supporting that quality; reachability concerns communication. Merely splitting an application into microservices does not automatically guarantee resilience.",
+      "ko": "복원력은 장애에 대응하고 회복하는 전반적인 시스템 특성으로, CNCF 정의도 클라우드 네이티브 시스템을 복원력 있는 시스템으로 설명합니다. 대체 수단 전환과 장애 조치는 이를 뒷받침할 수 있는 메커니즘이고 도달성은 통신 가능성에 관한 특성입니다. 앱을 마이크로서비스로 나누기만 하면 복원력이 자동으로 보장되는 것은 아닙니다."
+    },
+    "ref": "https://github.com/cncf/toc/blob/main/DEFINITION.md"
+  },
+  {
+    "id": "local-546",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Deployment-creation command selection · 자체 연습",
+    "difficulty": "medium",
+    "style": "exam",
+    "q": {
+      "en": "Which command creates an nginx Deployment with two desired replicas?",
+      "ko": "원하는 복제본 수가 두 개인 nginx Deployment를 생성하는 명령은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "kubectl run deploy nginx --image=nginx --replicas=2",
+        "kubectl create deploy nginx --image=nginx --replicas=2",
+        "kubectl create nginx deployment --image=nginx –replicas=2",
+        "kubectl create deploy nginx --image=nginx --count=2"
+      ],
+      "ko": [
+        "kubectl run deploy nginx --image=nginx --replicas=2",
+        "kubectl create deploy nginx --image=nginx --replicas=2",
+        "kubectl create nginx deployment --image=nginx –replicas=2",
+        "kubectl create deploy nginx --image=nginx --count=2"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "Create deploy is a valid abbreviation for create deployment; the name precedes --image and --replicas. Run is not this Deployment-creation form, the third choice misorders the subcommand and uses a non-ASCII flag dash, and --count is not the replicas flag. Desired replicas do not guarantee immediate readiness, and this command does not create a Service.",
+      "ko": "create deploy는 create deployment의 올바른 축약형이며 이름 뒤에 --image와 --replicas를 지정합니다. run은 이 Deployment 생성 형식이 아니고 세 번째 보기는 하위 명령 순서와 비ASCII 대시가 잘못됐으며 --count는 복제본 수 플래그가 아닙니다. 원하는 복제본 수가 즉시 Ready 상태를 보장하지는 않고 Service도 생성하지 않습니다."
+    },
+    "ref": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/kubectl_create_deployment/"
+  },
+  {
+    "id": "local-547",
+    "exam": "kcna",
+    "domain": "Cloud Native Application Delivery",
+    "subtopic": "Continuous Integration definition · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "What activity does Continuous Integration describe?",
+      "ko": "Continuous Integration(CI)은 어떤 활동을 뜻합니까?"
+    },
+    "choices": {
+      "en": [
+        "Integrating and testing code contributions from multiple sources manually",
+        "Integrating and testing code contributions from multiple sources through automation",
+        "Moving changes from one environment to another",
+        "Adding new developer-support tools to a project"
+      ],
+      "ko": [
+        "여러 출처의 코드 변경을 수동으로 통합하고 테스트한다",
+        "여러 출처의 코드 변경을 자동화를 통해 통합하고 테스트한다",
+        "한 환경에서 다른 환경으로 변경 사항을 옮긴다",
+        "프로젝트에 개발자 지원 도구를 새로 추가한다"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "CI frequently integrates code contributions and validates them with automated builds and tests, helping detect integration problems early. Moving changes between environments is a delivery/deployment concern, not the definition of CI; adding tools alone is not CI. Automated checks do not imply that every merge or approval must be automatic.",
+      "ko": "CI는 코드 변경을 자주 통합하고 자동 빌드·테스트로 검증하여 통합 문제를 조기에 발견하도록 돕습니다. 환경 간 변경 전달은 전달·배포에 관한 활동이지 CI의 정의가 아니며 도구 추가만으로 CI가 되지도 않습니다. 자동 검증이 모든 병합이나 승인을 자동으로 처리해야 한다는 뜻은 아닙니다."
+    },
+    "ref": "https://glossary.cncf.io/continuous-integration/"
+  },
+  {
+    "id": "local-550",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Dual-stack networking capability · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which capability does Kubernetes IPv4/IPv6 dual-stack networking provide?",
+      "ko": "Kubernetes의 IPv4/IPv6 듀얼 스택 네트워킹은 어떤 기능을 제공합니까?"
+    },
+    "choices": {
+      "en": [
+        "Translates requests from an IPv4 Service to an IPv6 Service",
+        "Accesses an IPv4 address simply by using an IPv6 address",
+        "Requires NetworkPolicies to prevent Services from mixing requests",
+        "Supports Services with both IPv4 and IPv6 cluster addresses"
+      ],
+      "ko": [
+        "IPv4 Service의 요청을 IPv6 Service로 변환한다",
+        "IPv6 주소를 사용하는 것만으로 IPv4 주소에 접근한다",
+        "Service의 요청 혼합을 막기 위해 NetworkPolicy가 필요하다",
+        "IPv4와 IPv6 클러스터 주소를 모두 가진 Service를 지원한다"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "Dual-stack support permits IPv4 and IPv6 networking together, including Services configured with both address families. It is not an automatic IPv4-to-IPv6 translator and does not require NetworkPolicy to separate the families. Cluster ranges and network support must permit dual stack; single-stack Services remain possible.",
+      "ko": "듀얼 스택은 IPv4와 IPv6 네트워킹을 함께 지원하며 두 주소 계열을 사용하는 Service도 구성할 수 있게 합니다. IPv4를 IPv6로 자동 변환하는 기능이 아니고 두 계열을 구분하기 위해 NetworkPolicy가 필수인 것도 아닙니다. 클러스터 주소 범위와 네트워크 구현이 듀얼 스택을 지원해야 하며 단일 스택 Service도 사용할 수 있습니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/dual-stack/"
+  },
+  {
+    "id": "local-553",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "OCI runtime-spec reference implementation · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which project is the reference implementation of the OCI runtime specification?",
+      "ko": "OCI 런타임 명세의 참조 구현인 프로젝트는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "LXC",
+        "CRI-O",
+        "runc",
+        "Docker"
+      ],
+      "ko": [
+        "LXC",
+        "CRI-O",
+        "runc",
+        "Docker"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "runc is the OCI runtime-spec reference implementation for creating and running containers. CRI-O provides Kubernetes CRI integration and uses OCI-compatible runtimes; Docker is a broader container engine, and LXC is not this reference implementation. Being OCI-compatible is a different criterion from being the specification's reference implementation.",
+      "ko": "runc는 컨테이너를 생성하고 실행하는 OCI 런타임 명세의 참조 구현입니다. CRI-O는 Kubernetes CRI 연동을 제공하며 OCI 호환 런타임을 사용하고, Docker는 더 넓은 기능의 컨테이너 엔진입니다. LXC도 이 참조 구현은 아닙니다. OCI 호환 여부와 명세의 참조 구현 여부는 서로 다른 기준입니다."
+    },
+    "ref": "https://github.com/opencontainers/runc"
+  },
+  {
+    "id": "local-556",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "JWT user-authentication framework identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which framework can Kubernetes use to authenticate users with JSON Web Tokens?",
+      "ko": "Kubernetes가 JSON Web Token으로 사용자를 인증할 때 사용할 수 있는 프레임워크는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "OpenID Connect",
+        "OpenID Container",
+        "OpenID Cluster",
+        "OpenID CNCF"
+      ],
+      "ko": [
+        "OpenID Connect",
+        "OpenID Container",
+        "OpenID Cluster",
+        "OpenID CNCF"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "OpenID Connect (OIDC) is the identity framework used by the configured OIDC authenticator to validate an issuer's JWT identity tokens and derive user information. It is not the only JWT authentication path: ServiceAccount tokens are also JWTs. Authentication establishes identity; authorization such as RBAC is a separate decision.",
+      "ko": "OpenID Connect(OIDC)는 OIDC 인증기가 발급자의 JWT 신원 토큰을 검증하고 사용자 정보를 얻을 때 사용하는 신원 프레임워크입니다. 모든 JWT 인증이 OIDC 사용자 인증인 것은 아니며 ServiceAccount 토큰도 JWT입니다. 인증은 신원을 확인하는 단계이고 RBAC 같은 인가는 별도의 판단입니다."
+    },
+    "ref": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens"
+  },
+  {
+    "id": "local-557",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Built-in orchestration feature identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which feature does Kubernetes provide by default as a container orchestration platform?",
+      "ko": "Kubernetes가 컨테이너 오케스트레이션 플랫폼으로서 기본 제공하는 기능은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "A portable operating system",
+        "File system redundancy",
+        "A container image registry",
+        "Automated rollouts and rollbacks"
+      ],
+      "ko": [
+        "이식 가능한 운영체제",
+        "파일 시스템 이중화",
+        "컨테이너 이미지 레지스트리",
+        "자동화된 롤아웃과 롤백"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "The Kubernetes overview lists automated rollouts and rollbacks: controllers reconcile requested versions at a controlled rate. It does not supply an operating system, redundant filesystem, or image registry by default. This feature name does not mean every failed Deployment automatically rolls back; an operator can request a rollback, and a progress deadline alone does not trigger one.",
+      "ko": "Kubernetes 개요는 자동화된 롤아웃과 롤백을 기능으로 제시하며 컨트롤러가 요청한 버전으로 제어된 속도로 조정합니다. 운영체제, 이중화 파일 시스템, 이미지 레지스트리를 기본 제공하지는 않습니다. 이 기능명이 모든 Deployment 실패 시 자동 롤백을 뜻하지는 않습니다. 운영자가 롤백을 요청할 수 있지만 진행 기한 만료만으로 롤백이 실행되지는 않습니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/overview/"
+  },
+  {
+    "id": "local-558",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Pod-hosting node runtime requirement · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which statement about container runtimes in Kubernetes is correct?",
+      "ko": "Kubernetes의 컨테이너 런타임에 대한 올바른 설명은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Making bridged traffic visible to iptables removes the need for a runtime",
+        "Enabling IPv4 forwarding removes the need for a runtime",
+        "Container runtimes are deprecated; install CRI instead on every node",
+        "Install a container runtime on each node that will run Pods"
+      ],
+      "ko": [
+        "iptables가 브리지 트래픽을 볼 수 있게 하면 런타임이 필요 없다",
+        "IPv4 포워딩을 활성화하면 런타임이 필요 없다",
+        "컨테이너 런타임은 폐기됐으므로 각 노드에 대신 CRI를 설치한다",
+        "Pod를 실행할 각 노드에 컨테이너 런타임을 설치한다"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "A node hosting Pods needs a container runtime to execute their containers. Network settings such as bridged-traffic handling and IPv4 forwarding do not replace it. CRI is the kubelet/runtime communication interface, not a separate runtime replacement; modern kubelets require a CRI-compatible implementation or adapter.",
+      "ko": "Pod를 호스팅하는 노드에는 컨테이너를 실행할 런타임이 필요합니다. 브리지 트래픽 처리나 IPv4 포워딩 같은 네트워크 설정이 이를 대체하지는 않습니다. CRI는 kubelet과 런타임 사이의 통신 인터페이스이지 별도의 런타임 대체 프로그램이 아닙니다. 현대 kubelet에는 CRI 호환 구현 또는 어댑터가 필요합니다."
+    },
+    "ref": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/"
+  },
+  {
+    "id": "local-565",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "CRI integration component identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which Kubernetes architecture component integrates with a CRI container runtime?",
+      "ko": "CRI 컨테이너 런타임과 연동하는 Kubernetes 아키텍처 구성 요소는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "kubeadm",
+        "kubelet",
+        "kube-apiserver",
+        "kubectl"
+      ],
+      "ko": [
+        "kubeadm",
+        "kubelet",
+        "kube-apiserver",
+        "kubectl"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "The kubelet is the node agent that communicates with the container runtime through CRI to manage Pods. kubeadm bootstraps clusters and can contact CRI during setup, but it is not this ongoing node-agent role. The API server exposes the Kubernetes API, and kubectl is an API client.",
+      "ko": "kubelet은 CRI를 통해 컨테이너 런타임과 통신하며 Pod를 관리하는 노드 에이전트입니다. kubeadm은 클러스터를 초기화하고 설정 중 CRI에 접근할 수 있지만 이 지속적인 노드 에이전트 역할은 아닙니다. API 서버는 Kubernetes API를 제공하고 kubectl은 API 클라이언트입니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/architecture/cri/"
+  },
+  {
+    "id": "local-571",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Secrets representation and default storage · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which statement correctly describes Kubernetes Secrets?",
+      "ko": "Kubernetes Secret을 올바르게 설명한 것은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "A Secret is an embedded part of a Pod specification",
+        "Secret data is encrypted with the cluster private key by default",
+        "Secret data is base64-encoded in the API representation, and Kubernetes stores Secrets unencrypted by default",
+        "A Secret can contain only confidential data"
+      ],
+      "ko": [
+        "Secret은 Pod 명세에 내장된 부분이다",
+        "Secret 데이터는 기본적으로 클러스터의 개인 키로 암호화된다",
+        "Secret 데이터는 API 표현에서 base64로 인코딩되며 Kubernetes는 기본적으로 Secret을 암호화하지 않고 저장한다",
+        "Secret에는 기밀 데이터만 담을 수 있다"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "Secret data values use base64 in JSON/YAML API representations; this is not encryption. Kubernetes does not enable Secret encryption at rest in etcd by default. These are separate representation and storage facts, not a claim that etcd must store literal base64 strings. A Secret is a separate API object referenced by a Pod, and confidentiality is not a content restriction. Managed providers can add storage encryption; this item describes Kubernetes's default configuration.",
+      "ko": "Secret의 data 값은 JSON/YAML API 표현에서 base64를 사용하며 이는 암호화가 아닙니다. Kubernetes는 기본적으로 etcd에 저장하는 Secret의 암호화를 활성화하지 않습니다. 표현 형식과 저장 시 암호화는 별개의 사실이며 etcd가 반드시 base64 문자열 자체를 저장한다는 뜻은 아닙니다. Secret은 Pod가 참조하는 별도의 API 오브젝트이고 기밀성은 내용 제한 조건이 아닙니다. 관리형 제공자는 저장 시 암호화를 추가할 수 있지만 이 문항은 Kubernetes의 기본 설정을 설명합니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/configuration/secret/"
+  },
+  {
+    "id": "local-572",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "API extension mechanism identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which of these mechanisms extends the Kubernetes API?",
+      "ko": "다음 중 Kubernetes API를 확장하는 메커니즘은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "ConfigMap",
+        "CustomResourceDefinition",
+        "MutatingAdmissionWebhook",
+        "Kustomize"
+      ],
+      "ko": [
+        "ConfigMap",
+        "CustomResourceDefinition",
+        "MutatingAdmissionWebhook",
+        "Kustomize"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "A CustomResourceDefinition registers a new resource type in the Kubernetes API. A mutating admission webhook changes admitted objects but does not itself register a resource type. ConfigMaps store configuration data, and Kustomize customizes manifests. The aggregation layer is another API-extension mechanism, but it is not an offered alternative.",
+      "ko": "CustomResourceDefinition은 Kubernetes API에 새 리소스 유형을 등록합니다. 변경 어드미션 웹훅은 처리 중인 오브젝트를 수정하지만 그 자체로 리소스 유형을 등록하지는 않습니다. ConfigMap은 설정 데이터를 저장하고 Kustomize는 매니페스트를 맞춤 구성합니다. API aggregation layer도 확장 방법이지만 보기에는 없습니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/"
+  },
+  {
+    "id": "local-574",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Scheduled Job kind identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which Kubernetes resource creates Jobs at scheduled times or on a repeating schedule?",
+      "ko": "정해진 시각이나 반복 일정에 따라 Job을 생성하는 Kubernetes 리소스는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Job",
+        "CalenderJob",
+        "BatchJob",
+        "CronJob"
+      ],
+      "ko": [
+        "Job",
+        "CalenderJob",
+        "BatchJob",
+        "CronJob"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "A CronJob creates Jobs according to a cron-style schedule. A Job tracks work to completion but does not itself provide a recurring calendar schedule. CalenderJob and BatchJob are not built-in Kubernetes resource kinds. CronJob scheduling is best effort, so workloads should tolerate missed or duplicate execution.",
+      "ko": "CronJob은 cron 형식의 일정에 따라 Job을 생성합니다. Job은 작업의 완료를 추적하지만 자체적으로 반복 달력 일정을 제공하지 않습니다. CalenderJob과 BatchJob은 Kubernetes의 내장 리소스 유형이 아닙니다. CronJob 일정 처리는 최선 노력 방식이므로 작업은 실행 누락이나 중복을 고려해야 합니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/"
+  },
+  {
+    "id": "local-584",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "etcd HA membership minimum · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "What is the minimum number of etcd members needed for a highly available Kubernetes cluster?",
+      "ko": "고가용성 Kubernetes 클러스터에 필요한 etcd 멤버의 최소 수는 얼마입니까?"
+    },
+    "choices": {
+      "en": [
+        "Two etcd members",
+        "Five etcd members",
+        "Six etcd members",
+        "Three etcd members"
+      ],
+      "ko": [
+        "etcd 멤버 2개",
+        "etcd 멤버 5개",
+        "etcd 멤버 6개",
+        "etcd 멤버 3개"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "A three-member etcd cluster retains its two-member majority after one member fails. A two-member cluster requires both members, so losing one stops quorum-based progress. Five or six are not the minimum. Membership count alone is not a complete HA design: independent failure domains and redundant control-plane components also matter.",
+      "ko": "etcd 멤버가 3개이면 하나가 실패해도 2개로 과반수를 유지합니다. 2개 구성은 둘 다 필요하므로 하나가 실패하면 정족수를 이용하는 처리가 중단됩니다. 5개나 6개는 최소 수가 아닙니다. 멤버 수만으로 고가용성이 완성되는 것은 아니며 독립적인 장애 영역과 제어 영역 구성 요소의 중복성도 중요합니다."
+    },
+    "ref": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/"
+  },
+  {
+    "id": "local-585",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Ingress HTTP routing purpose · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "What is the main purpose of Kubernetes Ingress?",
+      "ko": "Kubernetes Ingress의 주요 목적은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Access HTTP and HTTPS services in the cluster based on their IP address",
+        "Access non-HTTP/HTTPS services in the cluster based on their IP address",
+        "Access non-HTTP/HTTPS services in the cluster based on their path",
+        "Access HTTP and HTTPS services in the cluster based on their path"
+      ],
+      "ko": [
+        "IP 주소를 기준으로 클러스터의 HTTP·HTTPS 서비스에 접근",
+        "IP 주소를 기준으로 클러스터의 HTTP·HTTPS 이외 서비스에 접근",
+        "경로를 기준으로 클러스터의 HTTP·HTTPS 이외 서비스에 접근",
+        "경로를 기준으로 클러스터의 HTTP·HTTPS 서비스에 접근"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "The standard Ingress API provides HTTP/HTTPS routing to Services using host and path rules, implemented by an Ingress controller. Its purpose is application-layer routing rather than merely IP-based access or general non-HTTP transport routing. Controller-specific TCP extensions are not the standard Ingress API, and not every Ingress needs multiple path rules.",
+      "ko": "표준 Ingress API는 Ingress 컨트롤러를 통해 호스트와 경로 규칙을 이용한 HTTP·HTTPS 라우팅을 Service에 제공합니다. 핵심은 애플리케이션 계층 라우팅이며 단순한 IP 기반 접근이나 HTTP 이외의 일반 전송 계층 라우팅이 아닙니다. 컨트롤러별 TCP 확장은 표준 Ingress API가 아니고 모든 Ingress가 여러 경로 규칙을 가져야 하는 것도 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/services-networking/ingress/"
+  },
+  {
+    "id": "local-590",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Default ServiceAccount selection · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which ServiceAccount does a Pod use when no ServiceAccount is specified in its namespace?",
+      "ko": "Pod에 ServiceAccount를 지정하지 않으면 해당 네임스페이스에서 어떤 ServiceAccount를 사용합니까?"
+    },
+    "choices": {
+      "en": [
+        "admin",
+        "sysadmin",
+        "root",
+        "default"
+      ],
+      "ko": [
+        "admin",
+        "sysadmin",
+        "root",
+        "default"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "The standard ServiceAccount admission behavior assigns the namespace's default ServiceAccount when spec.serviceAccountName is omitted. This does not grant administrator or Linux-root privileges. Token automount and RBAC permissions are separate settings; disabling token automount does not change the selected account.",
+      "ko": "표준 ServiceAccount 어드미션 동작은 spec.serviceAccountName을 생략하면 해당 네임스페이스의 default ServiceAccount를 지정합니다. 이것이 관리자나 Linux root 권한을 부여하는 것은 아닙니다. 토큰 자동 마운트와 RBAC 권한은 별도 설정이며 토큰 자동 마운트를 끄더라도 선택된 계정은 바뀌지 않습니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/security/service-accounts/"
+  },
+  {
+    "id": "local-592",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Community decision-making method · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which listed approach best reflects common conflict resolution and decision-making in CNCF open-source projects?",
+      "ko": "CNCF 오픈소스 프로젝트의 일반적인 갈등 해결과 의사 결정 방식을 가장 잘 나타낸 것은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Financial analysis",
+        "Discussion and voting",
+        "Flipism: deciding by a coin toss",
+        "The project founder's say"
+      ],
+      "ko": [
+        "재무 분석",
+        "토론과 투표",
+        "동전 던지기로 결정하는 flipism",
+        "프로젝트 창립자의 결정"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "CNCF's common maintainer-council guidance uses discussion and informal lazy consensus, with explicit votes for disagreement, major actions or decisions that governance requires voting on. It describes this as the most common basic formal model, not a quantified census of every CNCF decision. Not every decision needs a vote, and projects can document different governance structures.",
+      "ko": "CNCF의 일반적인 maintainer council 지침은 토론과 비공식적인 lazy consensus를 사용하며 이견, 중요한 조치, 거버넌스가 투표를 요구하는 결정에는 명시적인 투표를 적용합니다. 이는 널리 쓰이는 기본 공식 모델에 대한 지침이지 모든 CNCF 결정을 계량한 조사 결과는 아닙니다. 모든 결정에 투표가 필요한 것은 아니고 프로젝트는 다른 거버넌스 구조를 문서화할 수 있습니다."
+    },
+    "ref": "https://contribute.cncf.io/projects/best-practices/governance/templates/governance-maintainer/"
+  },
+  {
+    "id": "local-596",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Orchestration need at scale · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Why do administrators need a container-orchestration tool?",
+      "ko": "관리자에게 컨테이너 오케스트레이션 도구가 필요한 이유는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "To manage the lifecycle of a large number of containers",
+        "To assess security risks in production container images",
+        "To learn how to convert monolithic applications into microservices",
+        "Because tools such as Kubernetes are the future"
+      ],
+      "ko": [
+        "많은 컨테이너의 생명주기를 관리하기 위해",
+        "운영 컨테이너 이미지의 보안 위험을 평가하기 위해",
+        "모놀리식 애플리케이션을 마이크로서비스로 바꾸는 방법을 배우기 위해",
+        "Kubernetes 같은 도구가 미래이기 때문에"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "Orchestration automates placement, scaling, recovery and lifecycle management across many containers. Image vulnerability assessment belongs to scanning and security workflows, architecture refactoring is a design task, and a popularity prediction is not an operational requirement. An orchestrator can integrate scanners without making scanning its main purpose.",
+      "ko": "오케스트레이션은 많은 컨테이너의 배치, 확장·축소, 복구, 생명주기 관리를 자동화합니다. 이미지 취약점 평가는 스캔과 보안 작업에 속하고 구조 변경은 설계 작업이며 유행 예측은 운영상 요구가 아닙니다. 오케스트레이터가 스캐너와 연동할 수 있더라도 스캔이 주요 목적이 되는 것은 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/overview/"
+  },
+  {
+    "id": "local-597",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Pod shared resource pair · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which pair of resources is shared by containers in the same Pod?",
+      "ko": "같은 Pod의 컨테이너가 공유하는 리소스 조합은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Network resources and liveness probes",
+        "Storage and a container image registry",
+        "Storage and network resources",
+        "Network resources and Dockerfiles"
+      ],
+      "ko": [
+        "네트워크 리소스와 liveness probe",
+        "스토리지와 컨테이너 이미지 레지스트리",
+        "스토리지와 네트워크 리소스",
+        "네트워크 리소스와 Dockerfile"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "Containers in a Pod share a network namespace and can access shared Pod volumes. Storage here means configured shared volumes, not automatically shared writable container filesystems or an image registry. Liveness probes are configured per container, and Dockerfiles are build inputs rather than a Pod runtime resource.",
+      "ko": "Pod의 컨테이너는 네트워크 네임스페이스를 공유하고 공유 Pod 볼륨에 접근할 수 있습니다. 여기서 스토리지는 설정된 공유 볼륨을 뜻하며 컨테이너의 쓰기 가능한 파일시스템이 자동으로 공유되거나 이미지 레지스트리를 공유한다는 뜻은 아닙니다. liveness probe는 컨테이너별로 설정되고 Dockerfile은 Pod 런타임 리소스가 아니라 빌드 입력입니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/workloads/pods/"
+  },
+  {
+    "id": "local-599",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Resource Metrics API group identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which API group exposes resource metrics supplied by metrics-server?",
+      "ko": "metrics-server가 제공하는 리소스 메트릭을 노출하는 API 그룹은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "custom.k8s.io",
+        "resources.k8s.io",
+        "metrics.k8s.io",
+        "cadvisor.k8s.io"
+      ],
+      "ko": [
+        "custom.k8s.io",
+        "resources.k8s.io",
+        "metrics.k8s.io",
+        "cadvisor.k8s.io"
+      ]
+    },
+    "answer": 2,
+    "explain": {
+      "en": "metrics-server exposes Pod and Node resource metrics through metrics.k8s.io, used by kubectl top and resource-metric autoscaling. The separate custom-metrics API is custom.metrics.k8s.io, not custom.k8s.io. cAdvisor can supply container measurements but cadvisor.k8s.io is not this API group.",
+      "ko": "metrics-server는 kubectl top과 리소스 메트릭 기반 자동 확장에서 사용하는 Pod·Node 메트릭을 metrics.k8s.io를 통해 제공합니다. 별도의 사용자 정의 메트릭 API는 custom.k8s.io가 아니라 custom.metrics.k8s.io입니다. cAdvisor가 컨테이너 측정값을 제공할 수 있지만 cadvisor.k8s.io는 이 API 그룹이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/"
+  },
+  {
+    "id": "local-602",
+    "exam": "kcna",
+    "domain": "Container Orchestration",
+    "subtopic": "Default security habit · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which is a recommended default container-security habit in Kubernetes?",
+      "ko": "Kubernetes에서 기본 컨테이너 보안 습관으로 권장되는 것은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Run containers with group ID 0 (root) and any user ID",
+        "Disallow privilege escalation from within containers by default",
+        "Run containers with user ID 0 (root) and any group ID",
+        "Allow privilege escalation from within containers by default"
+      ],
+      "ko": [
+        "컨테이너를 그룹 ID 0(root)과 임의의 사용자 ID로 실행한다",
+        "컨테이너 내부의 권한 상승을 기본 정책으로 금지한다",
+        "컨테이너를 사용자 ID 0(root)과 임의의 그룹 ID로 실행한다",
+        "컨테이너 내부의 권한 상승을 기본 정책으로 허용한다"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "Prefer least privilege and deny privilege escalation in the default security policy. For ordinary Linux containers, allowPrivilegeEscalation: false controls no_new_privs; Kubernetes does not automatically set this false for every container. UID 0 is not a least-privilege default. GID 0 is not itself equivalent to UID 0, but selecting the root group with an unrestricted user ID is not a general Kubernetes hardening rule.",
+      "ko": "최소 권한을 우선하고 기본 보안 정책에서 권한 상승을 금지하는 것이 권장됩니다. 일반 Linux 컨테이너에서 allowPrivilegeEscalation: false는 no_new_privs를 제어하지만 Kubernetes가 모든 컨테이너에 자동으로 false를 설정하는 것은 아닙니다. UID 0은 최소 권한 기본값이 아닙니다. GID 0 자체가 UID 0과 같은 것은 아니지만 root 그룹과 제한 없는 사용자 ID를 선택하는 것도 일반적인 Kubernetes 보안 강화 규칙은 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+  },
+  {
+    "id": "local-603",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Traditional observability pillars · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which are the pillars in the traditional three-pillars model of observability?",
+      "ko": "관측성의 전통적인 세 가지 기둥 모델에 해당하는 것은 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "Metrics, logs, and traces",
+        "Metrics, logs, and spans",
+        "Metrics, data, and traces",
+        "Resources, logs, and tracing"
+      ],
+      "ko": [
+        "메트릭, 로그, 트레이스",
+        "메트릭, 로그, 스팬",
+        "메트릭, 데이터, 트레이스",
+        "리소스, 로그, 트레이싱"
+      ]
+    },
+    "answer": 0,
+    "explain": {
+      "en": "The traditional model names metrics, logs and traces. A span represents a unit of work within a trace rather than a replacement name for the trace signal. Data and resources are broader categories, not the standard three names. This model is not a claim that these are the only possible telemetry signals or that collecting them alone guarantees observability.",
+      "ko": "전통적인 모델은 메트릭, 로그, 트레이스를 지칭합니다. 스팬은 트레이스 안에서 하나의 작업 단위를 나타내며 트레이스 신호의 대체 명칭이 아닙니다. 데이터와 리소스는 더 넓은 범주이지 표준적인 세 가지 이름이 아닙니다. 이 모델이 가능한 텔레메트리 신호가 이 셋뿐이라거나 이들을 수집하기만 하면 관측성이 보장된다는 뜻은 아닙니다."
+    },
+    "ref": "https://opentelemetry.io/docs/concepts/observability-primer/"
+  },
+  {
+    "id": "local-604",
+    "exam": "kcna",
+    "domain": "Cloud Native Architecture",
+    "subtopic": "Envoy project identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which edge and service proxy is designed for cloud-native applications?",
+      "ko": "클라우드 네이티브 애플리케이션을 위해 설계된 에지·서비스 프록시는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "CoreDNS",
+        "CNI",
+        "gRPC",
+        "Envoy"
+      ],
+      "ko": [
+        "CoreDNS",
+        "CNI",
+        "gRPC",
+        "Envoy"
+      ]
+    },
+    "answer": 3,
+    "explain": {
+      "en": "Envoy is a high-performance edge and service proxy used with cloud-native applications. CoreDNS is a DNS server, CNI defines container-networking interfaces, and gRPC is an RPC framework. These other projects can participate in application networking without being the specified edge/service proxy.",
+      "ko": "Envoy는 클라우드 네이티브 애플리케이션에 사용하는 고성능 에지·서비스 프록시입니다. CoreDNS는 DNS 서버, CNI는 컨테이너 네트워킹 인터페이스, gRPC는 RPC 프레임워크입니다. 나머지도 애플리케이션 네트워킹에 참여할 수 있지만 질문에서 지정한 에지·서비스 프록시는 아닙니다."
+    },
+    "ref": "https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy"
+  },
+  {
+    "id": "local-577",
+    "exam": "kcna",
+    "domain": "Kubernetes Fundamentals",
+    "subtopic": "Node-health controller identification · 자체 연습",
+    "difficulty": "easy",
+    "style": "exam",
+    "q": {
+      "en": "Which control-plane component updates the Node Ready condition when a node becomes unreachable?",
+      "ko": "노드에 연결할 수 없게 되면 Node의 Ready 조건을 갱신하는 제어 영역 구성 요소는 무엇입니까?"
+    },
+    "choices": {
+      "en": [
+        "kube-oroxy",
+        "The node controller",
+        "kubelct",
+        "kube-apiserver"
+      ],
+      "ko": [
+        "kube-oroxy",
+        "노드 컨트롤러",
+        "kubelct",
+        "kube-apiserver"
+      ]
+    },
+    "answer": 1,
+    "explain": {
+      "en": "The node controller, running within kube-controller-manager, monitors node health and updates Ready to Unknown when a node is unreachable. It writes the update through the API server; the API server is not the health-reconciliation controller. The unusual kube-oroxy and kubelct labels are preserved source spellings, not standard component names.",
+      "ko": "kube-controller-manager 안에서 실행되는 노드 컨트롤러는 노드 상태를 감시하며 노드에 연결할 수 없으면 Ready를 Unknown으로 갱신합니다. 갱신은 API 서버를 통해 기록하지만 API 서버 자체가 노드 상태 조정 컨트롤러는 아닙니다. kube-oroxy와 kubelct는 원문의 철자를 보존한 것으로 표준 구성 요소 이름이 아닙니다."
+    },
+    "ref": "https://kubernetes.io/docs/concepts/architecture/nodes/"
   }
 ];

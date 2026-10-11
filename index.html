@@ -8,28 +8,44 @@
 :root{--bg:#0f1115;--panel:#171a21;--line:#262b36;--fg:#e6e6e6;--mute:#8b93a5;--ok:#2ea043;--bad:#d9534f;--acc:#c9a227;--sel:#2b3a55}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",Segoe UI,Roboto,sans-serif}
-header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
-header h1{font-size:16px;margin:0 12px 0 0;color:var(--acc)}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px}
+header h1{font-size:16px;margin:0;color:var(--acc);white-space:nowrap}
+header .header-inner{max-width:868px;margin:0 auto}
+.header-top{display:flex;gap:10px;align-items:center}
+#quizControls{display:grid;grid-template-columns:160px minmax(220px,1fr) auto;gap:8px;align-items:center;margin-top:8px}
+#quizControls select,#quizControls button{min-height:44px}
+#quizControls select{width:100%;min-width:0}
+.study-settings{position:relative}
+.study-settings>summary{min-height:44px;padding:10px;border:1px solid var(--line);border-radius:6px;cursor:pointer;color:var(--mute);white-space:nowrap}
+.settings-panel{position:absolute;right:0;top:calc(100% + 8px);width:min(360px,calc(100vw - 32px));padding:16px;display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.settings-panel label{display:grid;gap:4px;color:var(--mute);font-size:12px}
+.settings-panel select,.settings-panel button{min-height:44px;width:100%;min-width:0}
+.settings-panel select{font-size:14px}
+#reset{background:transparent;color:var(--mute)}
 select,button{background:#1f232d;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
 button:hover,select:hover{border-color:#3b4356}
 button.primary{background:var(--acc);color:#111;border-color:var(--acc);font-weight:600}
 button:disabled{opacity:.45;cursor:default}
 label.sw{display:flex;gap:6px;align-items:center;color:var(--mute);font-size:13px}
-main{max-width:900px;margin:0 auto;padding:20px 16px 80px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:16px}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
-.stat b{display:block;font-size:20px}
-.stat span{color:var(--mute);font-size:12px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;overflow-wrap:anywhere}
-.meta{display:flex;flex-wrap:wrap;gap:8px;color:var(--mute);font-size:12px;margin-bottom:10px}
-.meta .tag{border:1px solid var(--line);border-radius:999px;padding:1px 9px}
-.meta .tag.d-easy{color:#7ccf8a}.meta .tag.d-medium{color:#e0c069}.meta .tag.d-hard{color:#f08a8a}
-.q{font-size:17px;margin:0 0 14px;white-space:pre-wrap}
+main{max-width:900px;margin:0 auto;padding:16px 16px 80px}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.stat{padding:0}
+.stat b{display:block;font-size:16px}
+.stat span{display:block;color:var(--mute);font-size:11px}
+.stat:nth-child(n+4) b{color:var(--mute)}
+.practice-note{margin:0 0 12px;font-size:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--mute);font-size:12px;margin-bottom:16px}
+.meta .tag{border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+.meta .question-domain{flex:1;min-width:0}
+.meta .question-id{font-size:11px;border:0;padding:0}
+.meta .question-position{font-variant-numeric:tabular-nums}
+.q{font-size:18px;line-height:1.65;margin:0 0 18px;white-space:pre-wrap}
 .q .primary{display:block}
 .translation{display:none;color:#cfd6e6;font-size:.94em;margin-top:3px}
 .translation.visible{display:block}
 .choices{display:grid;gap:8px;margin:0;padding:0;list-style:none}
-.choices li{border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 42px;position:relative;cursor:pointer;background:#13161d}
+.choices li{border:1px solid var(--line);border-radius:8px;padding:13px 14px 13px 60px;min-height:60px;position:relative;cursor:pointer;background:#13161d;line-height:1.6}
 .choices li:hover{border-color:#3b4356}
 .choices li .k{position:absolute;left:12px;top:10px;width:22px;height:22px;border-radius:50%;background:#262b36;color:var(--mute);font-size:12px;display:flex;align-items:center;justify-content:center}
 .choices li.sel{background:var(--sel);border-color:#4a6aa5}
@@ -66,15 +82,16 @@ main{max-width:900px;margin:0 auto;padding:20px 16px 80px}
 .pass{color:var(--ok)}.fail{color:var(--bad)}
 .hidden{display:none!important}
 [hidden]{display:none!important}
-.study-tabs{display:flex;gap:8px;margin-bottom:18px}
-.study-tabs button{min-height:44px;flex:1}
-.study-tabs button[aria-selected="true"]{background:var(--acc);color:#111;font-weight:600}
-body[data-view="vocabulary"] header>select,body[data-view="vocabulary"] header>.language-buttons,body[data-view="vocabulary"] #historyButton,body[data-view="vocabulary"] #reset{display:none}
+.study-tabs{display:flex;gap:4px;margin-left:auto}
+.study-tabs button{min-height:44px;padding:8px 12px;background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;color:var(--mute)}
+.study-tabs button[aria-selected="true"]{color:var(--acc);border-bottom-color:var(--acc);font-weight:600}
+#vocabularyCount{font-size:12px}
+body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySettings{display:none}
 .vocabulary-word{display:inline;padding:0;margin:0;border:0;border-radius:2px;background:transparent;color:inherit;font:inherit;line-height:inherit;max-width:100%;overflow-wrap:anywhere;vertical-align:baseline}
-.vocabulary-word:hover,.vocabulary-word.saved{color:var(--acc);text-decoration:underline;text-underline-offset:3px}
+.vocabulary-word.saved{text-decoration:underline dotted var(--mute);text-underline-offset:4px}
+.vocabulary-word:hover{color:var(--acc);text-decoration:underline;text-underline-offset:4px}
 .vocabulary-word:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.choices li{padding-left:60px;min-height:60px}
-.choices li button.k{left:6px;top:6px;width:44px;height:44px;padding:0;border:1px solid var(--line)}
+.choices li button.k{left:8px;top:8px;width:44px;height:44px;padding:0;border:0;border-radius:6px;background:transparent;font-size:14px}
 .vocabulary-notice{position:fixed;z-index:10;left:16px;right:16px;bottom:16px;max-width:600px;margin:0 auto;background:var(--panel);border:1px solid var(--acc);border-radius:8px;padding:12px 16px;pointer-events:none}
 .vocabulary-toolbar,.vocabulary-actions,.vocabulary-entry-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .vocabulary-toolbar input{flex:1;min-width:160px}
@@ -93,26 +110,59 @@ body[data-view="vocabulary"] header>select,body[data-view="vocabulary"] header>.
 #vocabularyPanel a{color:#7aa7ff}
 .vocabulary-study-word{font-size:30px;color:var(--acc);margin:8px 0}
 .vocabulary-study-answer{border-left:3px solid var(--acc);padding-left:14px;margin:20px 0}
-@media(max-width:600px){header{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:center}header h1,header .language-buttons{grid-column:1/-1}header select,header button,.actions button,.actions select{min-height:44px;padding:9px 12px;width:100%}.language-buttons button{width:auto}.dom{grid-template-columns:1fr 90px 60px}.history-row{align-items:flex-start;flex-direction:column}}
+@media(max-width:600px){
+  header{position:static;padding:8px 16px}
+  header h1{font-size:14px}
+  .header-top{gap:6px}
+  .study-tabs{gap:2px}
+  .study-tabs button{padding:8px;font-size:13px}
+  .study-settings>summary{padding:10px 8px;font-size:12px}
+  .timer{font-size:13px}
+  #quizControls{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #quizControls #exam{grid-column:1;grid-row:1}
+  #quizControls .language-buttons{grid-column:2;grid-row:1;justify-content:flex-end}
+  #quizControls #mode{grid-column:1/-1;grid-row:2}
+  .language-buttons{font-size:12px}
+  .language-buttons button{padding:6px 8px;font-size:13px}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:8px}
+  .card{padding:16px}
+  .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .actions button,.actions select{min-height:44px;width:100%}
+  .actions .hint{grid-column:1/-1;margin-left:0}
+  .dom{grid-template-columns:1fr 90px 60px}
+  .history-row{align-items:flex-start;flex-direction:column}
+}
 </style>
 </head>
 <body>
 <header>
-  <h1>KCNA / KCSA</h1>
-  <select id="exam"><option value="local-kcna">KCNA</option><option value="local-kcsa">KCSA</option><option value="local">KCNA + KCSA</option></select>
-  <select id="mode"><option value="endless">끝없이 (즉시 해설)</option><option value="wrong">오답만 다시</option><option value="exam">모의고사 60문항 / 90분</option></select>
-  <select id="domain"><option value="">전체 도메인</option></select>
-  <select id="style"><option value="">전체 유형</option><option value="exam">객관식 연습</option><option value="study">심화형 (시나리오)</option></select>
-  <span class="language-buttons" role="group" aria-label="번역 언어"><span>번역 언어</span><button id="target-ko" type="button" aria-pressed="true">한국어</button><button id="target-en" type="button" aria-pressed="false">English</button></span>
-  <span id="timer" class="timer hidden"></span>
-  <button id="historyButton" class="primary" type="button" aria-controls="history" aria-expanded="false">시험 기록</button>
-  <button id="reset" type="button" title="이 시험의 진행 통계 삭제">통계 초기화</button>
+  <div class="header-inner">
+    <div class="header-top">
+      <h1>KCNA / KCSA</h1>
+      <nav id="studyTabs" class="study-tabs" role="tablist" aria-label="학습 화면"><button id="quizTab" type="button" role="tab" aria-selected="true" aria-controls="quizPanel">퀴즈</button><button id="vocabularyTab" type="button" role="tab" aria-selected="false" aria-controls="vocabularyPanel" tabindex="-1">단어장 <span id="vocabularyCount">0</span></button></nav>
+      <span id="timer" class="timer hidden"></span>
+      <details id="studySettings" class="study-settings">
+        <summary>설정</summary>
+        <div class="settings-panel">
+          <label>도메인<select id="domain"><option value="">전체 도메인</option></select></label>
+          <label>문항 유형<select id="style"><option value="">전체 유형</option><option value="exam">객관식 연습</option><option value="study">심화형 (시나리오)</option></select></label>
+          <button id="historyButton" type="button" aria-controls="history" aria-expanded="false">시험 기록</button>
+          <button id="reset" type="button" title="이 시험의 진행 통계 삭제">통계 초기화</button>
+        </div>
+      </details>
+    </div>
+    <div id="quizControls">
+      <select id="exam" aria-label="학습할 시험"><option value="local-kcna">KCNA</option><option value="local-kcsa">KCSA</option><option value="local">KCNA + KCSA</option></select>
+      <select id="mode" aria-label="문제풀이 모드"><option value="endless">끝없이 (즉시 해설)</option><option value="wrong">오답만 다시</option><option value="exam">모의고사 60문항 / 90분</option></select>
+      <span class="language-buttons" role="group" aria-label="번역 언어"><span>번역</span><button id="target-ko" type="button" aria-pressed="true">한국어</button><button id="target-en" type="button" aria-pressed="false">English</button></span>
+    </div>
+  </div>
 </header>
 <main>
-  <nav id="studyTabs" class="study-tabs" role="tablist" aria-label="학습 화면"><button id="quizTab" type="button" role="tab" aria-selected="true" aria-controls="quizPanel">퀴즈</button><button id="vocabularyTab" type="button" role="tab" aria-selected="false" aria-controls="vocabularyPanel" tabindex="-1">단어장 <span id="vocabularyCount">0</span></button></nav>
   <div id="quizPanel" role="tabpanel" aria-labelledby="quizTab">
-  <p class="status">제공 자료와 자체 작성 연습문제가 섞여 있습니다. 공식 기출 여부와 실전 난이도가 검증된 문제은행은 아닙니다.</p>
+  <p class="status practice-note">학습용 연습문항 · 공식 기출·실전 난이도는 검증되지 않았습니다.</p>
   <div class="stats" id="stats"></div>
+  <p id="seenNotice" class="status hidden" role="status"></p>
   <div class="card" id="card"></div>
   <div class="domains" id="domains"></div>
   <div class="result card hidden" id="result"></div>
@@ -120,8 +170,8 @@ body[data-view="vocabulary"] header>select,body[data-view="vocabulary"] header>.
   </div>
   <section id="vocabularyPanel" class="card" role="tabpanel" aria-labelledby="vocabularyTab" hidden>
     <h2>개인 영단어장</h2>
-    <p class="status">문제·보기·해설의 영단어를 누르면 단어와 한영 예문이 저장됩니다. 일반 영영사전 뜻을 조회하며, 한국어 뜻은 직접 적을 수 있습니다.</p>
-    <p class="status">단어장은 이 브라우저에 저장됩니다. 모의고사 중 탭을 바꿔도 제한 시간은 계속 흐릅니다.</p>
+    <p class="status">영단어 클릭으로 추가하고, 다시 클릭하면 삭제합니다. 일반 영영사전의 영어 뜻을 조회하며 한국어 뜻은 직접 적을 수 있습니다.</p>
+    <p class="status">이 브라우저에만 저장됩니다. 모의고사 시간은 탭을 바꿔도 계속 흐릅니다.</p>
     <div id="vocabularyBrowse">
       <div class="vocabulary-toolbar"><input id="vocabularySearch" type="search" aria-label="단어·한국어 뜻 검색" placeholder="단어·한국어 뜻 검색"><select id="vocabularyFilter" aria-label="단어 학습 상태"><option value="all">전체 단어</option><option value="learning">복습할 단어</option><option value="known">학습 완료</option></select><button id="startVocabularyReview" type="button" class="primary">현재 목록 복습</button></div>
       <p id="vocabularySummary" class="status" aria-live="polite"></p>
@@ -131,8 +181,8 @@ body[data-view="vocabulary"] header>select,body[data-view="vocabulary"] header>.
   </section>
   <div id="vocabularyNotice" class="vocabulary-notice hidden" role="status" aria-live="polite"></div>
 </main>
-<script src="local/local.js?v=20261010-vocabulary"></script>
-<script src="vocabulary.js?v=20261010-vocabulary"></script>
+<script src="local/local.js?v=20261011-checkpoint180"></script>
+<script src="vocabulary.js?v=20261011-checkpoint180"></script>
 <script>
 (() => {
 const BANKS = window.QUIZ_BANKS || {};
@@ -149,6 +199,28 @@ const statsKey = () => "quiz:stats:" + el.exam.value;
 let stats = {};
 const loadStats = () => { try { stats = JSON.parse(localStorage.getItem(statsKey()) || "{}"); } catch { stats = {}; } };
 const saveStats = () => localStorage.setItem(statsKey(), JSON.stringify(stats));
+const SEEN_KEY = "quiz:seen:local", seenIds = new Set();
+let seenError = "";
+try {
+  const saved = localStorage.getItem(SEEN_KEY);
+  const ids = saved == null
+    ? ["local-kcna", "local-kcsa", "local"].flatMap(key => Object.keys(JSON.parse(localStorage.getItem("quiz:stats:" + key) || "{}"))).filter(id => /^local-\d+$/.test(id))
+    : JSON.parse(saved);
+  if (!Array.isArray(ids)) throw new Error("본 문항 기록 형식이 올바르지 않습니다.");
+  for (const id of ids) if (typeof id === "string") seenIds.add(id);
+} catch (e) { seenError = e.message; }
+function saveSeen() {
+  if (!seenError) {
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify([...seenIds])); }
+    catch (e) { seenError = e.message; }
+  }
+  const notice = $("#seenNotice");
+  notice.classList.toggle("hidden", !seenError);
+  notice.textContent = seenError ? `본 문항 기록 저장 실패: ${seenError}. 이번 화면의 기록만 사용합니다.` : "";
+}
+function markSeen(q) {
+  if (!seenIds.has(q.id)) { seenIds.add(q.id); saveSeen(); }
+}
 
 const base = () => {
   const s = el.style.value;
@@ -162,19 +234,19 @@ function pool() {
   return p;
 }
 
-// Weighted pick: unseen 3, last wrong 4, streak>=3 0.3, else 1. Never the same question twice in a row.
+// After unseen questions are exhausted, favor mistakes and avoid an immediate repeat.
 let lastId = null;
 function pick(p) {
   if (!p.length) return null;
   let total = 0;
   const w = p.map(q => {
     const s = stats[q.id];
-    let x = !s ? 3 : s.lastWrong ? 4 : s.streak >= 3 ? 0.3 : 1;
+    let x = s?.lastWrong ? 4 : s?.streak >= 3 ? 0.3 : 1;
     if (q.id === lastId && p.length > 1) x = 0;
     total += x; return x;
   });
   let r = Math.random() * total;
-  for (let i = 0; i < p.length; i++) { r -= w[i]; if (r <= 0) return p[i]; }
+  for (let i = 0; i < p.length; i++) { r -= w[i]; if (w[i] > 0 && r <= 0) return p[i]; }
   return p[p.length - 1];
 }
 
@@ -189,6 +261,7 @@ const bi = (en, ko, tag = "span", show = false) => {
 
 // ---- state ----
 let cur = null, order = null, locked = false, currentPicked = null;
+let endlessItems = [], endlessIndex = -1;
 let exam = null; // {items:[{q,order,picked}], idx, endAt, timerId}
 let historyDB = null, historyRecords = [], historyError = "", viewedAttempt = null, viewedAll = false, reviewOverrides = new Map(), attemptSave = null;
 const HISTORY_DB = "kcna-kcsa-history", HISTORY_STORE = "attempts";
@@ -233,13 +306,14 @@ function renderHistory() {
 function closeHistoryView() {
   viewedAttempt = null; viewedAll = false; reviewOverrides.clear();
   el.result.classList.add("hidden"); el.history.classList.add("hidden"); el.historyButton.setAttribute("aria-expanded", "false");
-  (cur ? el.card : el.historyButton).scrollIntoView({ behavior: "smooth", block: "start" });
+  (cur ? el.card : $("#studySettings")).scrollIntoView({ behavior: "smooth", block: "start" });
   if (cur) el.card.querySelector("#next, #translationToggle")?.focus();
+  else $("#studySettings>summary").focus();
 }
 
 function renderStats() {
   const p = base();
-  const seen = p.filter(q => stats[q.id]).length;
+  const seen = p.filter(q => seenIds.has(q.id)).length;
   let right = 0, total = 0, streak = 0;
   for (const q of p) { const s = stats[q.id]; if (!s) continue; right += s.right; total += s.right + s.wrong; }
   for (const id of (stats.__recent || [])) { if (stats[id] && !stats[id].lastWrong) streak++; else break; }
@@ -267,7 +341,7 @@ function fillDomains() {
 function renderQuestion(q, ord, picked, reveal) {
   const examTag = q.exam === "kcna" || q.id.startsWith("kcna") ? "KCNA" : q.exam === "kcsa" || q.id.startsWith("kcsa") ? "KCSA" : "개인";
   const html = `
-    <div class="meta"><span class="tag">${examTag}</span><span class="tag">${esc(q.domain)}</span><span class="tag">${esc(q.subtopic || "")}</span><span class="tag d-${q.difficulty}">${q.difficulty}</span><span class="tag">${q.style === "exam" ? "객관식 연습" : "심화형"}</span><span class="tag">${q.id}</span>${exam ? `<span class="tag">${exam.idx + 1} / ${exam.items.length}</span>` : ""}</div>
+    <div class="meta"><span class="tag">${examTag}</span><span class="question-domain">${esc(q.domain)}</span><span class="tag question-id">${q.id}</span>${exam ? `<span class="tag question-position">${exam.idx + 1} / ${exam.items.length}</span>` : endlessItems.length ? `<span class="question-position">${endlessIndex + 1} / ${endlessItems.length}</span>` : ""}</div>
     <p class="q">${bi(q.q.en, q.q.ko, "span", translationShown)}</p>
     <ol class="choices">${ord.map((ci, i) => {
       let cls = "";
@@ -283,30 +357,42 @@ function renderQuestion(q, ord, picked, reveal) {
     <div class="actions">
       <button id="translationToggle" type="button" aria-expanded="${translationShown}" aria-pressed="${translationShown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${translationShown ? "숨기기" : "보기"}</button>
       ${exam ? `<button id="prev"${exam.idx === 0 ? " disabled" : ""}>이전</button><button id="next" class="primary">${exam.idx === exam.items.length - 1 ? "제출" : "다음"}</button>`
-             : `<button id="next" class="primary"${reveal ? "" : " disabled"}>다음 문제 (Enter)</button><button id="skip">건너뛰기</button>`}
-      <span class="hint">영단어 클릭: 단어장 저장 · 보기 번호 또는 빈 공간: 답 선택 · 1–4 키${exam ? "" : " · Enter 다음"}</span>
+             : `<button id="prev"${endlessIndex <= 0 ? " disabled" : ""}>이전</button><button id="next" class="primary"${reveal || endlessIndex < endlessItems.length - 1 ? "" : " disabled"}>다음 문제</button>${!reveal && endlessIndex === endlessItems.length - 1 ? `<button id="skip">건너뛰기</button>` : ""}`}
+      <span class="hint">영단어: 추가·삭제 · 보기 번호/빈 공간: 답 선택 · 1–4 키${exam ? "" : " · Enter 다음"}</span>
     </div>`;
   el.card.innerHTML = html;
   el.card.querySelectorAll(".choices li").forEach(li => li.addEventListener("click", () => choose(+li.dataset.ci)));
-  const tr = $("#translationToggle"); if (tr) tr.addEventListener("click", () => { translationShown = !translationShown; renderQuestion(cur, order, picked, reveal); $("#translationToggle")?.focus(); });
+  const tr = $("#translationToggle"); if (tr) tr.addEventListener("click", () => { translationShown = !translationShown; if (!exam && endlessItems[endlessIndex]) endlessItems[endlessIndex].translationShown = translationShown; renderQuestion(cur, order, picked, reveal); $("#translationToggle")?.focus(); });
   const n = $("#next"); if (n) n.addEventListener("click", next);
   const s = $("#skip"); if (s) s.addEventListener("click", () => { lastId = cur.id; nextEndless(); });
-  const pv = $("#prev"); if (pv) pv.addEventListener("click", () => { exam.idx--; showExamItem(); });
+  const pv = $("#prev"); if (pv) pv.addEventListener("click", () => { if (exam) { exam.idx--; showExamItem(); } else if (endlessIndex > 0) { endlessIndex--; showEndlessItem(); } });
 }
 
 // ---- endless / wrong-only ----
+function showEndlessItem() {
+  const it = endlessItems[endlessIndex];
+  cur = it.q; order = it.order; currentPicked = it.picked;
+  locked = it.picked != null; translationShown = it.translationShown;
+  markSeen(cur); renderStats();
+  renderQuestion(cur, order, currentPicked, locked);
+}
 function nextEndless() {
-  const p = pool();
-  translationShown = false;
-  locked = false;
-  currentPicked = null;
-  cur = pick(p);
-  if (!cur) {
+  if (endlessIndex < endlessItems.length - 1) { endlessIndex++; showEndlessItem(); return; }
+  if (cur) lastId = cur.id;
+  const p = pool(), unseen = el.mode.value === "endless" ? p.filter(q => !seenIds.has(q.id)) : [];
+  const q = pick(unseen.length ? unseen : p);
+  if (!q) {
+    if (endlessIndex >= 0) {
+      showEndlessItem();
+      $("#next").disabled = true;
+      return;
+    }
+    cur = null; order = null; currentPicked = null; locked = false;
     el.card.innerHTML = `<p class="q">${el.mode.value === "wrong" ? "현재 오답으로 남은 문항이 없습니다. 다른 모드를 선택하세요." : "이 조건에 해당하는 문항이 없습니다."}</p>`;
     return;
   }
-  order = shuffle([0, 1, 2, 3]);
-  renderQuestion(cur, order, null, false);
+  endlessItems.push({ q, order: shuffle(q.choices.en.map((_, i) => i)), picked: null, translationShown: false });
+  endlessIndex++; showEndlessItem();
 }
 
 function record(q, ok) {
@@ -322,27 +408,47 @@ function choose(ci) {
   if (locked) return;
   locked = true;
   currentPicked = ci;
+  endlessItems[endlessIndex].picked = ci;
   record(cur, ci === cur.answer);
   lastId = cur.id;
+  renderStats();
   renderQuestion(cur, order, ci, true);
 }
 
 function next() {
   if (exam) { if (exam.idx === exam.items.length - 1) finishExam(); else { exam.idx++; showExamItem(); } return; }
-  if (locked) nextEndless();
+  if (locked || endlessIndex < endlessItems.length - 1) nextEndless();
 }
 
 // ---- mock exam ----
+const MOCK_WEIGHTS = {
+  kcna: { "Kubernetes Fundamentals": 44, "Container Orchestration": 28, "Cloud Native Application Delivery": 16, "Cloud Native Architecture": 12 },
+  kcsa: { "Overview of Cloud Native Security": 14, "Kubernetes Cluster Component Security": 22, "Kubernetes Security Fundamentals": 22, "Kubernetes Threat Model": 16, "Platform Security": 16, "Compliance and Security Frameworks": 10 }
+};
 function sampleMockQuestions(p) {
   if (!p.length) return [];
   const total = Math.min(60, p.length), byDom = {};
   for (const q of p) (byDom[q.domain] ||= []).push(q);
-  const groups = Object.values(byDom).map(qs => {
-    const quota = total * qs.length / p.length;
-    return { qs, n: Math.floor(quota), remainder: quota % 1 };
-  }).sort((a, b) => b.remainder - a.remainder);
-  const remaining = total - groups.reduce((sum, g) => sum + g.n, 0);
-  for (let i = 0; i < remaining; i++) groups[i].n++;
+  const weights = MOCK_WEIGHTS[p[0].exam];
+  const groups = Object.entries(byDom).map(([domain, qs]) => ({ qs, weight: weights[domain], n: 0 }));
+  let active = groups.slice(), remaining = total;
+  while (active.length && remaining) {
+    const sum = active.reduce((n, g) => n + g.weight, 0);
+    const capped = active.filter(g => remaining * g.weight / sum >= g.qs.length);
+    if (capped.length) {
+      for (const g of capped) { g.n = g.qs.length; remaining -= g.n; }
+      active = active.filter(g => g.n < g.qs.length);
+      continue;
+    }
+    for (const g of active) {
+      const quota = remaining * g.weight / sum;
+      g.n = Math.floor(quota); g.remainder = quota % 1;
+    }
+    const extra = remaining - active.reduce((n, g) => n + g.n, 0);
+    active.sort((a, b) => b.remainder - a.remainder);
+    for (let i = 0; i < extra; i++) active[i].n++;
+    break;
+  }
   return groups.flatMap(g => shuffle(g.qs.slice()).slice(0, g.n));
 }
 function startExam() {
@@ -376,6 +482,7 @@ function showExamItem() {
   translationShown = false;
   locked = false;
   const it = exam.items[exam.idx]; currentPicked = it.picked; cur = it.q; order = it.order;
+  markSeen(cur); renderStats();
   renderQuestion(cur, order, it.picked, false);
 }
 function snapshotAttempt(items, right) {
@@ -407,9 +514,10 @@ function renderAttempt(attempt, allShown = false, options = {}) {
   const saveStatus = attemptSave && attemptSave.attempt === attempt
     ? `<p id="saveStatus" class="status">${attemptSave.status === "saving" ? "기록 저장 중…" : attemptSave.status === "saved" ? "기록 저장됨" : `기록 저장 실패: ${esc(attemptSave.error)}`}</p>` : "";
   el.result.classList.remove("hidden");
-  el.result.innerHTML = `${saveStatus}<h2 class="${attempt.percent >= 75 ? "pass" : "fail"}">${attempt.percent}% — ${attempt.percent >= 75 ? "PASS" : "FAIL"} (합격선 75%)</h2>
+  el.result.innerHTML = `${saveStatus}<h2 class="${attempt.percent >= 75 ? "pass" : "fail"}">${attempt.percent}% — ${attempt.percent >= 75 ? "PASS" : "FAIL"} (연습 기준 75%)</h2>
+    <p class="status">연습문제의 점수입니다. 실제 시험 합격 여부나 합격 확률을 뜻하지 않습니다.</p>
     <p>${attempt.right} / ${attempt.total} 정답 · ${esc(new Date(attempt.completedAt).toLocaleString())} · ${esc(attempt.examLabel)} · ${esc(attempt.domainContext)} · ${esc(attempt.styleContext)}</p>
-    ${examScores ? `<table id="examScores"><caption>시험별 결과 (합격선 75%)</caption><tr><th>시험</th><th>정답</th><th>%</th><th>결과</th></tr>${examScores}</table>` : ""}
+    ${examScores ? `<table id="examScores"><caption>시험별 연습 결과 (기준 75%)</caption><tr><th>시험</th><th>정답</th><th>%</th><th>결과</th></tr>${examScores}</table>` : ""}
     <table><tr><th>도메인</th><th>정답</th><th>%</th></tr>${Object.entries(byDom).map(([d, v]) => `<tr><td>${esc(d)}</td><td>${v.r}/${v.n}</td><td>${Math.round(100 * v.r / v.n)}%</td></tr>`).join("")}</table>
     <div class="review-actions"><button id="allTranslations" type="button" aria-expanded="${allShown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${allShown ? "숨기기" : "모두 보기"}</button><span class="status">각 문항에서도 번역을 열 수 있습니다.</span></div>
     ${attempt.items.map((it, i) => {
@@ -493,6 +601,7 @@ function start() {
   el.mode.querySelector('option[value="exam"]').textContent = `모의고사 ${maxQuestions}문항 / ${maxQuestions * 1.5}분`;
   if (exam) { clearInterval(exam.timerId); exam = null; el.timer.classList.add("hidden"); }
   viewedAttempt = null; attemptSave = null; el.result.classList.add("hidden");
+  endlessItems = []; endlessIndex = -1; lastId = null;
   loadStats(); fillDomains(); renderStats();
   if (el.mode.value === "exam") startExam(); else nextEndless();
 }
@@ -505,11 +614,17 @@ el.targetEn.addEventListener("click", () => setTarget("en"));
 el.historyButton.addEventListener("click", () => {
   const open = el.history.classList.toggle("hidden") === false;
   el.historyButton.setAttribute("aria-expanded", open);
+  $("#studySettings").open = false;
   if (open) loadHistory().then(() => { el.history.scrollIntoView({ behavior: "smooth", block: "start" }); el.history.querySelector("#closeHistory")?.focus(); });
 });
-el.reset.addEventListener("click", () => { if (confirm(`${el.exam.selectedOptions[0].text} 진행 통계를 삭제할까요?`)) { localStorage.removeItem(statsKey()); start(); } });
+el.reset.addEventListener("click", () => {
+  if (!confirm(`${el.exam.selectedOptions[0].text} 진행 통계와 본 문항 기록을 삭제할까요?`)) return;
+  localStorage.removeItem(statsKey());
+  for (const key of EXAMS[el.exam.value]) for (const q of BANKS[key] || []) seenIds.delete(q.id);
+  saveSeen(); start();
+});
 document.addEventListener("keydown", e => {
-  if (e.target.tagName === "SELECT" || e.target.tagName === "BUTTON") return;
+  if (e.target.closest("select,button,input,textarea,summary,a,[contenteditable]")) return;
   if ($("#quizPanel").hidden || viewedAttempt || !el.history.classList.contains("hidden")) return;
   if (/^[1-4]$/.test(e.key) && cur && order) { choose(order[+e.key - 1]); e.preventDefault(); }
   else if ((e.key === "Enter" || e.key === " ") && cur) { next(); e.preventDefault(); }

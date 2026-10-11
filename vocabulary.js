@@ -36,11 +36,19 @@ function save(next) {
 function update(word, changes) {
   return save(words.map(w => w.word === word ? { ...w, ...changes } : w));
 }
+function markWord(word, saved) {
+  const action = saved ? "단어장에서 제거" : "단어장에 추가";
+  document.querySelectorAll(`button[data-vocabulary-word="${CSS.escape(word)}"]`).forEach(button => {
+    button.classList.toggle("saved", saved);
+    button.title = `${button.textContent} — ${action}`;
+    button.setAttribute("aria-label", `${button.textContent} ${action}`);
+  });
+}
 function format(text) {
   return String(text).split(/([A-Za-z][A-Za-z0-9]*(?:['’\-][A-Za-z0-9]+)*)/g).map((part, i) => {
     if (!(i % 2)) return esc(part);
-    const word = normalize(part), saved = wordKeys.has(word);
-    return `<button type="button" class="vocabulary-word${saved ? " saved" : ""}" data-vocabulary-word="${esc(word)}" title="${esc(part)} — 단어장에 추가" aria-label="${esc(part)} 단어장에 추가">${esc(part)}</button>`;
+    const word = normalize(part), saved = wordKeys.has(word), action = saved ? "단어장에서 제거" : "단어장에 추가";
+    return `<button type="button" class="vocabulary-word${saved ? " saved" : ""}" data-vocabulary-word="${esc(word)}" title="${esc(part)} — ${action}" aria-label="${esc(part)} ${action}">${esc(part)}</button>`;
   }).join("");
 }
 function selectedWords() {
@@ -50,10 +58,10 @@ function selectedWords() {
 }
 function definition(w) {
   const state = lookupStates.get(w.word);
-  const message = state === "loading" ? "영영사전 조회 중…" : state === "missing" ? "사전에 없는 단어입니다. 문제 예문을 확인하고 한국어 뜻을 직접 적어 주세요." : state === "error" ? "사전 조회에 실패했습니다. 저장된 예문으로 공부하거나 뜻을 직접 적을 수 있습니다." : "영영사전 뜻을 아직 조회하지 않았습니다.";
+  const message = state === "loading" ? "영영사전 조회 중…" : state === "missing" ? "일반 영영사전에 이 단어의 뜻이 없습니다. 기술 용어는 포함되지 않을 수 있습니다." : state === "timeout" ? "영영사전 서버가 10초 안에 응답하지 않았습니다. 단어와 예문은 저장되어 있습니다." : state?.startsWith("http:") ? `외부 영영사전 서버 오류 (HTTP ${state.slice(5)}). 단어와 예문은 저장되어 있습니다.` : state?.startsWith("request:") ? `외부 영영사전 요청 실패: ${state.slice(8)}. 연결 문제나 브라우저 요청 제한 등은 이 메시지만으로 구분할 수 없습니다.` : state === "response" ? "영영사전 응답에서 뜻을 읽지 못했습니다. 단어와 예문은 저장되어 있습니다." : "일반 영영사전의 영어 뜻을 아직 조회하지 않았습니다. 한국어 뜻은 직접 적을 수 있습니다.";
   const source = typeof w.definitionSource === "string" && /^https?:\/\//i.test(w.definitionSource) ? `<a href="${esc(w.definitionSource)}" target="_blank" rel="noopener noreferrer">사전 출처</a>` : "";
   const license = w.definitionLicense && /^https?:\/\//i.test(w.definitionLicense.url || "") ? `<a href="${esc(w.definitionLicense.url)}" target="_blank" rel="noopener noreferrer">${esc(w.definitionLicense.name)}</a>` : "";
-  return w.definition ? `<p class="vocabulary-definition"><b>영영사전${w.partOfSpeech ? ` · ${esc(w.partOfSpeech)}` : ""}</b><br>${esc(w.definition)}</p><p class="status">${source} ${license}</p>` : `<p class="status">${message}</p>`;
+  return w.definition ? `<p class="vocabulary-definition"><b>영영사전${w.partOfSpeech ? ` · ${esc(w.partOfSpeech)}` : ""}</b><br>${esc(w.definition)}</p><p class="status">${source} ${license}</p>` : `<p class="status">${esc(message)}</p>`;
 }
 function renderList() {
   const active = document.activeElement;
@@ -67,7 +75,7 @@ function renderList() {
     ${definition(w)}
     <form class="vocabulary-meaning-form" data-word="${esc(w.word)}"><label>한국어 뜻·메모<input name="meaning" type="text" value="${esc(meaningDrafts.has(w.word) ? meaningDrafts.get(w.word) : w.meaning || "")}" placeholder="이 문장에서의 뜻을 적어 주세요"></label><button type="submit">뜻 저장</button></form>
     <details><summary>저장한 한영 예문</summary><p>${esc(w.contextEn)}</p><p>${esc(w.contextKo)}</p></details>
-    <div class="vocabulary-actions"><button type="button" data-vocabulary-action="study" data-word="${esc(w.word)}">이 단어 복습</button><button type="button" data-vocabulary-action="lookup" data-word="${esc(w.word)}"${lookupStates.get(w.word) === "loading" ? " disabled" : ""}>사전 뜻 조회</button><button type="button" data-vocabulary-action="delete" data-word="${esc(w.word)}">삭제</button></div>
+    <div class="vocabulary-actions"><button type="button" data-vocabulary-action="study" data-word="${esc(w.word)}">이 단어 복습</button><button type="button" data-vocabulary-action="lookup" data-word="${esc(w.word)}"${lookupStates.get(w.word) === "loading" ? " disabled" : ""}>영영사전 조회</button><button type="button" data-vocabulary-action="delete" data-word="${esc(w.word)}">삭제</button></div>
   </article>`).join("") : `<p class="status">${words.length ? "검색·필터 조건에 맞는 단어가 없습니다." : "문제·보기·해설의 영단어를 누르면 이곳에 저장됩니다."}</p>`;
   if (focusedWord) {
     const input = document.querySelector(`.vocabulary-meaning-form[data-word="${CSS.escape(focusedWord)}"] input`);
@@ -119,9 +127,15 @@ function setTab(vocabulary) {
 async function lookup(word) {
   if (lookupStates.get(word) === "loading") return;
   lookupStates.set(word, "loading"); refresh();
+  let response;
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { signal: AbortSignal.timeout(10000) });
-    if (!response.ok) { lookupStates.set(word, response.status === 404 ? "missing" : "error"); refresh(); return; }
+    response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, { signal: AbortSignal.timeout(10000) });
+  } catch (e) {
+    lookupStates.set(word, e.name === "TimeoutError" || e.name === "AbortError" ? "timeout" : `request:${e.message}`);
+    refresh(); return;
+  }
+  if (!response.ok) { lookupStates.set(word, response.status === 404 ? "missing" : `http:${response.status}`); refresh(); return; }
+  try {
     const entries = await response.json();
     let found;
     if (Array.isArray(entries)) {
@@ -133,9 +147,9 @@ async function lookup(word) {
         if (found) break;
       }
     }
-    lookupStates.set(word, found ? "found" : "missing");
+    lookupStates.set(word, found ? "found" : "response");
     if (found && wordKeys.has(word)) update(word, found);
-  } catch { lookupStates.set(word, "error"); }
+  } catch { lookupStates.set(word, "response"); }
   refresh();
 }
 
@@ -144,12 +158,20 @@ document.addEventListener("click", e => {
   if (!button) return;
   e.preventDefault(); e.stopPropagation();
   const word = button.dataset.vocabularyWord;
-  if (wordKeys.has(word)) { tell(`${button.textContent} — 이미 단어장에 있습니다.`); return; }
+  if (wordKeys.has(word)) {
+    if (save(words.filter(w => w.word !== word))) {
+      meaningDrafts.delete(word);
+      markWord(word, false);
+      tell(`${button.textContent} — 단어장에서 삭제했습니다.`);
+      refresh();
+    }
+    return;
+  }
   const context = button.closest("[data-vocabulary-context]");
   if (!context) return;
   const item = { word, display: button.textContent, meaning: "", definition: "", partOfSpeech: "", contextEn: context.dataset.contextEn, contextKo: context.dataset.contextKo, known: false, addedAt: new Date().toISOString() };
   if (!save([...words, item])) return;
-  document.querySelectorAll(`button[data-vocabulary-word="${CSS.escape(word)}"]`).forEach(b => b.classList.add("saved"));
+  markWord(word, true);
   tell(`${item.display} — 단어장에 저장했습니다.`);
   lookup(word);
 }, true);
@@ -191,7 +213,7 @@ panel.addEventListener("click", e => {
   } else if (action === "delete" && confirm(`${words.find(w => w.word === word)?.display || word}를 단어장에서 삭제할까요?`)) {
     if (save(words.filter(w => w.word !== word))) {
       meaningDrafts.delete(word);
-      document.querySelectorAll(`button[data-vocabulary-word="${CSS.escape(word)}"]`).forEach(b => b.classList.remove("saved"));
+      markWord(word, false);
       renderList();
     }
   }
