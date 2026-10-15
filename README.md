@@ -1,8 +1,8 @@
-# Kubernetes Quiz
+# KCNA / KCSA Quiz
 
-[Open the bilingual KCNA/KCSA quiz](https://hancheo.github.io/kubernetes-quiz/).
+[Open the English-first KCNA / KCSA quiz](https://hancheo.github.io/kcna-kcsa-quiz/).
 
-**562 questions: 252 unchanged KCNA + 310 fully replaced KCSA.** No question from the former 202-record KCSA pool remains live. Existing factual IDs, learner storage, vocabulary and saved attempts are not reset or repurposed.
+**562 questions: 252 unchanged KCNA + 310 fully replaced KCSA.** English question text is the immutable original; Korean and any future data-backed locales are translations selected for question content only. Existing factual IDs, learner storage, vocabulary and saved attempts are not reset or repurposed.
 
 This is unofficial study practice, not authenticated past-exam content, an empirically calibrated difficulty benchmark or a pass-probability predictor. The retained KCNA material still includes the wider cloud-native/CNCF ecosystem; historical and protected source limitations remain applicable.
 
@@ -16,11 +16,26 @@ New IDs use `kcsa-mock-<three-digit upstream ID>`, preserving upstream gaps. Eng
 
 Two explanation-only corrections apply to `kcsa-mock-254` and `kcsa-mock-255`: denial of performed actions is **Repudiation**, not Denial of Service, in [Microsoft's STRIDE model](https://learn.microsoft.com/en-us/azure/security/develop/secure-design). Their questions, choices and answer keys are unchanged. Other explanations and keys remain community-source content, not an independently verified 310-question semantic audit. Some command alternatives and broad security-model wording can be ambiguous or version-dependent; compare primary references rather than treating preserved grading as authoritative.
 
+## Question contributions and PRs
+
+`local/local.js` is the runtime question-bank source published to the browser. Add or edit questions there and include that file in the PR. KCNA uses four choices and one answer index; KCSA uses five choices and either one answer index or a unique array of 2–4 answer indexes. Keep English and each translated question, choice, and explanation order aligned, and include an official HTTPS `ref` that supports the answer.
+
+New original questions must use the next unused `local-<number>` ID across the bank. `kcsa-mock-*` IDs are reserved for the imported KCSA source and must not be reassigned. Do not copy exam dumps, leaked questions or question banks without redistribution rights. State provenance and license in the PR description; do not add a separate license file without a project decision.
+
+The quiz defaults to the English original. **Question translation** is a question-only selector discovered from locale keys present in the bank; it does not translate the page UI. English source text and answer keys are read-only. In the browser, select a locale, expand the translation editor, save a draft locally, and export a version-1 JSON patch. Local drafts stay in `quiz:translation-overrides:v1`; they do not change the shared bank until reviewed and applied to `local/local.js` in a PR. For a new language, author genuine `q.<tag>`, `choices.<tag>`, and `explain.<tag>` fields directly in the bank first; the apply tool accepts only locale tags already present there.
+
+```sh
+python3 tools/apply-translation-patch.py translation-patch.json
+python3 tools/validate-question-bank.py
+```
+
+Fork the repository, create a branch, edit the runtime bank, run the checks, commit and push the branch, then open a GitHub PR. Describe the exam, domain, provenance/license and official references, and verify English and changed-locale rendering plus single- and multiple-answer grading in the browser.
+
 ## Choices and grading
 
 - Retained KCNA: four choices and a scalar answer index.
 - Imported KCSA: five choices; 278 single-answer and 32 multiple-answer questions. Multiple keys have sizes two (12 questions), three (17) or four (3).
-- Single-answer practice gives immediate feedback. Multiple-answer practice uses checkboxes, then **정답 확인**.
+- Single-answer practice gives immediate feedback. Multiple-answer practice uses checkboxes, then **Check answer**.
 - Multiple-answer grading requires exactly all correct choices and no extras, in any selection order. Subsets and extra selections receive no credit. An empty set is unanswered.
 - Number keys support the displayed choice count, including the fifth choice. Outside focused controls, Enter confirms an ungraded multiple-answer practice question; otherwise it advances.
 - Explicit option-number references in explanations follow the shuffled display order. Stored source explanation text and saved snapshots are not rewritten.
@@ -58,18 +73,14 @@ Storage is browser-and-origin local, with no server backup or cross-device synch
 
 ## Personal vocabulary
 
-Click an English word in a question, choice, explanation or saved review to toggle membership with its complete English/Korean context. Word clicks do not select or grade answers; use the choice control or an empty choice area. The vocabulary tab supports search, learning/known filters, editable Korean meanings/notes, confirmed deletion and reveal/self-rating cards. Vocabulary uses the separate `quiz:vocabulary` key.
+Click an English word in a question, choice, explanation or saved review to toggle membership with its complete English and translated context. Word clicks do not select or grade answers; use the choice control or an empty choice area. The vocabulary tab supports search, learning/known filters, editable meanings or notes, confirmed deletion and reveal/self-rating cards. Vocabulary uses the separate `quiz:vocabulary` key.
 
-[Free Dictionary API](https://dictionaryapi.dev/) supplies general English definitions, not automatic Korean or context-specific translations. Only the selected word is sent, not questions, contexts or notes. Successful responses retain attribution. The UI distinguishes missing words, HTTP errors, ten-second timeout, request failure and unreadable responses. Failed refreshes retain cached definitions; async updates preserve notes, focus and caret, and cannot restore a deleted word.
-
-**External verification limit:** real lookups for `counter`, `summary` and `sampler` timed out; a direct endpoint read returned HTTP 522. Controlled-response coverage is not real-provider success. No proxy or replacement provider was added. Offline saving, note editing and review remain usable.
+Wiktionary supplies general English definitions, not automatic translations or context-specific translations. Saving an English word from a question, choice, explanation, or saved review adds it to the Vocabulary tab without making a dictionary request. In Vocabulary, activate **Look up definition** (by click or keyboard activation) to request only that selected word from `https://en.wiktionary.org/api/rest_v1/page/definition/<word>`; pressing Enter in the meaning/note field saves the note instead of querying the dictionary. The UI distinguishes missing words and request errors; offline saving, note editing and review remain usable.
 
 ## Verification and publication
 
-The private and exact sanitized banks passed count, retained-KCNA equality, native question/option/key fidelity, ID-retirement, scalar/array bounds and public-schema validation. Actual UI scenarios exercised two/three/four-key exact sets, subsets, extras, empty selections, draft/graded restoration, word isolation and the fifth keyboard choice.
+Baseline verification (from the retained runtime) covered sanitized-bank counts and fidelity, ID retirement, scalar/array bounds, exact multi-answer cases, immutable snapshots, a 60-question KCSA mock, a mixed mock, and 390×844 checkbox rendering. Those historical smoke results are not learner performance measurements and are not claimed as a rerun for every contribution.
 
-The exact sanitized runtime completed a 60-question KCSA mock at 90:00 with 60/60, including six reverse-selected multiple-answer questions. A full mixed mock scored 117/120: one unanswered, one subset and one extra-selection case were the only misses. Array order, null unanswered picks, retired scalar history and byte-unchanged stored snapshots were verified. These are automated key-driven smoke scenarios, not learner performance measurements.
+Current integration checks cover English-first rendering, question-only locale discovery, English-baseline plus translated content, translation-editor local save/export/import boundaries, generic future-locale fallback, history translation toggles, Wiktionary success/not-found/offline cache behavior, no-auto-fetch word saving, note/caret preservation, word isolation, and staged Pages asset loading. The validator and patch tool checks are documented above and run in CI.
 
-Five real checkboxes and readable question metadata were exercised at a 390×844 Chromium viewport without horizontal overflow. This is viewport emulation, not physical-device testing.
-
-Only `index.html`, `vocabulary.js`, `local/local.js` and `README.md` are published. Each bank record contains exactly `id exam domain subtopic difficulty style q choices answer explain ref`, with only `en` and `ko` localized fields. Raw source material, private provenance, authoring, validation evidence and source-repository history are excluded. Script URLs use `v=20261011-kcsa310-multi` to refresh assets without clearing learner storage. Deployment uses the existing GitHub Pages workflow.
+Only `.nojekyll`, `index.html`, `vocabulary.js` and `local/local.js` are staged into the GitHub Pages artifact. Tools, contribution guidance, validation workflows and source material remain in the repository but are not published as site assets. Each bank record contains exactly `id exam domain subtopic difficulty style q choices answer explain ref`, with locale keys discovered from the data. Script URLs use `v=20261015-contributions` to refresh assets without clearing learner storage. Deployment uses the existing GitHub Pages workflow.

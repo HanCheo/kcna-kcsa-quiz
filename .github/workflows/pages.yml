@@ -22,10 +22,16 @@ jobs:
         uses: actions/checkout@v6
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Prepare Pages artifact
+        run: |
+          rm -rf _site
+          mkdir -p _site/local
+          cp .nojekyll index.html vocabulary.js _site/
+          cp local/local.js _site/local/
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: _site
   deploy:
     needs: build
     runs-on: ubuntu-latest

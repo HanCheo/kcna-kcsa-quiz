@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KCNA / KCSA 문제 은행</title>
+<title>KCNA / KCSA Quiz</title>
 <style>
 :root{--bg:#0f1115;--panel:#171a21;--line:#262b36;--fg:#e6e6e6;--mute:#8b93a5;--ok:#2ea043;--bad:#d9534f;--acc:#c9a227;--sel:#2b3a55}
 *{box-sizing:border-box}
@@ -44,6 +44,13 @@ main{max-width:900px;margin:0 auto;padding:16px 16px 80px}
 .q .primary{display:block}
 .translation{display:none;color:#cfd6e6;font-size:.94em;margin-top:3px}
 .translation.visible{display:block}
+.translation-fallback{display:block;color:var(--mute);font-size:12px;margin-top:3px}
+.translation-editor{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.translation-editor summary{cursor:pointer;color:var(--mute)}
+.translation-editor label{display:grid;gap:4px;margin-top:8px;color:var(--mute);font-size:12px}
+.translation-editor textarea{width:100%;min-height:52px;background:#1f232d;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit}
+.translation-editor .editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.translation-editor input[type=file]{max-width:100%}
 .choices{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .choices li{border:1px solid var(--line);border-radius:8px;padding:13px 14px 13px 60px;min-height:60px;position:relative;cursor:pointer;background:#13161d;line-height:1.6}
 .choices li:hover{border-color:#3b4356}
@@ -59,7 +66,7 @@ main{max-width:900px;margin:0 auto;padding:16px 16px 80px}
 .explain a{color:#7aa7ff;font-size:13px;word-break:break-all}
 .actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
 .actions .hint{color:var(--mute);font-size:12px;margin-left:auto}
-.language-buttons{display:flex;gap:4px;align-items:center;color:var(--mute);font-size:13px}
+.language-buttons{display:flex;gap:4px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:13px}
 .language-buttons button[aria-pressed="true"]{background:var(--acc);color:#111;border-color:var(--acc);font-weight:600}
 .domains{margin-top:22px;display:grid;gap:6px}
 .dom{display:grid;grid-template-columns:1fr 160px 70px;gap:10px;align-items:center;font-size:13px;color:var(--mute)}
@@ -141,28 +148,29 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
   <div class="header-inner">
     <div class="header-top">
       <h1>KCNA / KCSA</h1>
-      <nav id="studyTabs" class="study-tabs" role="tablist" aria-label="학습 화면"><button id="quizTab" type="button" role="tab" aria-selected="true" aria-controls="quizPanel">퀴즈</button><button id="vocabularyTab" type="button" role="tab" aria-selected="false" aria-controls="vocabularyPanel" tabindex="-1">단어장 <span id="vocabularyCount">0</span></button></nav>
+      <nav id="studyTabs" class="study-tabs" role="tablist" aria-label="Study views"><button id="quizTab" type="button" role="tab" aria-selected="true" aria-controls="quizPanel">Quiz</button><button id="vocabularyTab" type="button" role="tab" aria-selected="false" aria-controls="vocabularyPanel" tabindex="-1">Vocabulary <span id="vocabularyCount">0</span></button></nav>
       <span id="timer" class="timer hidden"></span>
       <details id="studySettings" class="study-settings">
-        <summary>설정</summary>
+        <summary>Settings</summary>
         <div class="settings-panel">
-          <label>도메인<select id="domain"><option value="">전체 도메인</option></select></label>
-          <label>문항 유형<select id="style"><option value="">전체 유형</option><option value="exam">객관식 연습</option><option value="study">심화형 (시나리오)</option></select></label>
-          <button id="historyButton" type="button" aria-controls="history" aria-expanded="false">시험 기록</button>
-          <button id="reset" type="button" title="이 시험의 진행 통계 삭제">통계 초기화</button>
+          <label>Domain<select id="domain"><option value="">All domains</option></select></label>
+          <label>Question type<select id="style"><option value="">All types</option><option value="exam">Practice</option><option value="study">Scenario</option></select></label>
+          <button id="historyButton" type="button" aria-controls="history" aria-expanded="false">Exam history</button>
+          <button id="review-wrong" type="button">Review wrong answers</button>
+          <button id="reset" type="button" title="Delete progress for this exam">Reset progress</button>
         </div>
       </details>
     </div>
     <div id="quizControls">
-      <select id="exam" aria-label="학습할 시험"><option value="local-kcna">KCNA</option><option value="local-kcsa">KCSA</option><option value="local">KCNA + KCSA</option></select>
-      <select id="mode" aria-label="문제풀이 모드"><option value="endless">끝없이 (즉시 해설)</option><option value="wrong">오답만 다시</option><option value="exam">모의고사 60문항 / 90분</option></select>
-      <span class="language-buttons" role="group" aria-label="번역 언어"><span>번역</span><button id="target-ko" type="button" aria-pressed="true">한국어</button><button id="target-en" type="button" aria-pressed="false">English</button></span>
+      <select id="exam" aria-label="Exam"><option value="local-kcna">KCNA</option><option value="local-kcsa">KCSA</option><option value="local">KCNA + KCSA</option></select>
+      <select id="mode" aria-label="Practice mode"><option value="endless">Endless practice (instant feedback)</option><option value="wrong">Wrong answers only</option><option value="exam">Mock exam: 60 questions / 90 minutes</option></select>
+      <span id="localeButtons" class="language-buttons" role="group" aria-label="Question translation language"></span>
     </div>
   </div>
 </header>
 <main>
   <div id="quizPanel" role="tabpanel" aria-labelledby="quizTab">
-  <p class="status practice-note">학습용 연습문항 · 공식 기출·실전 난이도는 검증되지 않았습니다.</p>
+  <p class="status practice-note">Study practice only · not authenticated exam content or a validated difficulty benchmark.</p>
   <div class="stats" id="stats"></div>
   <p id="seenNotice" class="status hidden" role="status"></p>
   <div class="card" id="card"></div>
@@ -171,12 +179,12 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
   <div class="history-list card hidden" id="history"></div>
   </div>
   <section id="vocabularyPanel" class="card" role="tabpanel" aria-labelledby="vocabularyTab" hidden>
-    <h2>개인 영단어장</h2>
-    <p class="status">영단어 클릭으로 추가하고, 다시 클릭하면 삭제합니다. 일반 영영사전의 영어 뜻을 조회하며 한국어 뜻은 직접 적을 수 있습니다.</p>
-    <p class="status"><a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer">Free Dictionary API</a>에 선택한 영단어만 보냅니다. 예문·한국어 뜻·메모는 보내지 않으며 기술 용어는 조회되지 않을 수 있습니다.</p>
-    <p class="status">이 브라우저에만 저장됩니다. 모의고사 시간은 탭을 바꿔도 계속 흐릅니다.</p>
+    <h2>Personal vocabulary</h2>
+    <p class="status">Click an English word to save or remove it. Add your own meaning or notes.</p>
+    <p class="status"><a href="https://en.wiktionary.org/" target="_blank" rel="noopener noreferrer">Wiktionary</a> provides English definitions. Only an explicit lookup button or Enter sends the selected word to the external API; questions, context and notes are not sent.</p>
+    <p class="status">Saved in this browser only. Mock-exam time continues while switching tabs.</p>
     <div id="vocabularyBrowse">
-      <div class="vocabulary-toolbar"><input id="vocabularySearch" type="search" aria-label="단어·한국어 뜻 검색" placeholder="단어·한국어 뜻 검색"><select id="vocabularyFilter" aria-label="단어 학습 상태"><option value="all">전체 단어</option><option value="learning">복습할 단어</option><option value="known">학습 완료</option></select><button id="startVocabularyReview" type="button" class="primary">현재 목록 복습</button></div>
+      <div class="vocabulary-toolbar"><input id="vocabularySearch" type="search" aria-label="Search words or notes" placeholder="Search words or notes"><select id="vocabularyFilter" aria-label="Vocabulary status"><option value="all">All words</option><option value="learning">To review</option><option value="known">Learned</option></select><button id="startVocabularyReview" type="button" class="primary">Review current list</button></div>
       <p id="vocabularySummary" class="status" aria-live="polite"></p>
       <div id="vocabularyList"></div>
     </div>
@@ -184,8 +192,8 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
   </section>
   <div id="vocabularyNotice" class="vocabulary-notice hidden" role="status" aria-live="polite"></div>
 </main>
-<script src="local/local.js?v=20261011-kcsa310-multi"></script>
-<script src="vocabulary.js?v=20261011-kcsa310-multi"></script>
+<script src="local/local.js?v=20261015-contributions"></script>
+<script src="vocabulary.js?v=20261015-contributions"></script>
 <script>
 (() => {
 const BANKS = window.QUIZ_BANKS || {};
@@ -195,7 +203,7 @@ if (BANKS.local) {
   for (const exam of ["kcna", "kcsa"]) BANKS[`local-${exam}`] = BANKS.local.filter(q => q.exam === exam);
 }
 const $ = s => document.querySelector(s);
-const el = { exam: $("#exam"), mode: $("#mode"), domain: $("#domain"), style: $("#style"), targetKo: $("#target-ko"), targetEn: $("#target-en"), timer: $("#timer"), historyButton: $("#historyButton"), reset: $("#reset"), stats: $("#stats"), card: $("#card"), domains: $("#domains"), result: $("#result"), history: $("#history") };
+const el = { exam: $("#exam"), mode: $("#mode"), domain: $("#domain"), style: $("#style"), localeButtons: $("#localeButtons"), timer: $("#timer"), historyButton: $("#historyButton"), reviewWrong: $("#review-wrong"), reset: $("#reset"), stats: $("#stats"), card: $("#card"), domains: $("#domains"), result: $("#result"), history: $("#history") };
 
 const pref = (k, v) => v === undefined ? localStorage.getItem("quiz:" + k) : localStorage.setItem("quiz:" + k, v);
 const statsKey = () => "quiz:stats:" + el.exam.value;
@@ -203,13 +211,83 @@ let stats = {};
 const loadStats = () => { try { stats = JSON.parse(localStorage.getItem(statsKey()) || "{}"); } catch { stats = {}; } };
 const saveStats = () => localStorage.setItem(statsKey(), JSON.stringify(stats));
 const SEEN_KEY = "quiz:seen:local", seenIds = new Set();
+const TRANSLATION_KEY = "quiz:translation-overrides:v1";
+let translationOverrides = {}, translationReadError = "";
+try {
+  const stored = JSON.parse(localStorage.getItem(TRANSLATION_KEY) || "{}");
+  if (!stored || typeof stored !== "object" || Array.isArray(stored)) throw new Error("Stored translation edits are not an object.");
+  translationOverrides = stored;
+} catch (e) { translationReadError = e.message; }
+const supportedLocales = [...new Set(["en", ...["kcna", "kcsa"].flatMap(exam => (BANKS[`local-${exam}`] || []).flatMap(q => ["q", "explain"].flatMap(group => Object.keys(q[group] || {})).concat((q.choices && Object.keys(q.choices)) || [])))])];
+const localeLabels = { en: "English", ko: "Korean" };
+const localeNames = typeof Intl.DisplayNames === "function" ? new Intl.DisplayNames(["en"], { type: "language" }) : null;
+let targetLocale = "en";
+function localeLabel(locale) {
+  if (localeLabels[locale]) return localeLabels[locale];
+  try { return localeNames?.of(locale) || locale.toUpperCase(); }
+  catch { return locale.toUpperCase(); }
+}
+function localeData(q, group, index = null) {
+  const source = group === "choices" ? q.choices : q[group];
+  const values = index == null ? source : Object.fromEntries(Object.entries(source || {}).map(([locale, choices]) => [locale, choices?.[index]]));
+  const override = translationOverrides[q.id]?.[targetLocale];
+  const edited = override && (group === "choices" ? override.choices?.[index] : override?.[group]);
+  const translated = targetLocale === "en" ? source?.en : (edited || values?.[targetLocale]);
+  return { en: index == null ? source?.en : source?.en?.[index], ko: index == null ? source?.ko : source?.ko?.[index], target: translated, fallback: targetLocale !== "en" && !translated };
+}
+function validateStoredOverrides(data) {
+  for (const [id, locales] of Object.entries(data)) {
+    const q = (BANKS.local || []).find(item => item.id === id);
+    if (!q || !locales || typeof locales !== "object" || Array.isArray(locales)) throw new Error(`Invalid stored translation ID: ${id}`);
+    for (const [locale, values] of Object.entries(locales)) {
+      if (locale === "en" || !supportedLocales.includes(locale) || !values || typeof values !== "object") throw new Error(`Invalid stored translation locale: ${locale}`);
+      if (typeof values.q !== "string" || !values.q.trim() || typeof values.explain !== "string" || !values.explain.trim() || !Array.isArray(values.choices) || values.choices.length !== q.choices.en.length || values.choices.some(choice => typeof choice !== "string" || !choice.trim())) throw new Error(`Invalid stored translation for ${id}`);
+    }
+  }
+}
+if (!translationReadError) {
+  try { validateStoredOverrides(translationOverrides); }
+  catch (e) { translationReadError = e.message; translationOverrides = {}; }
+}
+function snapshotLocalized(q) {
+  const result = {};
+  for (const group of ["q", "explain"]) {
+    result[group] = {};
+    for (const locale of supportedLocales) {
+      const edited = translationOverrides[q.id]?.[locale]?.[group];
+      const original = q[group]?.[locale];
+      if (locale === "en" || edited || original) result[group][locale] = edited || original;
+    }
+  }
+  result.choices = {};
+  for (const locale of supportedLocales) {
+    const original = q.choices?.[locale], edited = translationOverrides[q.id]?.[locale]?.choices;
+    if (locale === "en" || edited || original) result.choices[locale] = edited ? edited.slice() : original.slice();
+  }
+  return result;
+}
+function snapshotValues(values, index = null) {
+  const target = index == null ? values?.[targetLocale] : values?.[targetLocale]?.[index];
+  const en = index == null ? values?.en : values?.en?.[index];
+  const ko = index == null ? values?.ko : values?.ko?.[index];
+  return { en, ko, target: target || undefined, fallback: targetLocale !== "en" && !target };
+}
+function saveTranslationOverrides(next) {
+  if (translationReadError) { alert(`Translation edits were not loaded safely: ${translationReadError}`); return false; }
+  try { localStorage.setItem(TRANSLATION_KEY, JSON.stringify(next)); return true; }
+  catch (e) { alert(`Could not save translation edits: ${e.message}`); return false; }
+}
+function localeButtons() {
+  el.localeButtons.innerHTML = `<span class="locale-title">Question translation</span>` + supportedLocales.map(locale => `<button type="button" data-locale="${esc(locale)}" aria-pressed="${locale === targetLocale}">${esc(localeLabel(locale))}</button>`).join("");
+  el.localeButtons.querySelectorAll("[data-locale]").forEach(button => button.addEventListener("click", () => setTarget(button.dataset.locale)));
+}
 let seenError = "";
 try {
   const saved = localStorage.getItem(SEEN_KEY);
   const ids = saved == null
     ? ["local-kcna", "local-kcsa", "local"].flatMap(key => Object.keys(JSON.parse(localStorage.getItem("quiz:stats:" + key) || "{}"))).filter(id => /^(?:local-\d+|kcsa-mock-\d+)$/.test(id))
     : JSON.parse(saved);
-  if (!Array.isArray(ids)) throw new Error("본 문항 기록 형식이 올바르지 않습니다.");
+  if (!Array.isArray(ids)) throw new Error("Viewed-question history has an invalid format.");
   for (const id of ids) if (typeof id === "string") seenIds.add(id);
 } catch (e) { seenError = e.message; }
 function saveSeen() {
@@ -219,7 +297,7 @@ function saveSeen() {
   }
   const notice = $("#seenNotice");
   notice.classList.toggle("hidden", !seenError);
-  notice.textContent = seenError ? `본 문항 기록 저장 실패: ${seenError}. 이번 화면의 기록만 사용합니다.` : "";
+  notice.textContent = seenError ? `Could not save viewed-question history: ${seenError}. This session only.` : "";
 }
 function markSeen(q) {
   if (!seenIds.has(q.id)) { seenIds.add(q.id); saveSeen(); }
@@ -262,10 +340,10 @@ const correctSelection = (answer, picked) => Array.isArray(answer)
   : picked === answer;
 const copySelection = value => Array.isArray(value) ? value.slice() : value;
 function selectionLabels(value, ord) {
-  if (!hasSelection(value)) return "무응답";
-  if (!Array.isArray(value)) return `${ord.indexOf(value) + 1}번`;
+  if (!hasSelection(value)) return "Unanswered";
+  if (!Array.isArray(value)) return `Option ${ord.indexOf(value) + 1}`;
   return ord.reduce((labels, ci, i) => {
-    if (value.includes(ci)) labels.push(`${i + 1}번`);
+    if (value.includes(ci)) labels.push(`Option ${i + 1}`);
     return labels;
   }, []).join(", ");
 }
@@ -276,12 +354,21 @@ function orderedExplanation(text, ord) {
       return position < 0 ? n : String(position + 1);
     }));
 }
-let targetLanguage = "ko", translationShown = false;
-const bi = (en, ko, tag = "span", show = false) => {
-  const primary = targetLanguage === "ko" ? en : ko, translation = targetLanguage === "ko" ? ko : en;
-  const context = ` data-vocabulary-context data-context-en="${esc(en)}" data-context-ko="${esc(ko)}"`;
-  return `<${tag} class="primary"${context}>${window.QuizVocabulary.format(primary)}</${tag}><${tag} class="translation${show ? " visible" : ""}"${context}>${window.QuizVocabulary.format(translation)}</${tag}>`;
-};
+
+function explanationData(q, ord) {
+  const values = localeData(q, "explain");
+  values.en = orderedExplanation(values.en || "", ord);
+  values.ko = orderedExplanation(values.ko || "", ord);
+  values.target = orderedExplanation(values.target || "", ord);
+  return values;
+}
+function bi(values, tag = "span", showTranslation = true) {
+  const translated = targetLocale !== "en" && values.target;
+  const translation = translated ? `<span class="translation${showTranslation ? " visible" : ""}" lang="${esc(targetLocale)}">${esc(values.target)}</span>` : "";
+  const fallback = values.fallback ? `<small class="translation-fallback">Translation unavailable — showing English original.</small>` : "";
+  const context = ` data-vocabulary-context data-context-en="${esc(values.en || "")}" data-context-ko="${esc(values.ko || values.target || values.en || "")}"`;
+  return `<${tag} class="primary" lang="en"${context}>${window.QuizVocabulary.format(values.en || "")}</${tag}>${translation}${fallback}`;
+}
 
 // ---- state ----
 let cur = null, order = null, locked = false, currentPicked = null;
@@ -290,13 +377,13 @@ let exam = null; // {items:[{q,order,picked}], idx, endAt, timerId}
 let historyDB = null, historyRecords = [], historyError = "", viewedAttempt = null, viewedAll = false, reviewOverrides = new Map(), attemptSave = null;
 const HISTORY_DB = "kcna-kcsa-history", HISTORY_STORE = "attempts";
 function openHistoryDB() {
-  if (!window.indexedDB) return Promise.reject(new Error("이 브라우저는 IndexedDB를 지원하지 않습니다."));
+  if (!window.indexedDB) return Promise.reject(new Error("This browser does not support IndexedDB."));
   if (historyDB) return Promise.resolve(historyDB);
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(HISTORY_DB, 1);
     req.onupgradeneeded = () => req.result.createObjectStore(HISTORY_STORE, { keyPath: "id", autoIncrement: true });
     req.onsuccess = () => { historyDB = req.result; resolve(historyDB); };
-    req.onerror = () => reject(req.error || new Error("시험 기록 저장소를 열 수 없습니다."));
+    req.onerror = () => reject(req.error || new Error("Could not open exam history storage."));
   });
 }
 function historyRequest(mode, value) {
@@ -305,25 +392,38 @@ function historyRequest(mode, value) {
     const req = mode === "readonly" ? store.getAll() : store.add(value);
     let result;
     req.onsuccess = () => { result = req.result; };
-    const fail = () => reject(tx.error || req.error || new Error("시험 기록 저장에 실패했습니다."));
+    const fail = () => reject(tx.error || req.error || new Error("Could not save exam history."));
     req.onerror = fail;
     tx.onerror = fail;
     tx.onabort = fail;
     tx.oncomplete = () => resolve(result);
   }));
 }
+function validSnapshotLocale(locale) {
+  return /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(locale);
+}
+function validSnapshotMap(values, arrays = false) {
+  if (!values || typeof values !== "object" || Array.isArray(values)) return false;
+  const english = values.en;
+  if (arrays ? !Array.isArray(english) || !english.length || english.some(value => typeof value !== "string" || !value.trim()) : typeof english !== "string" || !english.trim()) return false;
+  const count = arrays ? english.length : null;
+  return Object.entries(values).every(([locale, value]) => validSnapshotLocale(locale) && (arrays
+    ? Array.isArray(value) && value.length === count && value.every(item => typeof item === "string" && item.trim())
+    : typeof value === "string" && value.trim()));
+}
 async function loadHistory() {
   try {
     const raw = await historyRequest("readonly") || [];
-    const valid = raw.filter(r => r && typeof r.completedAt === "string" && typeof r.examLabel === "string" && Array.isArray(r.items) && r.items.length > 0 && r.items.every(it => it.question && typeof it.question.en === "string" && typeof it.question.ko === "string" && it.choices && Array.isArray(it.choices.en) && Array.isArray(it.choices.ko) && it.explain && (typeof it.answer === "number" || (Array.isArray(it.answer) && it.answer.length > 0 && it.answer.every(Number.isInteger))) && Array.isArray(it.order)));
-    historyError = valid.length !== raw.length ? "읽을 수 없는 시험 기록이 있어 제외했습니다." : "";
+    const valid = raw.filter(r => r && typeof r.completedAt === "string" && typeof r.examLabel === "string" && Array.isArray(r.items) && r.items.length > 0 && r.items.every(it => validSnapshotMap(it.question) && validSnapshotMap(it.choices, true) && validSnapshotMap(it.explain) && (typeof it.answer === "number" || (Array.isArray(it.answer) && it.answer.length > 0 && it.answer.every(Number.isInteger))) && Array.isArray(it.order)));
+    historyError = valid.length !== raw.length ? "Some unreadable exam history entries were skipped." : "";
     historyRecords = valid.sort((a, b) => String(b.completedAt).localeCompare(String(a.completedAt)));
   } catch (e) { historyError = e.message; historyRecords = []; }
   renderHistory();
 }
+function displayContext(value) { return { "전체 도메인": "All domains", "전체 유형": "All types" }[value] || value || "All domains"; }
 function renderHistory() {
-  const rows = historyRecords.map((r, i) => `<div class="history-row"><span>${esc(r.examLabel)} · ${esc(new Date(r.completedAt).toLocaleString())} · ${r.right}/${r.total} (${r.percent}%) · ${esc(r.domainContext)}</span><button type="button" data-history-index="${i}">결과 열기</button></div>`).join("");
-  el.history.innerHTML = `<h2>시험 기록</h2>${historyError ? `<p class="status">${esc(historyError)}</p>` : ""}${rows || "<p class='status'>완료된 모의고사가 없습니다.</p>"}<p><button id="closeHistory" type="button">현재 퀴즈로 돌아가기</button></p>`;
+  const rows = historyRecords.map((r, i) => `<div class="history-row"><span>${esc(r.examLabel)} · ${esc(new Date(r.completedAt).toLocaleString("en-US"))} · ${r.right}/${r.total} (${r.percent}%) · ${esc(displayContext(r.domainContext))}</span><button type="button" data-history-index="${i}">Open result</button></div>`).join("");
+  el.history.innerHTML = `<h2>Exam history</h2>${historyError ? `<p class="status">${esc(historyError)}</p>` : ""}${rows || "<p class='status'>No completed mock exams.</p>"}<p><button id="closeHistory" type="button">Return to current quiz</button></p>`;
   el.history.querySelectorAll("[data-history-index]").forEach(b => b.addEventListener("click", () => { reviewOverrides.clear(); renderAttempt(historyRecords[+b.dataset.historyIndex]); }));
   $("#closeHistory").addEventListener("click", closeHistoryView);
 }
@@ -344,8 +444,8 @@ function renderStats() {
   const mastered = p.filter(q => (stats[q.id] || {}).streak >= 3).length;
   const wrongNow = p.filter(q => (stats[q.id] || {}).lastWrong).length;
   el.stats.innerHTML = [
-    [p.length, "문항 수"], [`${seen} / ${p.length}`, "본 문항"], [total ? Math.round(100 * right / total) + "%" : "–", `정답률 (${right}/${total})`],
-    [mastered, "숙달 (3연속 정답)"], [wrongNow, "현재 오답"], [streak, "연속 정답"]
+    [p.length, "Questions"], [`${seen} / ${p.length}`, "Viewed"], [total ? Math.round(100 * right / total) + "%" : "–", `Accuracy (${right}/${total})`],
+    [mastered, "Mastered (3 in a row)"], [wrongNow, "Current wrong"], [streak, "Correct streak"]
   ].map(([b, s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
 
   const byDom = {};
@@ -359,39 +459,109 @@ function renderStats() {
 function fillDomains() {
   const ds = [...new Set(EXAMS[el.exam.value].flatMap(k => (BANKS[k] || []).map(q => q.domain)))];
   const keep = el.domain.value;
-  el.domain.innerHTML = `<option value="">전체 도메인</option>` + ds.map(d => `<option value="${esc(d)}"${d === keep ? " selected" : ""}>${esc(d)}</option>`).join("");
+  el.domain.innerHTML = `<option value="">All domains</option>` + ds.map(d => `<option value="${esc(d)}"${d === keep ? " selected" : ""}>${esc(d)}</option>`).join("");
 }
 
+function translationEditor(q) {
+  if (targetLocale === "en") return "";
+  const qValues = localeData(q, "q"), eValues = localeData(q, "explain");
+  const choices = q.choices.en.map((_, i) => localeData(q, "choices", i));
+  return `<details class="translation-editor"><summary>Edit ${esc(localeLabel(targetLocale))} translation</summary><form id="translation-form">
+    <p class="status">English original is read-only. Keep choices in the original order.</p>
+    <label>Original question<textarea readonly>${esc(q.q.en)}</textarea></label>
+    <label>${esc(localeLabel(targetLocale))} question<textarea name="translation-q">${esc(qValues.target || "")}</textarea></label>
+    ${q.choices.en.map((choice, i) => `<label>Original option ${i + 1}<textarea readonly>${esc(choice)}</textarea><span class="status">${esc(localeLabel(targetLocale))} option ${i + 1}</span><textarea name="translation-choice-${i}">${esc(choices[i].target || "")}</textarea></label>`).join("")}
+    <label>Original explanation<textarea readonly>${esc(q.explain.en)}</textarea></label>
+    <label>${esc(localeLabel(targetLocale))} explanation<textarea name="translation-explain">${esc(eValues.target || "")}</textarea></label>
+    <div class="editor-actions"><button type="submit" class="primary">Save translation locally</button><button type="button" id="export-translations">Export translation patch</button><label>Import patch JSON<input id="import-translations" type="file" accept="application/json"></label></div>
+    <p class="status">Exported patches can be applied to <code>local/local.js</code> and submitted in a PR. See the <a href="https://github.com/HanCheo/kcna-kcsa-quiz/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">contribution instructions</a>.</p>
+  </form></details>`;
+}
+function exportTranslations() {
+  const patches = [];
+  for (const [id, locales] of Object.entries(translationOverrides)) for (const [locale, values] of Object.entries(locales || {})) patches.push({ id, locale, ...values });
+  const blob = new Blob([JSON.stringify({ version: 1, patches }, null, 2) + "\n"], { type: "application/json" });
+  const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "translation-patch.json"; link.click(); URL.revokeObjectURL(link.href);
+}
+function patchRecord(id) { return [...(BANKS.local || [])].find(q => q.id === id); }
+function validatePatchData(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data) || data.version !== 1 || !Array.isArray(data.patches)) throw new Error("Patch must contain version 1 and a patches array.");
+  const checked = [], seen = new Set();
+  for (const patch of data.patches) {
+    if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new Error("Each patch must be an object.");
+    const id = patch.id, locale = patch.locale;
+    if (typeof id !== "string" || !id.trim()) throw new Error("Patch id must be a non-empty string.");
+    if (typeof locale !== "string" || !locale.trim()) throw new Error(`Patch locale must be a non-empty string for ${id}.`);
+    const key = `${id}\u0000${locale}`;
+    if (seen.has(key)) throw new Error(`Duplicate patch: ${id}/${locale}.`);
+    seen.add(key);
+    const q = patchRecord(id);
+    if (!q) throw new Error(`Unknown question ID: ${id}`);
+    if (!/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(locale) || locale === "en" || !supportedLocales.includes(locale)) throw new Error(`Unsupported translation locale: ${locale}`);
+    if (typeof patch.q !== "string" || !patch.q.trim() || typeof patch.explain !== "string" || !patch.explain.trim()) throw new Error(`Question ${id} has invalid translated text.`);
+    if (!Array.isArray(patch.choices) || patch.choices.length !== q.choices.en.length || patch.choices.some(choice => typeof choice !== "string" || !choice.trim())) throw new Error(`Question ${id} has the wrong choice count or invalid text.`);
+    checked.push({ id: q.id, locale, q: patch.q, choices: patch.choices.slice(), explain: patch.explain });
+  }
+  return checked;
+}
+function importTranslations(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const checked = validatePatchData(JSON.parse(reader.result));
+      const next = JSON.parse(JSON.stringify(translationOverrides));
+      for (const patch of checked) (next[patch.id] ||= {})[patch.locale] = { q: patch.q, choices: patch.choices, explain: patch.explain };
+      if (!saveTranslationOverrides(next)) throw new Error("Could not persist imported translations.");
+      translationOverrides = next;
+      renderQuestion(cur, order, exam ? exam.items[exam.idx].picked : currentPicked, exam ? false : locked);
+    } catch (e) { alert(`Translation patch was rejected: ${e.message}`); }
+  };
+  reader.readAsText(file);
+}
+function saveTranslationForm(event) {
+  event.preventDefault();
+  const form = event.currentTarget, q = cur, next = { q: form.elements["translation-q"].value.trim(), choices: q.choices.en.map((_, i) => form.elements[`translation-choice-${i}`].value.trim()), explain: form.elements["translation-explain"].value.trim() };
+  try { validatePatchData({ version: 1, patches: [{ id: cur.id, locale: targetLocale, ...next }] }); }
+  catch (e) { alert(`Translation was rejected: ${e.message}`); return; }
+  const merged = JSON.parse(JSON.stringify(translationOverrides));
+  (merged[cur.id] ||= {})[targetLocale] = next;
+  if (saveTranslationOverrides(merged)) { translationOverrides = merged; renderQuestion(cur, order, exam ? exam.items[exam.idx].picked : currentPicked, exam ? false : locked); }
+}
 function renderQuestion(q, ord, picked, reveal) {
-  const examTag = q.exam === "kcna" || q.id.startsWith("kcna") ? "KCNA" : q.exam === "kcsa" || q.id.startsWith("kcsa") ? "KCSA" : "개인";
+  const examTag = q.exam === "kcna" || q.id.startsWith("kcna") ? "KCNA" : q.exam === "kcsa" || q.id.startsWith("kcsa") ? "KCSA" : "Personal";
   const multiple = Array.isArray(q.answer);
   const correct = correctSelection(q.answer, picked);
   const html = `
-    <div class="meta"><span class="tag">${examTag}</span><span class="question-domain">${esc(q.domain)}</span><span class="tag">${multiple ? "복수 정답 · 모두 선택" : "단일 정답"}</span><span class="tag question-id">${q.id}</span>${exam ? `<span class="tag question-position">${exam.idx + 1} / ${exam.items.length}</span>` : endlessItems.length ? `<span class="question-position">${endlessIndex + 1} / ${endlessItems.length}</span>` : ""}</div>
-    <p class="q">${bi(q.q.en, q.q.ko, "span", translationShown)}</p>
+    <div class="meta"><span class="tag">${examTag}</span><span class="question-domain">${esc(q.domain)}</span><span class="tag">${multiple ? "Multiple answers · select all" : "Single answer"}</span><span class="tag question-id">${q.id}</span>${exam ? `<span class="tag question-position">${exam.idx + 1} / ${exam.items.length}</span>` : endlessItems.length ? `<span class="question-position">${endlessIndex + 1} / ${endlessItems.length}</span>` : ""}</div>
+    <p class="q">${bi(localeData(q, "q"), "span")}</p>
     <ol class="choices">${ord.map((ci, i) => {
       let cls = "";
       if (reveal) { if (hasChoice(q.answer, ci)) cls = "ok"; else if (hasChoice(picked, ci)) cls = "bad"; cls += " locked"; }
       else if (hasChoice(picked, ci)) cls = "sel";
       const control = multiple
-        ? `<input type="checkbox" class="k" aria-label="${i + 1}번 보기 선택"${hasChoice(picked, ci) ? " checked" : ""}${reveal ? " disabled" : ""}><span class="choice-number" aria-hidden="true">${i + 1}</span>`
-        : `<button type="button" class="k" aria-label="${i + 1}번 보기 선택"${reveal ? " disabled" : ""}>${i + 1}</button>`;
-      return `<li data-ci="${ci}" class="${cls}">${control}${bi(q.choices.en[ci], q.choices.ko[ci], "span", translationShown)}</li>`;
+        ? `<input type="checkbox" class="k" aria-label="Select option ${i + 1}"${hasChoice(picked, ci) ? " checked" : ""}${reveal ? " disabled" : ""}><span class="choice-number" aria-hidden="true">${i + 1}</span>`
+        : `<button type="button" class="k" aria-label="Select option ${i + 1}"${reveal ? " disabled" : ""}>${i + 1}</button>`;
+      return `<li data-ci="${ci}" class="${cls}">${control}${bi(localeData(q, "choices", ci), "span")}</li>`;
     }).join("")}</ol>
     <div class="explain${reveal ? " show" : ""}">
-      <div class="verdict ${correct ? "ok" : "bad"}">${correct ? "정답" : "오답 — 정답은 " + selectionLabels(q.answer, ord)}</div>
-      ${bi(orderedExplanation(q.explain.en, ord), orderedExplanation(q.explain.ko, ord), "div", translationShown)}
+      <div class="verdict ${correct ? "ok" : "bad"}">${correct ? "Correct" : "Wrong — correct: " + selectionLabels(q.answer, ord)}</div>
+      ${bi(explanationData(q, ord), "div")}
       ${q.ref ? `<a href="${esc(q.ref)}" target="_blank" rel="noopener noreferrer">${esc(q.ref)}</a>` : ""}
     </div>
+    ${translationEditor(q)}
     <div class="actions">
-      <button id="translationToggle" type="button" aria-expanded="${translationShown}" aria-pressed="${translationShown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${translationShown ? "숨기기" : "보기"}</button>
-      ${exam ? `<button id="prev"${exam.idx === 0 ? " disabled" : ""}>이전</button><button id="next" class="primary">${exam.idx === exam.items.length - 1 ? "제출" : "다음"}</button>`
-             : `${multiple && !reveal ? `<button id="checkAnswer" class="primary"${hasSelection(picked) ? "" : " disabled"}>정답 확인</button>` : ""}<button id="prev"${endlessIndex <= 0 ? " disabled" : ""}>이전</button><button id="next" class="primary"${reveal || endlessIndex < endlessItems.length - 1 ? "" : " disabled"}>다음 문제</button>${!reveal && endlessIndex === endlessItems.length - 1 ? `<button id="skip">건너뛰기</button>` : ""}`}
-      <span class="hint">영단어: 추가·삭제 · 보기 번호/빈 공간: ${multiple ? "선택·해제" : "답 선택"} · 1–${ord.length} 키${exam ? "" : multiple ? " · Enter 확인/다음" : " · Enter 다음"}</span>
+      ${exam ? `<button id="prev"${exam.idx === 0 ? " disabled" : ""}>Previous</button><button id="next" class="primary">${exam.idx === exam.items.length - 1 ? "Submit" : "Next"}</button>`
+             : `${multiple && !reveal ? `<button id="checkAnswer" class="primary"${hasSelection(picked) ? "" : " disabled"}>Check answer</button>` : ""}<button id="prev"${endlessIndex <= 0 ? " disabled" : ""}>Previous</button><button id="next" class="primary"${reveal || endlessIndex < endlessItems.length - 1 ? "" : " disabled"}>Next question</button>${!reveal && endlessIndex === endlessItems.length - 1 ? `<button id="skip">Skip</button>` : ""}`}
+      <span class="hint">English words: save/remove · ${multiple ? "select/unselect" : "select answer"} · 1–${ord.length} keys${exam ? "" : multiple ? " · Enter to check/next" : " · Enter for next"}</span>
     </div>`;
   el.card.innerHTML = html;
   el.card.querySelectorAll(".choices li").forEach(li => li.addEventListener("click", () => choose(+li.dataset.ci)));
-  const tr = $("#translationToggle"); if (tr) tr.addEventListener("click", () => { translationShown = !translationShown; if (!exam && endlessItems[endlessIndex]) endlessItems[endlessIndex].translationShown = translationShown; renderQuestion(cur, order, picked, reveal); $("#translationToggle")?.focus(); });
+  const editor = $("#translation-form");
+  if (editor) {
+    editor.addEventListener("submit", saveTranslationForm);
+    $("#export-translations").addEventListener("click", exportTranslations);
+    $("#import-translations").addEventListener("change", event => { if (event.target.files[0]) importTranslations(event.target.files[0]); });
+  }
   const check = $("#checkAnswer"); if (check) check.addEventListener("click", gradePractice);
   const n = $("#next"); if (n) n.addEventListener("click", next);
   const s = $("#skip"); if (s) s.addEventListener("click", () => { lastId = cur.id; nextEndless(); });
@@ -402,7 +572,7 @@ function renderQuestion(q, ord, picked, reveal) {
 function showEndlessItem() {
   const it = endlessItems[endlessIndex];
   cur = it.q; order = it.order; currentPicked = it.picked;
-  locked = it.graded; translationShown = it.translationShown;
+  locked = it.graded;
   markSeen(cur); renderStats();
   renderQuestion(cur, order, currentPicked, locked);
 }
@@ -418,10 +588,10 @@ function nextEndless() {
       return;
     }
     cur = null; order = null; currentPicked = null; locked = false;
-    el.card.innerHTML = `<p class="q">${el.mode.value === "wrong" ? "현재 오답으로 남은 문항이 없습니다. 다른 모드를 선택하세요." : "이 조건에 해당하는 문항이 없습니다."}</p>`;
+    el.card.innerHTML = `<p class="q">${el.mode.value === "wrong" ? "No wrong answers remain for these filters. Choose another mode." : "No questions match these filters."}</p>`;
     return;
   }
-  endlessItems.push({ q, order: shuffle(q.choices.en.map((_, i) => i)), picked: null, graded: false, translationShown: false });
+  endlessItems.push({ q, order: shuffle(q.choices.en.map((_, i) => i)), picked: null, graded: false });
   endlessIndex++; showEndlessItem();
 }
 
@@ -499,12 +669,12 @@ function sampleMockQuestions(p) {
 function startExam() {
   if (exam) clearInterval(exam.timerId);
   exam = null; el.timer.classList.add("hidden"); viewedAttempt = null; attemptSave = null;
-  locked = false; currentPicked = null; translationShown = false; reviewOverrides.clear();
+  locked = false; currentPicked = null; reviewOverrides.clear();
   const p = el.domain.value ? base().filter(q => q.domain === el.domain.value) : base();
   if (!p.length) {
     cur = null; order = null; locked = false; exam = null;
     el.timer.classList.add("hidden");
-    el.card.innerHTML = `<p class="q">이 조건에 해당하는 문항이 없습니다.</p>`;
+    el.card.innerHTML = `<p class="q">No questions match these filters.</p>`;
     return;
   }
   const items = el.exam.value === "local"
@@ -524,7 +694,6 @@ function tick() {
   if (left === 0) finishExam();
 }
 function showExamItem() {
-  translationShown = false;
   locked = false;
   const it = exam.items[exam.idx]; currentPicked = it.picked; cur = it.q; order = it.order;
   markSeen(cur); renderStats();
@@ -535,10 +704,10 @@ function snapshotAttempt(items, right) {
     completedAt: new Date().toISOString(),
     examKey: el.exam.value,
     examLabel: el.exam.selectedOptions[0].text,
-    domainContext: el.domain.value || "전체 도메인",
-    styleContext: el.style.value || "전체 유형",
+    domainContext: el.domain.value || "All domains",
+    styleContext: el.style.value || "All types",
     right, total: items.length, percent: Math.round(100 * right / items.length),
-    items: items.map(it => ({ id: it.q.id, exam: it.q.exam, domain: it.q.domain, subtopic: it.q.subtopic || "", difficulty: it.q.difficulty, style: it.q.style || "study", question: { en: it.q.q.en, ko: it.q.q.ko }, choices: { en: it.q.choices.en.slice(), ko: it.q.choices.ko.slice() }, answer: copySelection(it.q.answer), picked: hasSelection(it.picked) ? copySelection(it.picked) : null, order: it.order.slice(), explain: { en: it.q.explain.en, ko: it.q.explain.ko }, ref: it.q.ref || "" }))
+    items: items.map(it => { const localized = snapshotLocalized(it.q); return { id: it.q.id, exam: it.q.exam, domain: it.q.domain, subtopic: it.q.subtopic || "", difficulty: it.q.difficulty, style: it.q.style || "study", question: localized.q, choices: localized.choices, answer: copySelection(it.q.answer), picked: hasSelection(it.picked) ? copySelection(it.picked) : null, order: it.order.slice(), explain: localized.explain, ref: it.q.ref || "" }; })
   };
 }
 function renderAttempt(attempt, allShown = false, options = {}) {
@@ -559,32 +728,34 @@ function renderAttempt(attempt, allShown = false, options = {}) {
     return `<tr><th scope="row">${kind.toUpperCase()}</th><td>${e.r}/${e.n}</td><td>${pct}%</td><td class="${passed ? "pass" : "fail"}">${passed ? "PASS" : "FAIL"}</td></tr>`;
   }).join("");
   const saveStatus = attemptSave && attemptSave.attempt === attempt
-    ? `<p id="saveStatus" class="status">${attemptSave.status === "saving" ? "기록 저장 중…" : attemptSave.status === "saved" ? "기록 저장됨" : `기록 저장 실패: ${esc(attemptSave.error)}`}</p>` : "";
+    ? `<p id="saveStatus" class="status">${attemptSave.status === "saving" ? "Saving history…" : attemptSave.status === "saved" ? "History saved" : `History save failed: ${esc(attemptSave.error)}`}</p>` : "";
+  const translationLabel = targetLocale === "en" ? "Translation" : `${esc(localeLabel(targetLocale))} translation`;
   el.result.classList.remove("hidden");
-  el.result.innerHTML = `${saveStatus}<h2 class="${passed ? "pass" : "fail"}">${percent}% — ${passed ? "PASS" : "FAIL"} (연습 기준 75%)</h2>
-    <p class="status">연습문제의 점수입니다. 실제 시험 합격 여부나 합격 확률을 뜻하지 않습니다.</p>
-    <p>${attempt.right} / ${attempt.total} 정답 · ${esc(new Date(attempt.completedAt).toLocaleString())} · ${esc(attempt.examLabel)} · ${esc(attempt.domainContext)} · ${esc(attempt.styleContext)}</p>
-    ${examScores ? `<table id="examScores"><caption>시험별 연습 결과 (기준 75%)</caption><tr><th>시험</th><th>정답</th><th>%</th><th>결과</th></tr>${examScores}</table>` : ""}
-    <table><tr><th>도메인</th><th>정답</th><th>%</th></tr>${Object.entries(byDom).map(([d, v]) => `<tr><td>${esc(d)}</td><td>${v.r}/${v.n}</td><td>${Math.round(100 * v.r / v.n)}%</td></tr>`).join("")}</table>
-    <div class="review-actions"><button id="allTranslations" type="button" aria-expanded="${allShown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${allShown ? "숨기기" : "모두 보기"}</button><span class="status">각 문항에서도 번역을 열 수 있습니다.</span></div>
+  el.result.innerHTML = `${saveStatus}<h2 class="${passed ? "pass" : "fail"}">${percent}% — ${passed ? "PASS" : "FAIL"} (75% practice threshold)</h2>
+    <p class="status">This is a practice score, not a real-exam result or pass-probability estimate.</p>
+    <p>${attempt.right} / ${attempt.total} Correct · ${esc(new Date(attempt.completedAt).toLocaleString("en-US"))} · ${esc(attempt.examLabel)} · ${esc(displayContext(attempt.domainContext))} · ${esc(displayContext(attempt.styleContext))}</p>
+    ${examScores ? `<table id="examScores"><caption>Practice result by exam (75% threshold)</caption><tr><th>Exam</th><th>Correct</th><th>%</th><th>Result</th></tr>${examScores}</table>` : ""}
+    <table><tr><th>Domain</th><th>Correct</th><th>%</th></tr>${Object.entries(byDom).map(([d, v]) => `<tr><td>${esc(d)}</td><td>${v.r}/${v.n}</td><td>${Math.round(100 * v.r / v.n)}%</td></tr>`).join("")}</table>
+    <div class="review-actions"><button id="allTranslations" type="button" aria-expanded="${allShown}">${translationLabel} ${allShown ? "Hide all" : "Show all"}</button><span class="status">Each question can also show its translation.</span></div>
     ${attempt.items.map((it, i) => {
       const shown = reviewOverrides.has(i) ? reviewOverrides.get(i) : allShown;
-      const choiceHtml = it.order.map((ci, n) => `<li class="${hasChoice(it.answer, ci) ? "ok" : hasChoice(it.picked, ci) ? "bad" : ""}"><span class="k">${n + 1}</span>${bi(it.choices.en[ci], it.choices.ko[ci], "span", false)}</li>`).join("");
+      const choiceHtml = it.order.map((ci, n) => `<li class="${hasChoice(it.answer, ci) ? "ok" : hasChoice(it.picked, ci) ? "bad" : ""}"><span class="k">${n + 1}</span>${bi(snapshotValues(it.choices, ci), "span", false)}</li>`).join("");
       const picked = selectionLabels(it.picked, it.order);
-      return `<div class="review-item${shown ? " translation-on" : ""}" data-review-index="${i}"><div class="meta"><span class="tag">${esc(it.domain)}</span><span class="tag">${esc(it.id)}</span></div><p class="q">${bi(it.question.en, it.question.ko, "span", false)}</p><ol class="choices">${choiceHtml}</ol><p class="review-answer"><b>내 답:</b> ${picked} · <b>${correctSelection(it.answer, it.picked) ? "정답" : "정답은 " + selectionLabels(it.answer, it.order)}</b></p><div class="review-actions"><button type="button" data-review-toggle aria-expanded="${shown}">${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${shown ? "숨기기" : "보기"}</button></div><div class="explain show">${bi(orderedExplanation(it.explain.en, it.order), orderedExplanation(it.explain.ko, it.order), "div", false)}${it.ref ? `<a href="${esc(it.ref)}" target="_blank" rel="noopener noreferrer">${esc(it.ref)}</a>` : ""}</div></div>`;
+      const explanation = Object.fromEntries(Object.entries(it.explain || {}).map(([locale, text]) => [locale, orderedExplanation(text, it.order)]));
+      return `<div class="review-item${shown ? " translation-on" : ""}" data-review-index="${i}"><div class="meta"><span class="tag">${esc(it.domain)}</span><span class="tag">${esc(it.id)}</span></div><p class="q">${bi(snapshotValues(it.question), "span", false)}</p><ol class="choices">${choiceHtml}</ol><p class="review-answer"><b>My answer:</b> ${picked} · <b>${correctSelection(it.answer, it.picked) ? "Correct" : "Correct: " + selectionLabels(it.answer, it.order)}</b></p><div class="review-actions"><button type="button" data-review-toggle aria-expanded="${shown}">${translationLabel} ${shown ? "Hide" : "Show"}</button></div><div class="explain show">${bi(snapshotValues(explanation), "div", false)}${it.ref ? `<a href="${esc(it.ref)}" target="_blank" rel="noopener noreferrer">${esc(it.ref)}</a>` : ""}</div></div>`;
     }).join("")}
-    <button id="closeReview" type="button">현재 퀴즈로 돌아가기</button> <button id="again" class="primary" type="button">다시 모의고사</button>`;
+    <button id="closeReview" type="button">Return to current quiz</button> <button id="again" class="primary" type="button">Start another mock exam</button>`;
   $("#allTranslations").addEventListener("click", () => {
     viewedAll = !viewedAll; reviewOverrides.clear();
     el.result.querySelectorAll(".review-item").forEach(item => {
       item.classList.toggle("translation-on", viewedAll);
-      const b = item.querySelector("[data-review-toggle]"); b.setAttribute("aria-expanded", viewedAll); b.textContent = `${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${viewedAll ? "숨기기" : "보기"}`;
+      const b = item.querySelector("[data-review-toggle]"); b.setAttribute("aria-expanded", viewedAll); b.textContent = `${translationLabel} ${viewedAll ? "Hide" : "Show"}`;
     });
-    const all = $("#allTranslations"); all.setAttribute("aria-expanded", viewedAll); all.textContent = `${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${viewedAll ? "숨기기" : "모두 보기"}`; all.focus();
+    const all = $("#allTranslations"); all.setAttribute("aria-expanded", viewedAll); all.textContent = `${translationLabel} ${viewedAll ? "Hide all" : "Show all"}`; all.focus();
   });
   el.result.querySelectorAll("[data-review-toggle]").forEach(b => b.addEventListener("click", () => {
     const item = b.closest(".review-item"), i = +item.dataset.reviewIndex, on = !item.classList.contains("translation-on");
-    reviewOverrides.set(i, on); item.classList.toggle("translation-on", on); b.setAttribute("aria-expanded", on); b.textContent = `${targetLanguage === "ko" ? "한국어" : "English"} 번역 ${on ? "숨기기" : "보기"}`; b.focus();
+    reviewOverrides.set(i, on); item.classList.toggle("translation-on", on); b.setAttribute("aria-expanded", on); b.textContent = `${translationLabel} ${on ? "Hide" : "Show"}`; b.focus();
   }));
   $("#closeReview").addEventListener("click", closeHistoryView);
   $("#again").addEventListener("click", startExam);
@@ -625,27 +796,24 @@ function finishExam() {
   persistAttempt(attempt);
   exam = null;
   cur = null; order = null; currentPicked = null; locked = false;
-  el.card.innerHTML = `<p class="q">모의고사 종료. 아래 결과를 확인하세요.</p>`;
+  el.card.innerHTML = `<p class="q">Mock exam complete. Review the result below.</p>`;
   renderStats();
 }
 
 // ---- wiring ----
-function updateLanguageButtons() {
-  el.targetKo.setAttribute("aria-pressed", targetLanguage === "ko");
-  el.targetEn.setAttribute("aria-pressed", targetLanguage === "en");
-}
-function setTarget(lang) {
-  targetLanguage = lang; pref("lang", lang); updateLanguageButtons();
+function updateLanguageButtons() { localeButtons(); }
+function setTarget(locale) {
+  if (!supportedLocales.includes(locale)) return;
+  targetLocale = locale; pref("translationLocale", locale); updateLanguageButtons();
   const reviewVisible = viewedAttempt && !el.result.classList.contains("hidden");
   const scrollTop = reviewVisible ? window.scrollY : null;
   const active = reviewVisible ? document.activeElement?.closest?.(".review-item") : null;
   if (cur && order) renderQuestion(cur, order, exam ? exam.items[exam.idx].picked : currentPicked, exam ? false : locked);
   if (reviewVisible) renderAttempt(viewedAttempt, viewedAll, { scroll: false, scrollTop, reviewIndex: active ? +active.dataset.reviewIndex : null });
-  if (reviewVisible && !active) (lang === "ko" ? el.targetKo : el.targetEn).focus();
 }
 function start() {
   const maxQuestions = el.exam.value === "local" ? 120 : 60;
-  el.mode.querySelector('option[value="exam"]').textContent = `모의고사 ${maxQuestions}문항 / ${maxQuestions * 1.5}분`;
+  el.mode.querySelector('option[value="exam"]').textContent = `Mock exam: ${maxQuestions} questions / ${maxQuestions * 1.5} minutes`;
   if (exam) { clearInterval(exam.timerId); exam = null; el.timer.classList.add("hidden"); }
   viewedAttempt = null; attemptSave = null; el.result.classList.add("hidden");
   endlessItems = []; endlessIndex = -1; lastId = null;
@@ -656,8 +824,7 @@ el.exam.addEventListener("change", () => { pref("exam", el.exam.value); el.domai
 el.mode.addEventListener("change", () => { pref("mode", el.mode.value); start(); });
 el.domain.addEventListener("change", start);
 el.style.addEventListener("change", () => { pref("style", el.style.value); start(); });
-el.targetKo.addEventListener("click", () => setTarget("ko"));
-el.targetEn.addEventListener("click", () => setTarget("en"));
+el.reviewWrong.addEventListener("click", () => { el.mode.value = "wrong"; pref("mode", "wrong"); start(); });
 el.historyButton.addEventListener("click", () => {
   const open = el.history.classList.toggle("hidden") === false;
   el.historyButton.setAttribute("aria-expanded", open);
@@ -665,7 +832,7 @@ el.historyButton.addEventListener("click", () => {
   if (open) loadHistory().then(() => { el.history.scrollIntoView({ behavior: "smooth", block: "start" }); el.history.querySelector("#closeHistory")?.focus(); });
 });
 el.reset.addEventListener("click", () => {
-  if (!confirm(`${el.exam.selectedOptions[0].text} 진행 통계와 본 문항 기록을 삭제할까요?`)) return;
+  if (!confirm(`Delete progress and viewed-question history for ${el.exam.selectedOptions[0].text}?`)) return;
   localStorage.removeItem(statsKey());
   for (const key of EXAMS[el.exam.value]) for (const q of BANKS[key] || []) seenIds.delete(q.id);
   saveSeen(); start();
@@ -680,11 +847,11 @@ document.addEventListener("keydown", e => {
 const savedExam = pref("exam");
 el.exam.value = ["local-kcna", "local-kcsa", "local"].includes(savedExam) ? savedExam : "local-kcna";
 el.mode.value = pref("mode") || "endless";
-targetLanguage = ["ko", "en"].includes(pref("lang")) ? pref("lang") : "ko";
+targetLocale = supportedLocales.includes(pref("translationLocale")) ? pref("translationLocale") : "en";
 el.style.value = pref("style") || "";
 updateLanguageButtons();
 loadHistory();
-if (!Object.keys(BANKS).length) el.card.innerHTML = "<p class='q'>local/local.js 가 없습니다.</p>"; else start();
+if (!Object.keys(BANKS).length) el.card.innerHTML = "<p class='q'>local/local.js is missing.</p>"; else start();
 })();
 </script>
 </body>
