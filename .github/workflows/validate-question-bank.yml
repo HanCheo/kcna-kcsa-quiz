@@ -1,0 +1,21 @@
+name: Validate question bank
+
+on:
+  pull_request:
+    paths:
+      - "local/local.js"
+      - "tools/validate-question-bank.py"
+      - "tools/apply-translation-patch.py"
+      - ".github/workflows/validate-question-bank.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v6
+      - name: Validate public runtime bank
+        run: python3 tools/validate-question-bank.py
