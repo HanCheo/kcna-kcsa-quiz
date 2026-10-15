@@ -2,7 +2,7 @@
 
 [Open the English-first KCNA / KCSA quiz](https://hancheo.github.io/kcna-kcsa-quiz/).
 
-**562 questions: 252 unchanged KCNA + 310 fully replaced KCSA.** English question text is the immutable original; Korean and any future data-backed locales are translations selected for question content only. Existing factual IDs, learner storage, vocabulary and saved attempts are not reset or repurposed.
+**562 questions: 252 unchanged KCNA + 310 fully replaced KCSA.** English question text is the canonical original and is read-only in the translation editor; Korean and any future data-backed locales are translations selected for question content only. Existing factual IDs, learner storage, vocabulary and saved attempts are not reset or repurposed.
 
 This is unofficial study practice, not authenticated past-exam content, an empirically calibrated difficulty benchmark or a pass-probability predictor. The retained KCNA material still includes the wider cloud-native/CNCF ecosystem; historical and protected source limitations remain applicable.
 
@@ -81,6 +81,6 @@ Wiktionary supplies general English definitions, not automatic translations or c
 
 Baseline verification (from the retained runtime) covered sanitized-bank counts and fidelity, ID retirement, scalar/array bounds, exact multi-answer cases, immutable snapshots, a 60-question KCSA mock, a mixed mock, and 390×844 checkbox rendering. Those historical smoke results are not learner performance measurements and are not claimed as a rerun for every contribution.
 
-Current integration checks cover English-first rendering, question-only locale discovery, English-baseline plus translated content, translation-editor local save/export/import boundaries, generic future-locale fallback, history translation toggles, Wiktionary success/not-found/offline cache behavior, no-auto-fetch word saving, note/caret preservation, word isolation, and staged Pages asset loading. The validator and patch tool checks are documented above and run in CI.
+Current integration checks cover English-first rendering, question-only locale discovery, English-baseline plus translated content, translation-editor local save/export/import boundaries, generic future-locale fallback, history translation toggles, Wiktionary success/not-found/offline cache behavior, no-auto-fetch word saving, note/caret preservation, word isolation, and staged Pages asset loading. CI runs bank validation; patch-tool and UI smoke checks were exercised locally.
 
 Only `.nojekyll`, `index.html`, `vocabulary.js` and `local/local.js` are staged into the GitHub Pages artifact. Tools, contribution guidance, validation workflows and source material remain in the repository but are not published as site assets. Each bank record contains exactly `id exam domain subtopic difficulty style q choices answer explain ref`, with locale keys discovered from the data. Script URLs use `v=20261015-contributions` to refresh assets without clearing learner storage. Deployment uses the existing GitHub Pages workflow.

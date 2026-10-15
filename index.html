@@ -51,6 +51,7 @@ main{max-width:900px;margin:0 auto;padding:16px 16px 80px}
 .translation-editor textarea{width:100%;min-height:52px;background:#1f232d;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit}
 .translation-editor .editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .translation-editor input[type=file]{max-width:100%}
+.translation-editor a{color:#7aa7ff}
 .choices{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .choices li{border:1px solid var(--line);border-radius:8px;padding:13px 14px 13px 60px;min-height:60px;position:relative;cursor:pointer;background:#13161d;line-height:1.6}
 .choices li:hover{border-color:#3b4356}
@@ -473,7 +474,7 @@ function translationEditor(q) {
     ${q.choices.en.map((choice, i) => `<label>Original option ${i + 1}<textarea readonly>${esc(choice)}</textarea><span class="status">${esc(localeLabel(targetLocale))} option ${i + 1}</span><textarea name="translation-choice-${i}">${esc(choices[i].target || "")}</textarea></label>`).join("")}
     <label>Original explanation<textarea readonly>${esc(q.explain.en)}</textarea></label>
     <label>${esc(localeLabel(targetLocale))} explanation<textarea name="translation-explain">${esc(eValues.target || "")}</textarea></label>
-    <div class="editor-actions"><button type="submit" class="primary">Save translation locally</button><button type="button" id="export-translations">Export translation patch</button><label>Import patch JSON<input id="import-translations" type="file" accept="application/json"></label></div>
+    <div class="editor-actions"><button type="submit" class="primary">Save translation locally</button><button type="button" id="export-translations">Export translation patch</button><button type="button" id="import-translations-button">Import translation patch</button><input id="import-translations" type="file" accept="application/json" aria-label="Import translation patch" hidden></div>
     <p class="status">Exported patches can be applied to <code>local/local.js</code> and submitted in a PR. See the <a href="https://github.com/HanCheo/kcna-kcsa-quiz/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">contribution instructions</a>.</p>
   </form></details>`;
 }
@@ -560,6 +561,7 @@ function renderQuestion(q, ord, picked, reveal) {
   if (editor) {
     editor.addEventListener("submit", saveTranslationForm);
     $("#export-translations").addEventListener("click", exportTranslations);
+    $("#import-translations-button").addEventListener("click", () => $("#import-translations").click());
     $("#import-translations").addEventListener("change", event => { if (event.target.files[0]) importTranslations(event.target.files[0]); });
   }
   const check = $("#checkAnswer"); if (check) check.addEventListener("click", gradePractice);
