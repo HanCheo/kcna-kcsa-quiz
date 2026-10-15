@@ -19,10 +19,10 @@ The validator rejects missing or unexpected top-level fields, malformed locale m
 
 ## Translation editor and locale workflow
 
-The question-only locale selector is labeled **Question translation**. It does not change the page UI language, grade a draft, or reshuffle choices. English source fields and answer keys are read-only.
+The question-only selector is labeled **Translation language**. It does not change the page UI language, grade a draft, or reshuffle choices. English is always visible. Select Korean or another available data-backed locale, then click **Translate** beside the question navigation to reveal that locale's question, choices, and explanation alongside English; click **Hide translation** to hide them. The reveal resets when navigating, while the selected target persists. English selection disables Translate with guidance to select a translated language. If a question has no data for the selected locale, Translate remains unavailable and English remains visible. English source fields and answer keys remain read-only in the translation editor.
 
 1. Select a translated locale in the quiz.
-2. Expand **Edit _locale_ translation** and edit the translated question, each translated choice, and the translated explanation. Choices must stay paired with the English choices and in the original order.
+2. Click **Translate** when you want to reveal the selected-language content, then expand **Edit _locale_ translation** if you need to edit it. Choices must stay paired with the English choices and in the original order.
 3. **Save translation locally** stores a draft only in this browser under `quiz:translation-overrides:v1`; it does not modify the committed bank or publish anything.
 4. **Export translation patch** downloads a version-1 JSON patch. Review it, then apply it to `local/local.js` before opening a PR:
 
