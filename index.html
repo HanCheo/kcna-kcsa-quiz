@@ -69,6 +69,9 @@ main{max-width:900px;margin:0 auto;padding:16px 16px 80px}
 .actions .hint{color:var(--mute);font-size:12px;margin-left:auto}
 .language-buttons{display:flex;gap:4px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:13px}
 .language-buttons button[aria-pressed="true"]{background:var(--acc);color:#111;border-color:var(--acc);font-weight:600}
+.translation-toggle{margin-left:0}
+.next-translation-actions{display:flex;gap:8px;align-items:stretch}
+.next-translation-actions > button{flex:1;min-width:0}
 .domains{margin-top:22px;display:grid;gap:6px}
 .dom{display:grid;grid-template-columns:1fr 160px 70px;gap:10px;align-items:center;font-size:13px;color:var(--mute)}
 .bar{height:8px;background:#262b36;border-radius:4px;overflow:hidden}
@@ -138,6 +141,7 @@ body[data-view="vocabulary"] #quizControls,body[data-view="vocabulary"] #studySe
   .card{padding:16px}
   .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
   .actions button,.actions select{min-height:44px;width:100%}
+  .actions .next-translation-actions{grid-column:1/-1}
   .actions .hint{grid-column:1/-1;margin-left:0}
   .dom{grid-template-columns:1fr 90px 60px}
   .history-row{align-items:flex-start;flex-direction:column}
@@ -279,7 +283,7 @@ function saveTranslationOverrides(next) {
   catch (e) { alert(`Could not save translation edits: ${e.message}`); return false; }
 }
 function localeButtons() {
-  el.localeButtons.innerHTML = `<span class="locale-title">Question translation</span>` + supportedLocales.map(locale => `<button type="button" data-locale="${esc(locale)}" aria-pressed="${locale === targetLocale}">${esc(localeLabel(locale))}</button>`).join("");
+  el.localeButtons.innerHTML = `<span class="locale-title">Translation language</span>` + supportedLocales.map(locale => `<button type="button" data-locale="${esc(locale)}" aria-pressed="${locale === targetLocale}">${esc(localeLabel(locale))}</button>`).join("");
   el.localeButtons.querySelectorAll("[data-locale]").forEach(button => button.addEventListener("click", () => setTarget(button.dataset.locale)));
 }
 let seenError = "";
@@ -372,7 +376,7 @@ function bi(values, tag = "span", showTranslation = true) {
 }
 
 // ---- state ----
-let cur = null, order = null, locked = false, currentPicked = null;
+let cur = null, order = null, locked = false, currentPicked = null, translationShown = false;
 let endlessItems = [], endlessIndex = -1;
 let exam = null; // {items:[{q,order,picked}], idx, endAt, timerId}
 let historyDB = null, historyRecords = [], historyError = "", viewedAttempt = null, viewedAll = false, reviewOverrides = new Map(), attemptSave = null;
@@ -532,9 +536,13 @@ function renderQuestion(q, ord, picked, reveal) {
   const examTag = q.exam === "kcna" || q.id.startsWith("kcna") ? "KCNA" : q.exam === "kcsa" || q.id.startsWith("kcsa") ? "KCSA" : "Personal";
   const multiple = Array.isArray(q.answer);
   const correct = correctSelection(q.answer, picked);
+  const translatedValues = [localeData(q, "q").target, localeData(q, "explain").target, ...q.choices.en.map((_, i) => localeData(q, "choices", i).target)];
+  const canTranslate = targetLocale !== "en" && translatedValues.some(Boolean);
+  const unavailableTitle = targetLocale === "en" ? "Select a translated language to enable translation." : "Translation unavailable for this question.";
+  const translationButton = `<button id="translationToggle" class="translation-toggle" type="button" aria-pressed="${translationShown}"${canTranslate ? "" : ` disabled title="${unavailableTitle}"`}>${translationShown && canTranslate ? "Hide translation" : "Translate"}</button>`;
   const html = `
     <div class="meta"><span class="tag">${examTag}</span><span class="question-domain">${esc(q.domain)}</span><span class="tag">${multiple ? "Multiple answers · select all" : "Single answer"}</span><span class="tag question-id">${q.id}</span>${exam ? `<span class="tag question-position">${exam.idx + 1} / ${exam.items.length}</span>` : endlessItems.length ? `<span class="question-position">${endlessIndex + 1} / ${endlessItems.length}</span>` : ""}</div>
-    <p class="q">${bi(localeData(q, "q"), "span")}</p>
+    <p class="q">${bi(localeData(q, "q"), "span", translationShown)}</p>
     <ol class="choices">${ord.map((ci, i) => {
       let cls = "";
       if (reveal) { if (hasChoice(q.answer, ci)) cls = "ok"; else if (hasChoice(picked, ci)) cls = "bad"; cls += " locked"; }
@@ -542,21 +550,30 @@ function renderQuestion(q, ord, picked, reveal) {
       const control = multiple
         ? `<input type="checkbox" class="k" aria-label="Select option ${i + 1}"${hasChoice(picked, ci) ? " checked" : ""}${reveal ? " disabled" : ""}><span class="choice-number" aria-hidden="true">${i + 1}</span>`
         : `<button type="button" class="k" aria-label="Select option ${i + 1}"${reveal ? " disabled" : ""}>${i + 1}</button>`;
-      return `<li data-ci="${ci}" class="${cls}">${control}${bi(localeData(q, "choices", ci), "span")}</li>`;
+      return `<li data-ci="${ci}" class="${cls}">${control}${bi(localeData(q, "choices", ci), "span", translationShown)}</li>`;
     }).join("")}</ol>
     <div class="explain${reveal ? " show" : ""}">
       <div class="verdict ${correct ? "ok" : "bad"}">${correct ? "Correct" : "Wrong — correct: " + selectionLabels(q.answer, ord)}</div>
-      ${bi(explanationData(q, ord), "div")}
+      ${bi(explanationData(q, ord), "div", translationShown)}
       ${q.ref ? `<a href="${esc(q.ref)}" target="_blank" rel="noopener noreferrer">${esc(q.ref)}</a>` : ""}
     </div>
     ${translationEditor(q)}
     <div class="actions">
-      ${exam ? `<button id="prev"${exam.idx === 0 ? " disabled" : ""}>Previous</button><button id="next" class="primary">${exam.idx === exam.items.length - 1 ? "Submit" : "Next"}</button>`
-             : `${multiple && !reveal ? `<button id="checkAnswer" class="primary"${hasSelection(picked) ? "" : " disabled"}>Check answer</button>` : ""}<button id="prev"${endlessIndex <= 0 ? " disabled" : ""}>Previous</button><button id="next" class="primary"${reveal || endlessIndex < endlessItems.length - 1 ? "" : " disabled"}>Next question</button>${!reveal && endlessIndex === endlessItems.length - 1 ? `<button id="skip">Skip</button>` : ""}`}
+      ${exam
+        ? `<button id="prev"${exam.idx === 0 ? " disabled" : ""}>Previous</button><div class="next-translation-actions"><button id="next" class="primary">${exam.idx === exam.items.length - 1 ? "Submit" : "Next"}</button>${translationButton}</div>`
+        : `${multiple && !reveal ? `<button id="checkAnswer" class="primary"${hasSelection(picked) ? "" : " disabled"}>Check answer</button>` : ""}<button id="prev"${endlessIndex <= 0 ? " disabled" : ""}>Previous</button><div class="next-translation-actions"><button id="next" class="primary"${reveal || endlessIndex < endlessItems.length - 1 ? "" : " disabled"}>Next question</button>${translationButton}</div>${!reveal && endlessIndex === endlessItems.length - 1 ? `<button id="skip">Skip</button>` : ""}`}
       <span class="hint">English words: save/remove · ${multiple ? "select/unselect" : "select answer"} · 1–${ord.length} keys${exam ? "" : multiple ? " · Enter to check/next" : " · Enter for next"}</span>
     </div>`;
   el.card.innerHTML = html;
   el.card.querySelectorAll(".choices li").forEach(li => li.addEventListener("click", () => choose(+li.dataset.ci)));
+  const translationToggle = $("#translationToggle");
+  if (translationToggle && !translationToggle.disabled) translationToggle.addEventListener("click", () => {
+    translationShown = !translationShown;
+    el.card.querySelectorAll(".translation").forEach(node => node.classList.toggle("visible", translationShown));
+    translationToggle.textContent = translationShown ? "Hide translation" : "Translate";
+    translationToggle.setAttribute("aria-pressed", String(translationShown));
+    translationToggle.focus();
+  });
   const editor = $("#translation-form");
   if (editor) {
     editor.addEventListener("submit", saveTranslationForm);
@@ -574,7 +591,7 @@ function renderQuestion(q, ord, picked, reveal) {
 function showEndlessItem() {
   const it = endlessItems[endlessIndex];
   cur = it.q; order = it.order; currentPicked = it.picked;
-  locked = it.graded;
+  locked = it.graded; translationShown = false;
   markSeen(cur); renderStats();
   renderQuestion(cur, order, currentPicked, locked);
 }
@@ -671,7 +688,7 @@ function sampleMockQuestions(p) {
 function startExam() {
   if (exam) clearInterval(exam.timerId);
   exam = null; el.timer.classList.add("hidden"); viewedAttempt = null; attemptSave = null;
-  locked = false; currentPicked = null; reviewOverrides.clear();
+  locked = false; currentPicked = null; translationShown = false; reviewOverrides.clear();
   const p = el.domain.value ? base().filter(q => q.domain === el.domain.value) : base();
   if (!p.length) {
     cur = null; order = null; locked = false; exam = null;
@@ -696,7 +713,7 @@ function tick() {
   if (left === 0) finishExam();
 }
 function showExamItem() {
-  locked = false;
+  locked = false; translationShown = false;
   const it = exam.items[exam.idx]; currentPicked = it.picked; cur = it.q; order = it.order;
   markSeen(cur); renderStats();
   renderQuestion(cur, order, it.picked, false);
@@ -806,7 +823,7 @@ function finishExam() {
 function updateLanguageButtons() { localeButtons(); }
 function setTarget(locale) {
   if (!supportedLocales.includes(locale)) return;
-  targetLocale = locale; pref("translationLocale", locale); updateLanguageButtons();
+  targetLocale = locale; translationShown = false; pref("translationLocale", locale); updateLanguageButtons();
   const reviewVisible = viewedAttempt && !el.result.classList.contains("hidden");
   const scrollTop = reviewVisible ? window.scrollY : null;
   const active = reviewVisible ? document.activeElement?.closest?.(".review-item") : null;
@@ -818,7 +835,7 @@ function start() {
   el.mode.querySelector('option[value="exam"]').textContent = `Mock exam: ${maxQuestions} questions / ${maxQuestions * 1.5} minutes`;
   if (exam) { clearInterval(exam.timerId); exam = null; el.timer.classList.add("hidden"); }
   viewedAttempt = null; attemptSave = null; el.result.classList.add("hidden");
-  endlessItems = []; endlessIndex = -1; lastId = null;
+  endlessItems = []; endlessIndex = -1; lastId = null; translationShown = false;
   loadStats(); fillDomains(); renderStats();
   if (el.mode.value === "exam") startExam(); else nextEndless();
 }
